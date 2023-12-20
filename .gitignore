@@ -121,7 +121,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-
+.csv
 # Azure Functions artifacts
 bin
 obj
