@@ -91,7 +91,7 @@ def filter_hours(df):
     return pd.concat([df_weekday, df_weekend])
 
 
-def bergen(prediction_category):
+def bergen(prediction_category,restaurant):
     # Group data in dataset by date to prepare it
     sales_data_df = pd.read_csv("test.csv")
 

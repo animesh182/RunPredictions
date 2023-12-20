@@ -69,14 +69,13 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     first_weekend_christmas_school_vacation,
 )
 
-def oslo_storo(prediction_category):
-    sales_data_df = pd.read_csv("historical_data.csv")
+from PredictionFunction.utils.fetch_sales_data import fetch_salesdata
+def oslo_storo(prediction_category,restaurant,merged_data,historical_data,future_data):
+    sales_data_df = historical_data
     sales_data_df = sales_data_df.rename(columns={"date": "ds"})
 
-    future_data = pd.read_csv("future_data.csv")
     future_data = future_data.rename(columns={"date": "ds"})
 
-    merged_data = pd.read_csv("test.csv")
     merged_data = merged_data.rename(columns={"date": "ds"})
     sales_data_df["ds"] = pd.to_datetime(sales_data_df["ds"])
     if prediction_category == "day":
@@ -105,7 +104,6 @@ def oslo_storo(prediction_category):
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
 
     elif prediction_category == "hour":
         df = (
@@ -134,7 +132,6 @@ def oslo_storo(prediction_category):
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
 
     elif prediction_category in ["type", "product"]:
         df = (
@@ -162,7 +159,6 @@ def oslo_storo(prediction_category):
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
     # df['y'] = np.log(df['y'])
 
     # df['y'] = np.log(df['y'])
@@ -217,7 +213,7 @@ def oslo_storo(prediction_category):
     # Convert 'ds' column to datetime if it is not already
     df["ds"] = pd.to_datetime(df["ds"])
     # Calculate the week number for each date
-    df["week_number"] = df["ds"].dt.week
+    df["week_number"] = df["ds"].dt.isocalendar().week
 
     # pattern august-sept
     # Convert 'ds' column to datetime if it is not already
@@ -238,7 +234,7 @@ def oslo_storo(prediction_category):
     end_week = pd.to_datetime(end_date).week
 
     # Calculate the week number for each date
-    df["week_number"] = df["ds"].dt.week
+    df["week_number"] = df["ds"].dt.isocalendar().week
 
     # Define a function to calculate the custom regressor value based on the week number
 
@@ -259,7 +255,7 @@ def oslo_storo(prediction_category):
 
 
     # The training DataFrame (df) should also include 'days_since_last' and 'days_until_next' columns.
-    df = calculate_days_30(df, fifteenth_working_days)
+    # df = calculate_days_30(df, fifteenth_working_days)
 
     # Ullevål big concerts regressor (Oslo)
     ullevaal_big_football_games_df = pd.DataFrame(ullevaal_big_football_games)
@@ -308,8 +304,8 @@ def oslo_storo(prediction_category):
         )
 
     # Add the payday columns as regressors
-    m.add_regressor("days_since_last_30")
-    m.add_regressor("days_until_next_30")
+    # m.add_regressor("days_since_last_30")
+    # m.add_regressor("days_until_next_30")
 
     m.add_regressor("warm_and_dry")
     m.add_regressor("heavy_rain_fall_weekday")
@@ -423,7 +419,7 @@ def oslo_storo(prediction_category):
         future = pd.concat([df_weekday, df_weekend])
 
     # add the last working day and the +/- 5 days
-    future = calculate_days_30(future, last_working_day)
+    # future = calculate_days_30(future, last_working_day)
 
     future["sunshine_amount"] = merged_data["sunshine_amount"]
     future.dropna(inplace=True)
@@ -451,7 +447,7 @@ def oslo_storo(prediction_category):
     # Calculate the custom regressor values for the future dates
     future["ds"] = pd.to_datetime(future["ds"])
     future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)
-    future["week_number"] = future["ds"].dt.week
+    future["week_number"] = future["ds"].dt.isocalendar().week
     future.loc[future_date_mask, "custom_regressor"] = future.loc[
         future_date_mask, "week_number"
     ].apply(custom_regressor)
@@ -476,5 +472,5 @@ def oslo_storo(prediction_category):
     return m, future, df
 
 
-def location_function(prediction_category):
-    return oslo_storo(prediction_category)
+def location_function(prediction_category,restaurant,merged_data,historical_data,future_data):
+    return oslo_storo(prediction_category,restaurant,merged_data,historical_data,future_data)

@@ -33,7 +33,6 @@ def add_weather_parameters(prediction_category, sales_data_df):
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
 
     elif prediction_category == "hour":
         df = (
@@ -62,7 +61,6 @@ def add_weather_parameters(prediction_category, sales_data_df):
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
 
     elif prediction_category in ["type", "product"]:
         df = (
@@ -90,7 +88,6 @@ def add_weather_parameters(prediction_category, sales_data_df):
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
 
     return df
 

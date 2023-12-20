@@ -79,3 +79,67 @@ def is_within_hours(date_obj, opening_hour, closing_hour):
         if opening_hour <= hour_of_day < closing_hour:
             return True
     return False
+
+
+tourist_data={
+    "Oslo Storo":{
+        "July":"1",
+        "June":"1",
+        "August":"1",
+    },
+    "Oslo City":{
+        "July":"1",
+        "June":"1",
+        "August":"1",
+    },
+    "Oslo Torggata":{
+        "July":"1",
+        "June":"1",
+        "August":"1",
+    },    
+    "Karl Johan":{
+        "July":"1",
+        "June":"1",
+        "August":"1",
+    },
+    "Fredrikstad":{
+        "July":"1",
+        "June":"1",
+        "August":"1",
+    },
+    "Pedersgata":{
+        "July":"1",
+        "June":"1",
+        "August":"1",
+    },
+    "Oslo Lokka":{
+        "July":"1",
+        "June":"1",
+        "August":"1",
+    },
+    "Stavanger":{
+        "July":"1",
+        "June":"1",
+        "August":"1",
+    },
+    "Bergen":{
+        "July":"1",
+        "June":"1",
+        "August":"1",
+    },
+    "Oslo Steen_Strom":{
+        "July":"1",
+        "June":"1",
+        "August":"1",
+    },
+    "Sandnes":{
+        "July":"1",
+        "June":"1",
+        "August":"1",
+    },
+    "Oslo Smestad":{
+        "July":"1",
+        "June":"1",
+        "August":"1",
+    },
+}

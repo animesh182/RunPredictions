@@ -26,10 +26,6 @@ data = [
     {"Restaurant": "Sandnes", "City": "Stavanger", "Company": "Los Tacos"},
 
 ]
-# these restaurant doesnt have enough data to be run
-# Sandnes started 18th of april 2023 (I think). Need closer to a year before predictions are really good
-#     {"Restaurant": "Sandnes", "City": "Stavanger", "Company": "Los Tacos"},
-# dictionary of which location specific file the chosen restaurant in main_file is connected to
 location_specific_dictionary = {
     "Stavanger": stavanger_function,
     "Bergen": bergen_function,
