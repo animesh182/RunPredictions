@@ -158,7 +158,7 @@ def prepare_data(company, restaurant, start_date, end_date):
 
 
     #group sales data by date and sum the total_gross
-    sales_data_df = sales_data_df.groupby('date')['total_sales'].sum().reset_index()
+    sales_data_df = sales_data_df.groupby('date')['total_net'].sum().reset_index()
     
     #print all rows from salesdata from august 2023 with total_net and date/ds columns, take away the max rows
     pd.set_option('display.max_rows', None)
@@ -172,15 +172,14 @@ def prepare_data(company, restaurant, start_date, end_date):
     pd.set_option('display.max_rows', None)
     #print(weather_data_df[['date', 'sunshine_amount']])
     merged_data = weather_data_df.merge(sales_data_df, on='date', how='left')
-    merged_data['total_sales'].fillna(0, inplace=True)
+    merged_data['total_net'].fillna(0, inplace=True)
     #merged_data = sales_data_df
-
     #fill missing dates with 0, as these are closed days
     full_date_range = pd.date_range(start=min(merged_data['date']), end=max(merged_data['date']))
     df_full = pd.DataFrame(full_date_range, columns=['date'])
     df_full['date'] = df_full['date'].astype('object')
     merged_data = pd.merge(merged_data, df_full, on='date', how='left')
-    merged_data.loc[merged_data['total_sales'].isnull(), 'total_net'] = 0
+    merged_data.loc[merged_data['total_net'].isnull(), 'total_net'] = 0
     merged_data["date"]=pd.to_datetime(merged_data["date"])
     #merged_data.loc[merged_data['total_gross'].isnull(), 'total_gross'] = 0
 
@@ -191,6 +190,7 @@ def prepare_data(company, restaurant, start_date, end_date):
     future_data = merged_data[merged_data['date'] > end_date]
     #delete the total_gross values from future_data
     #future_data = future_data['total_gross'] = 0
+
 
     return merged_data, historical_data, future_data
 

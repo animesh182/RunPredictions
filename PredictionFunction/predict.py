@@ -251,11 +251,6 @@ def predict(m,future,df,company,restaurant,start_date,end_date,prediction_catego
         test_set.index = test_set.ds
 
         # Vizualization
-        import matplotlib.pyplot as plt
-
-        training_set.residuals.plot(figsize=(9, 6), legend=True)
-        test_set.residuals.plot(legend=True)
-        predictions_xgb.plot(legend=True)
         # plt.show()
 
         # Assessment
@@ -339,14 +334,13 @@ def predict(m,future,df,company,restaurant,start_date,end_date,prediction_catego
 
         # Join the original and forecast dataframes to align y and yhat
         merged = pd.merge(df, forecast_filtered, on="ds", how="inner")
-
+        test_set.to_csv('1234.csv')
         # Compute RMSE
         # rmse = sqrt(mean_squared_error(merged['y'], merged['yhat']))
         rmse_original = sqrt(mean_squared_error(test_set["y"], test_set["yhat"]))
         # Remove rows where either 'y' or 'adjusted_forecast' contains NaN
         valid_rows = ~test_set["y"].isna() & ~test_set["adjusted_forecast"].isna()
         filtered_test_set = test_set[valid_rows]
-
         rmse_adjusted = sqrt(
             mean_squared_error(
                 filtered_test_set["y"], filtered_test_set["adjusted_forecast"]

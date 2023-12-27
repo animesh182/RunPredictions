@@ -10,7 +10,7 @@ def fetch_salesdata(company,restaurant,start_date,end_date):
     # Define the query
     raw_query = """    select
                     gastronomic_day as date,
-                    sum("total_net") as total_sales
+                    sum("total_net") as total_net
                     from public."SalesData"
                     WHERE
                         "company"=%s

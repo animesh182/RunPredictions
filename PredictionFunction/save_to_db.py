@@ -1,7 +1,10 @@
 import datetime
-
-
-def save_to_db(forecast_df,company,restaurant):
+import uuid
+import logging
+import pandas as pd
+from PredictionFunction.PredictionSaver.saveDailyPredictions import save_daily_predictions
+from PredictionFunction.PredictionSaver.saveHolidayParams import save_holiday_params
+def save_to_db(forecast_df,company,restaurant,prediction_category):
     unwanted_columns = [
         "_lower",
         "_upper",
@@ -31,37 +34,37 @@ def save_to_db(forecast_df,company,restaurant):
     # filtered_df = forecast_df
 
     if prediction_category == "day":
-        for index, row in filtered_df.iterrows():
-            date_obj = datetime.datetime.strptime(row["ds"], "%Y-%m-%d")
-            total_gross_value = (
-                round(float(row["yhat"] / 500)) * 500
-            )  # Round to the nearest 500
-            prediction_instance = Predictions(
-                company=company,
-                restaurant=restaurant,
-                date=date_obj.date(),
-                total_gross=total_gross_value,
-            )
-            prediction_instance.save()
+        #SAVE DAILY PREDICTIONS
+        prediction_data = filtered_df[['ds', 'yhat']]
+        prediction_data = prediction_data.rename(columns={"ds": "date", "yhat": "total_gross"})
+        prediction_data["date"]=pd.to_datetime(prediction_data["date"]).dt.date
+        prediction_data["company"]=company
+        prediction_data["restaurant"]=restaurant
+        prediction_data['total_gross'] = prediction_data['total_gross'].apply(lambda x: int(round(x / 500) * 500))
+        prediction_data['id'] = [uuid.uuid4() for _ in range(len(prediction_data))]
+        prediction_data['created_at']=datetime.datetime.now()
+        prediction_data['created_at'] = prediction_data['created_at'].apply(lambda x: x.strftime('%Y-%m-%d %H:%M:%S'))
+        prediction_data['total_gross'] = prediction_data['total_gross'].astype(float)
+        prediction_data['id'] = prediction_data['id'].apply(str)
+        
+        # save_daily_predictions(prediction_data,restaurant)
+        
+        # Save the holiday parameters for predictions
+        holiday_parameter_data = prediction_data
+        holiday_parameter_data = holiday_parameter_data.rename(columns={"yhat": "total_gross"})
+        id_vars= ['ds']
+        melted_data = pd.melt(filtered_df, id_vars=id_vars, var_name='name', value_name='effect')
+        melted_data = melted_data.rename(columns={"ds": "date"})
+        melted_data["date"]=pd.to_datetime(melted_data["date"]).dt.date
+        filtered_prediction_data = prediction_data[['id','date','company','restaurant']]
+        joined_data = melted_data.merge(filtered_prediction_data, on='date', how='inner')
+        joined_data = joined_data.rename(columns={"id": "prediction_id"})
+        joined_data['id'] = [uuid.uuid4() for _ in range(len(joined_data))]
+        joined_data['id'] = joined_data['id'].apply(str)
+        joined_data['created_at']=datetime.datetime.now()
+        joined_data['created_at'] = joined_data['created_at'].apply(lambda x: x.strftime('%Y-%m-%d %H:%M:%S'))
 
-            # Save the holiday parameters for this prediction instance
-            for name in filtered_df.columns:
-                if name in ["ds", "yhat"]:
-                    continue
-                effect_value = (
-                    round(float(row[name]))
-                    if row[name] not in [None, "", np.nan]
-                    else 0
-                )
-                if effect_value != 0:
-                    holiday_instance = HolidayParameters.objects.create(
-                        prediction=prediction_instance,
-                        name=name,
-                        effect=effect_value,
-                        date=date_obj,
-                        restaurant=restaurant,
-                        company=company,
-                    )
+        # save_holiday_params(joined_data,restaurant)        
 
     elif prediction_category == "hour":
         latest_hours = defaultdict(dict)

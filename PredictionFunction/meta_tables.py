@@ -13,9 +13,9 @@ from PredictionFunction.PredictionFiles.LosTacos.stavanger import location_funct
 
 # This is a datatable showing which city each restaurant locations is in
 data = [
-   {"Restaurant": "Oslo Storo", "City": "Oslo", "Company": "Los Tacos"},
+#    {"Restaurant": "Oslo Storo", "City": "Oslo", "Company": "Los Tacos"},
     {"Restaurant": "Oslo City", "City": "Oslo", "Company": "Los Tacos"},
-     {"Restaurant": "Oslo Torggata", "City": "Oslo", "Company": "Los Tacos"},
+     {"Restaurant": "Oslo Torggata", "City": "Oslo", "Company": "Los Tacos"}, #error 
      {"Restaurant": "Karl Johan", "City": "Oslo", "Company": "Los Tacos"},
    {"Restaurant": "Fredrikstad", "City": "Fredrikstad", "Company": "Los Tacos"},
    {"Restaurant": "Oslo Lokka", "City": "Oslo", "Company": "Los Tacos"},

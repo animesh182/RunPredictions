@@ -70,14 +70,12 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     halloween_weekend,
 )
 
-def sandnes(prediction_category):
-    sales_data_df = pd.read_csv("historical_data.csv")
+def sandnes(prediction_category,restaurant,merged_data,historical_data,future_data):
+    sales_data_df = historical_data
     sales_data_df = sales_data_df.rename(columns={"date": "ds"})
     sales_data_df["ds"] = pd.to_datetime(sales_data_df["ds"])
-    future_data = pd.read_csv("future_data.csv")
     future_data = future_data.rename(columns={"date": "ds"})
     future_data["ds"] = pd.to_datetime(future_data["ds"])
-    merged_data = pd.read_csv("test.csv")
     merged_data = merged_data.rename(columns={"date": "ds"})
     merged_data["ds"] = pd.to_datetime(merged_data["ds"])
     if prediction_category == "day":
@@ -251,7 +249,7 @@ def sandnes(prediction_category):
     # Convert 'ds' column to datetime if it is not already
     df["ds"] = pd.to_datetime(df["ds"])
     # Calculate the week number for each date
-    df["week_number"] = df["ds"].dt.week
+    df["week_number"] = df["ds"].dt.isocalendar().week
 
     # Convert 'ds' column to datetime if it is not already
     df["ds"] = pd.to_datetime(df["ds"])
@@ -271,7 +269,7 @@ def sandnes(prediction_category):
     end_week = pd.to_datetime(end_date).week
 
     # Calculate the week number for each date
-    df["week_number"] = df["ds"].dt.week
+    df["week_number"] = df["ds"].dt.isocalendar().week
 
     # Define a function to calculate the custom regressor value based on the week number
 
@@ -304,10 +302,10 @@ def sandnes(prediction_category):
         last_working_day = pd.to_datetime(pd.Series(last_working_day))
 
         df["days_since_last"] = df["ds"].apply(
-            lambda x: min([abs(x - y).days for y in last_working_day if x >= y])
+            lambda x: min([abs(x - y).days for y in last_working_day if x >= y],default=0)
         )
         df["days_until_next"] = df["ds"].apply(
-            lambda x: min([abs(x - y).days for y in last_working_day if x <= y])
+            lambda x: min([abs(x - y).days for y in last_working_day if x <= y],default=0)
         )
 
         # Set 'days_since_last' and 'days_until_next' to 0 for days that are not within the -5 to +5 range
@@ -515,7 +513,7 @@ def sandnes(prediction_category):
     # Calculate the custom regressor values for the future dates
     future["ds"] = pd.to_datetime(future["ds"])
     future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)
-    future["week_number"] = future["ds"].dt.week
+    future["week_number"] = future["ds"].dt.isocalendar().week
     future.loc[future_date_mask, "custom_regressor"] = future.loc[
         future_date_mask, "week_number"
     ].apply(custom_regressor)
@@ -540,5 +538,5 @@ def sandnes(prediction_category):
     return m, future, df
 
 
-def location_function(prediction_category):
-    return sandnes(prediction_category)
+def location_function(prediction_category,restaurant,merged_data,historical_data,future_data):
+    return sandnes(prediction_category,restaurant,merged_data,historical_data,future_data)

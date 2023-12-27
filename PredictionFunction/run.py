@@ -40,7 +40,7 @@ async def main(mytimer: func.TimerRequest) -> None:
         model,future_df,current_df = restaurant_func(prediction_category,restaurant,merged_data,historical_data,future_data)
 
         forecast = predict(model,future_df,current_df,company,restaurant,start_date,end_date,prediction_category)
-        save_to_db(forecast,company,restaurant)
+        save_to_db(forecast,company,restaurant,prediction_category)
     logging.info('Timer trigger function ran at %s', utc_timestamp)
 
 

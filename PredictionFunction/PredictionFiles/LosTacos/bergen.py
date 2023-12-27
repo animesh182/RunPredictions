@@ -91,16 +91,15 @@ def filter_hours(df):
     return pd.concat([df_weekday, df_weekend])
 
 
-def bergen(prediction_category,restaurant):
+def bergen(prediction_category,restaurant,merged_data,historical_data,future_data):
     # Group data in dataset by date to prepare it
-    sales_data_df = pd.read_csv("test.csv")
+    sales_data_df = historical_data
 
     sales_data_df["date"] = pd.to_datetime(sales_data_df["date"])
     sales_data_df = sales_data_df.rename(columns={"date": "ds"})
-    future_data = pd.read_csv("future_data.csv")
+
     future_data = future_data.rename(columns={"date": "ds"})
 
-    merged_data = pd.read_csv("test.csv")
     merged_data = merged_data.rename(columns={"date": "ds"})
     sales_data_df["ds"] = pd.to_datetime(sales_data_df["ds"])
 
@@ -705,5 +704,5 @@ def bergen(prediction_category,restaurant):
     return m, future, df
 
 
-def location_function(prediction_category):
-    return bergen(prediction_category)
+def location_function(prediction_category,restaurant,merged_data,historical_data,future_data):
+    return bergen(prediction_category,restaurant,merged_data,historical_data,future_data)

@@ -9,10 +9,10 @@ def calculate_days_30(df, last_working_day):
     last_working_day = pd.to_datetime(pd.Series(last_working_day))
 
     df["days_since_last_30"] = df["ds"].apply(
-        lambda x: min([abs(x - y).days for y in last_working_day if x >= y])
+        lambda x: min([abs(x - y).days for y in last_working_day if x >= y],default =0)
     )
     df["days_until_next_30"] = df["ds"].apply(
-        lambda x: min([abs(x - y).days for y in last_working_day if x <= y])
+        lambda x: min([abs(x - y).days for y in last_working_day if x <= y],default=0)
     )
 
     # Set 'days_since_last' and 'days_until_next' to 0 for days that are not within the -5 to +5 range
@@ -41,9 +41,9 @@ def calculate_days_15(df, fifteenth_working_days):
     fifteenth_working_days = pd.to_datetime(pd.Series(fifteenth_working_days))
 
     df["days_since_last_15"] = df["ds"].apply(
-              lambda x: min([abs(x - pd.to_datetime(y)).days for y in fifteenth_working_days if x >= pd.to_datetime(y)]))
+              lambda x: min([abs(x - pd.to_datetime(y)).days for y in fifteenth_working_days if x >= pd.to_datetime(y)],default=0))
     df["days_until_next_15"] = df["ds"].apply(             
-              lambda x: min([abs(x -pd.to_datetime(y)).days for y in fifteenth_working_days if x <= pd.to_datetime(y)])
+              lambda x: min([abs(x -pd.to_datetime(y)).days for y in fifteenth_working_days if x <= pd.to_datetime(y)],default=0)
         )
 
     # Set 'days_since_last' and 'days_until_next' to 0 for days that are not within the -5 to +5 range

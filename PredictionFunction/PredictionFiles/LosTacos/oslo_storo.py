@@ -71,12 +71,14 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
 
 from PredictionFunction.utils.fetch_sales_data import fetch_salesdata
 def oslo_storo(prediction_category,restaurant,merged_data,historical_data,future_data):
+
     sales_data_df = historical_data
     sales_data_df = sales_data_df.rename(columns={"date": "ds"})
 
     future_data = future_data.rename(columns={"date": "ds"})
 
     merged_data = merged_data.rename(columns={"date": "ds"})
+    
     sales_data_df["ds"] = pd.to_datetime(sales_data_df["ds"])
     if prediction_category == "day":
         df = (
@@ -104,6 +106,7 @@ def oslo_storo(prediction_category,restaurant,merged_data,historical_data,future
             "windspeed",
             "air_temperature",
         ]
+        df.to_csv('df.csv')
 
     elif prediction_category == "hour":
         df = (
@@ -132,7 +135,6 @@ def oslo_storo(prediction_category,restaurant,merged_data,historical_data,future
             "windspeed",
             "air_temperature",
         ]
-
     elif prediction_category in ["type", "product"]:
         df = (
             sales_data_df.groupby(["ds"])

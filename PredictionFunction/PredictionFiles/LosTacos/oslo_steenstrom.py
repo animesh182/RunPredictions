@@ -63,14 +63,12 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     first_weekend_christmas_school_vacation,
 )
 
-def oslo_steenstrom(prediction_category):
-    sales_data_df = pd.read_csv("historical_data.csv")
+def oslo_steenstrom(prediction_category,restaurant,merged_data,historical_data,future_data):
+    sales_data_df = historical_data
     sales_data_df = sales_data_df.rename(columns={"date": "ds"})
 
-    future_data = pd.read_csv("future_data.csv")
     future_data = future_data.rename(columns={"date": "ds"})
 
-    merged_data = pd.read_csv("test.csv")
     merged_data = merged_data.rename(columns={"date": "ds"})
     sales_data_df["ds"] = pd.to_datetime(sales_data_df["ds"])
 
@@ -219,7 +217,7 @@ def oslo_steenstrom(prediction_category):
     # Convert 'ds' column to datetime if it is not already
     df["ds"] = pd.to_datetime(df["ds"])
     # Calculate the week number for each date
-    df["week_number"] = df["ds"].dt.week
+    df["week_number"] = df["ds"].dt.isocalendar().week
 
     # pattern august-sept
     # Convert 'ds' column to datetime if it is not already
@@ -240,7 +238,7 @@ def oslo_steenstrom(prediction_category):
     end_week = pd.to_datetime(end_date).week
 
     # Calculate the week number for each date
-    df["week_number"] = df["ds"].dt.week
+    df["week_number"] = df["ds"].dt.isocalendar().week
 
     # Define a function to calculate the custom regressor value based on the week number
 
@@ -444,7 +442,7 @@ def oslo_steenstrom(prediction_category):
     # Calculate the custom regressor values for the future dates
     future["ds"] = pd.to_datetime(future["ds"])
     future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)
-    future["week_number"] = future["ds"].dt.week
+    future["week_number"] = future["ds"].dt.isocalendar().week
     future.loc[future_date_mask, "custom_regressor"] = future.loc[
         future_date_mask, "week_number"
     ].apply(custom_regressor)
@@ -474,5 +472,5 @@ def oslo_steenstrom(prediction_category):
     return m, future, df
 
 
-def location_function(prediction_category):
-    return oslo_steenstrom(prediction_category)
+def location_function(prediction_category,restaurant,merged_data,historical_data,future_data):
+    return oslo_steenstrom(prediction_category,restaurant,merged_data,historical_data,future_data)
