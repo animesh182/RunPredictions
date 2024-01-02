@@ -106,7 +106,6 @@ def oslo_storo(prediction_category,restaurant,merged_data,historical_data,future
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv('df.csv')
 
     elif prediction_category == "hour":
         df = (

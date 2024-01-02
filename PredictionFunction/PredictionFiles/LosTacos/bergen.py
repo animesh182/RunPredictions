@@ -5,6 +5,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.dataset_holidays import (
     last_working_day,
     fifteenth_working_days,
 )
+import logging
 from PredictionFunction.Datasets.Regressors.general_regressors import( 
     is_fall_start,
     is_fellesferie,
@@ -129,7 +130,6 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
 
     elif prediction_category == "hour":
         df = (
@@ -158,7 +158,6 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
 
     elif prediction_category in ["type", "product"]:
         df = (
@@ -186,7 +185,6 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
     df = warm_dry_weather_spring(df)
     #df = heavy_rain_fall_weekday(df)
     #df = heavy_rain_fall_weekend(df)
@@ -699,8 +697,6 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     #future = heavy_rain_spring_weekday_future(future)
     future = heavy_rain_spring_weekend_future(future)
     future = non_heavy_rain_fall_weekend_future(future)
-
-
     return m, future, df
 
 

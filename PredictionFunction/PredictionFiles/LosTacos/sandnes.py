@@ -104,7 +104,6 @@ def sandnes(prediction_category,restaurant,merged_data,historical_data,future_da
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
 
     elif prediction_category == "hour":
         df = (
@@ -133,7 +132,6 @@ def sandnes(prediction_category,restaurant,merged_data,historical_data,future_da
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
 
     elif prediction_category in ["type", "product"]:
         df = (
@@ -161,8 +159,7 @@ def sandnes(prediction_category,restaurant,merged_data,historical_data,future_da
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
-        # df['y'] = np.log(df['y'])
+
     df = warm_dry_weather_spring(df)
     df = heavy_rain_fall_weekday(df)
     df = heavy_rain_fall_weekend(df)

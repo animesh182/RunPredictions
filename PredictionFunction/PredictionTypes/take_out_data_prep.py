@@ -221,12 +221,6 @@ def type_predictor(company, restaurant, start_date, end_date):
     #delete the total_gross values from future_data
     #future_data = future_data['total_gross'] = 0
 
-    historical_data.to_csv('historical_data.csv')
-    future_data.to_csv('future_data.csv')
-
-
-    merged_data.to_csv('test.csv')
-
     return merged_data, historical_data, future_data
 
 

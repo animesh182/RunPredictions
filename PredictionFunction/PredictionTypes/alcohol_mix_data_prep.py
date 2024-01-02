@@ -121,7 +121,6 @@ def product_mix_predictions(company, restaurant, start_date, end_date):
         # Return True if the current hour falls within the range for the current day
         return start <= hour < end
 
-    #print date and sunshine_amount of weather_data_df
     #replace Nan with 0 for weather_data_df
     
     weather_data_df['sunshine_amount'].fillna(0, inplace=True)
@@ -162,12 +161,6 @@ def product_mix_predictions(company, restaurant, start_date, end_date):
     #group sales data by date and sum the total_gross
     sales_data_df = sales_data_df.groupby('date')['percentage'].sum().reset_index()
 
-
-
-
-    #group weather data by date and sum the total rain_sum
-    #weather_data_df = weather_data_df.groupby('date')['sunshine_amount'].sum().reset_index()
-
     #take away dataframe head rows limit
     pd.set_option('display.max_rows', None)
     #print(weather_data_df[['date', 'sunshine_amount']])
@@ -185,61 +178,10 @@ def product_mix_predictions(company, restaurant, start_date, end_date):
 
     pd.set_option('display.max_rows', None)
 
-    # Snowfall deviation
-
-    # Call the calculate_snowfall_deviation function and add the new column to the merged_data DataFrame
-    #weather_data_df = weather_data_df[['date', 'snowfall_sum']]
-    # merged_data['snowfall_sum'] = merged_data['snowfall_sum'].astype(float)
-    #
-    # # Calculating snowfall deviation from average
-    # merged_data['rolling_mean_snow'] = merged_data['snowfall_sum'].rolling(window=10).mean()
-    # merged_data['rolling_mean_snow'] = merged_data['rolling_mean_snow'].astype(float)
-    #
-    # merged_data['snowfall_deviation'] = (merged_data['snowfall_sum'] - merged_data['rolling_mean_snow']) / \
-    #     merged_data['rolling_mean_snow'] * 100
-    # merged_data['snowfall_deviation'].fillna(0, inplace=True)
-    #
-    # # Change windspeed_10m_max datatype to float
-    # merged_data['windspeed_10m_max'] = merged_data['windspeed_10m_max'].astype(float)
-    #
-    # # Calculating sum of windspeed_10m_max+rain_sum+(snow_sum*10)
-    # merged_data['windspeed_10m_max'] = merged_data['windspeed_10m_max'].astype(float)
-    # merged_data['rain_sum'] = merged_data['rain_sum'].astype(float)
-    # merged_data['snowfall_sum'] = merged_data['snowfall_sum'].astype(float)
-    #
-    # merged_data['wind_rain_snow'] = merged_data['windspeed_10m_max'] + merged_data['rain_sum'] + (
-    #             merged_data['snowfall_sum'] * 10)
-    #
-    #
-    # #Calculate deviation from average temperature last 10 days and add to merged_data
-    # merged_data['rolling_mean_temp'] = merged_data['temperature_2m_max'].rolling(window=10).mean()
-    # merged_data['rolling_mean_temp'] = merged_data['rolling_mean_temp'].astype(float)
-    # #make temperature_2m_max float
-    # merged_data['temperature_2m_max'] = merged_data['temperature_2m_max'].astype(float)
-    # merged_data['temp_deviation'] = (merged_data['temperature_2m_max'] - merged_data['rolling_mean_temp']) / \
-    #     merged_data['rolling_mean_temp'] * 100
-    # merged_data['temp_deviation'].fillna(0, inplace=True)
-    #
-    # #Calculate deviation from rain_sum last 10 days and add to merged_data
-    # merged_data['rolling_mean_rain'] = merged_data['rain_sum'].rolling(window=10).mean()
-    # merged_data['rolling_mean_rain'] = merged_data['rolling_mean_rain'].astype(float)
-    # #make rain_sum float
-    # merged_data['rain_sum'] = merged_data['rain_sum'].astype(float)
-    # merged_data['rain_deviation'] = (merged_data['rain_sum'] - merged_data['rolling_mean_rain']) / \
-    #     merged_data['rolling_mean_rain']
-    # merged_data['rain_deviation'].fillna(0, inplace=True)
-
     # Split the data into two periods
     historical_data = merged_data[merged_data['date'] <= end_date]
     future_data = merged_data[merged_data['date'] > end_date]
-    #delete the total_gross values from future_data
-    #future_data = future_data['total_gross'] = 0
 
-    historical_data.to_csv('historical_data.csv')
-    future_data.to_csv('future_data.csv')
-
-
-    merged_data.to_csv('test.csv')
 
     return merged_data, historical_data, future_data
 

@@ -1,4 +1,5 @@
 import pandas as pd
+import logging
 from prophet import Prophet
 from PredictionFunction.Datasets.OpeningHours.lostacos_opening_hours import restaurant_opening_hours
 import numpy as np
@@ -18,7 +19,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.dataset_holidays import (
     ullevaal_big_football_games,
 )
 from PredictionFunction.Datasets.Concerts.concerts import oslo_spektrum,sentrum_scene_oslo
-
+from PredictionFunction.utils.fetch_events import fetch_events
 from PredictionFunction.Datasets.Regressors.weather_regressors import (
     # warm_dry_weather_spring,
     # warm_and_dry_future,
@@ -136,7 +137,6 @@ def karl_johan(prediction_category,restaurant,merged_data,historical_data,future
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
 
     elif prediction_category == "hour":
         df = (
@@ -296,7 +296,11 @@ def karl_johan(prediction_category,restaurant,merged_data,historical_data,future
 
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
     # Fornebu concerts as regressor (Oslo)
-    fornebu_large_concerts_df = pd.DataFrame(fornebu_large_concerts)
+    fornebu_large_concerts_df = fetch_events("Karl Johan","Fornebu")
+    fornebu_large_concerts_df = pd.DataFrame(fornebu_large_concerts_df) 
+    logging.info(fornebu_large_concerts_df.head(5))
+    fornebu_large_concerts_df = fornebu_large_concerts_df[["date","name"]]
+ 
     fornebu_large_concerts_df["date"] = pd.to_datetime(
         fornebu_large_concerts_df["date"]
     )
@@ -310,11 +314,14 @@ def karl_johan(prediction_category,restaurant,merged_data,historical_data,future
     df["fornebu_large_concerts"].fillna(0, inplace=True)
 
     # Ullevål big concerts regressor (Oslo)
-    ullevaal_big_football_games_df = pd.DataFrame(ullevaal_big_football_games)
+    ullevaal_big_football_games_df = fetch_events("Karl Johan","Ulleval")
+    ullevaal_big_football_games_df = pd.DataFrame(ullevaal_big_football_games_df)  
     ullevaal_big_football_games_df["date"] = pd.to_datetime(
         ullevaal_big_football_games_df["date"]
     )
-    # Rename the columns to match the existing DataFrame
+    # Rename the columns to match the existing DataFrame\
+    ullevaal_big_football_games_df = ullevaal_big_football_games_df[["date","name"]]
+
     ullevaal_big_football_games_df.columns = ["ds", "event"]
     # Create a new column for the event
     ullevaal_big_football_games_df["ullevaal_big_football_games"] = 1
@@ -324,8 +331,9 @@ def karl_johan(prediction_category,restaurant,merged_data,historical_data,future
     df["ullevaal_big_football_games"].fillna(0, inplace=True)
 
     # Oslo Spektrum large concerts
-    oslo_spectrum_large_df = pd.DataFrame(oslo_spektrum)
-    # oslo_spectrum_large_df = oslo_spectrum_large_df.loc[(oslo_spectrum_large_df['Audience Group'] == 'Young')]
+    oslo_spektrum = fetch_events("Karl Johan","Oslo Spektrum")
+    oslo_spectrum_large_df = pd.DataFrame(oslo_spektrum) 
+    oslo_spectrum_large_df = oslo_spectrum_large_df.rename(columns={"date": "ds"})
     oslo_spectrum_large_df["ds"] = pd.to_datetime(oslo_spectrum_large_df["ds"])
     oslo_spectrum_large_df["oslo_spektrum_large_concert"] = 1
     oslo_spectrum_large_df = oslo_spectrum_large_df[
@@ -341,7 +349,7 @@ def karl_johan(prediction_category,restaurant,merged_data,historical_data,future
     # Sentrum scene concerts regressor
     # Convert date strings to datetime format and create separate columns for each weekday
     # after testing, it seems there is only an effect on sun, monn and tue
-    sentrum_scene_oslo_df = pd.DataFrame(sentrum_scene_oslo)
+    sentrum_scene_oslo_df = fetch_events("Karl Johan","Sentrum Scene")
     sentrum_scene_oslo_df["date"] = pd.to_datetime(sentrum_scene_oslo_df["date"])
 
     # def is_campaign_active(ds, campaign_row):

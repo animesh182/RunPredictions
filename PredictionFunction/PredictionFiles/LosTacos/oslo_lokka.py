@@ -109,7 +109,6 @@ def oslo_lokka_jtorget_smestad_torggata(prediction_category,restaurant,merged_da
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
 
     elif prediction_category == "hour":
         df = (
@@ -138,7 +137,6 @@ def oslo_lokka_jtorget_smestad_torggata(prediction_category,restaurant,merged_da
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
 
     elif prediction_category in ["type", "product"]:
         df = (
@@ -166,7 +164,6 @@ def oslo_lokka_jtorget_smestad_torggata(prediction_category,restaurant,merged_da
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
 
     df = warm_dry_weather_spring(df)
     df = heavy_rain_fall_weekday(df)

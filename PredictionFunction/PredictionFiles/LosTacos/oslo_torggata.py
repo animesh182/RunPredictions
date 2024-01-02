@@ -73,6 +73,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     halloween_day,
     halloween_weekend,
 )
+from PredictionFunction.utils.fetch_events import fetch_events
 
 def oslo_torggata(prediction_category,restaurant,merged_data,historical_data,future_data):
     # Import sales data
@@ -311,7 +312,7 @@ def oslo_torggata(prediction_category,restaurant,merged_data,historical_data,fut
     # Sentrum scene concerts regressor
     # Convert date strings to datetime format and create separate columns for each weekday
     # after testing, it seems there is only an effect on sun, monn and tue
-    sentrum_scene_oslo_df = pd.DataFrame(sentrum_scene_oslo)
+    sentrum_scene_oslo_df = fetch_events("Oslo City","Sentrum Scene")
     sentrum_scene_oslo_df["date"] = pd.to_datetime(sentrum_scene_oslo_df["date"])
 
     # Create separate columns for each weekday

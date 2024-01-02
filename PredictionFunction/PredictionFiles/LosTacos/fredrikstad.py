@@ -94,7 +94,6 @@ def fredrikstad(prediction_category,restaurant,merged_data,historical_data,futur
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
 
     elif prediction_category == "hour":
         df = (
@@ -123,7 +122,6 @@ def fredrikstad(prediction_category,restaurant,merged_data,historical_data,futur
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
 
     elif prediction_category in ["type", "product"]:
         df = (
@@ -151,7 +149,6 @@ def fredrikstad(prediction_category,restaurant,merged_data,historical_data,futur
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
         # df['y'] = np.log(df['y'])
     #df = warm_dry_weather_spring(df)
     df = heavy_rain_fall_weekday(df)

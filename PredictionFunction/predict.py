@@ -4,7 +4,7 @@ import xgboost as xgb
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-
+import logging
 from PredictionFunction.utils.fetch_sales_data import fetch_salesdata
 from PredictionFunction.PredictionTypes.daily_data_prep import prepare_data
 from PredictionFunction.utils.utils import tourist_data
@@ -15,12 +15,9 @@ def predict(m,future,df,company,restaurant,start_date,end_date,prediction_catego
         ######### make forecast and plots
 
         # This must be changted to the correct opening hours, which varies for days and restaurants. Create dictionary for that and use here
-        # future.to_csv("futuredata.csv")
     forecast = m.predict(future)
-    forecast.to_csv("forecast.csv")
     # forecast2 = m1.predict(future_residual)
     # forecast2 = m1.predict(future_residual)
-    # forecast2.to_csv("forecast2.csv")
     sales_data=fetch_salesdata(company,restaurant,start_date,end_date)
     catering_df = sales_data
     try:
@@ -104,9 +101,6 @@ def predict(m,future,df,company,restaurant,start_date,end_date,prediction_catego
         prophet_variables = prophet_variables.drop(columns=["ds"])
         df_xgb = pd.concat([df, prophet_variables], axis=1)
         df_xgb["residuals"] = df_xgb["y"] - df_xgb["yhat"]
-
-        # sace df_xgb to csv
-        df_xgb.to_csv("df_xgb.csv")
 
         # set max columns to none and print columns in df_xgb
         pd.set_option("display.max_columns", None)
@@ -235,14 +229,12 @@ def predict(m,future,df,company,restaurant,start_date,end_date,prediction_catego
         # Forecasting
         predictions_xgb = pd.Series(model.predict(Test), name="XGBoost")
 
-        # save predictions_xgb to csv
-        predictions_xgb.to_csv("predictions_xgb.csv")
-
+        test_set['adjusted_forecast'] = 0.0  # Initialize with default values (e.g., 0.0)   
         # Adjust the Prophet forecast with the residuals predicted by XGBoost
-        test_set["adjusted_forecast"] = test_set["yhat"] + predictions_xgb
-
-        # save test_set to csv
-        test_set.to_csv("test_set.csv")
+        if len(test_set) == len(predictions_xgb):
+            test_set['adjusted_forecast'] = test_set['yhat'].values + predictions_xgb.values
+        else:
+            print("The lengths of test_set and predictions_xgb do not match.")
 
         predictions_xgb.index = test_set.ds
 
@@ -334,7 +326,6 @@ def predict(m,future,df,company,restaurant,start_date,end_date,prediction_catego
 
         # Join the original and forecast dataframes to align y and yhat
         merged = pd.merge(df, forecast_filtered, on="ds", how="inner")
-        test_set.to_csv('1234.csv')
         # Compute RMSE
         # rmse = sqrt(mean_squared_error(merged['y'], merged['yhat']))
         rmse_original = sqrt(mean_squared_error(test_set["y"], test_set["yhat"]))
@@ -361,8 +352,6 @@ def predict(m,future,df,company,restaurant,start_date,end_date,prediction_catego
 
     # month_plot(df['y'].resample(rule='MS').mean())
 
-    forecast.to_csv("forecast.csv")
-
     # Calculate the median of the logarithmic values
     log_median = df["y"].median()
     # Convert the median back to its original scale
@@ -376,8 +365,6 @@ def predict(m,future,df,company,restaurant,start_date,end_date,prediction_catego
     # create a residual df that we use in a gradient booster model that captures weather effect
     # 2. Subtract those forecasts from your target variable to get the residuals
     df["residuals"] = df["y"] - forecast["yhat"]
-    # Export the residuals dataframe to a .csv file
-    df[["ds", "residuals"]].to_csv("residuals.csv", index=False)
     return forecast
 
    

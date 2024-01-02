@@ -8,7 +8,6 @@ from PredictionFunction.Datasets.Holidays.LosTacos.dataset_holidays import (
 from prophet import Prophet
 import plotly.express as px
 from PredictionFunction.Datasets.OpeningHours.lostacos_opening_hours import restaurant_opening_hours
-from PredictionFunction.Datasets.Concerts.concerts import oslo_spektrum
 from PredictionFunction.Datasets.Regressors.general_regressors import (
     is_specific_month,
     is_covid_restriction_christmas,
@@ -66,6 +65,7 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import(
     # non_heavy_rain_fall_weekend,
     # non_heavy_rain_fall_weekend_future,
 )
+from PredictionFunction.utils.fetch_events import fetch_events
 
 def oslo_city(prediction_category,restaurant,merged_data,historical_data,future_data):
     sales_data_df = historical_data
@@ -104,7 +104,6 @@ def oslo_city(prediction_category,restaurant,merged_data,historical_data,future_
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2OSLOCITY.csv")
 
     elif prediction_category == "hour":
         df = (
@@ -160,44 +159,12 @@ def oslo_city(prediction_category,restaurant,merged_data,historical_data,future_
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
-    # df['y'] = np.log(df['y'])
-    # forecast_data = pd.read_csv("forecast.csv")
-    # forecast_data['ds'] = pd.to_datetime(forecast_data['ds'])
-    # # merged_weather_sales['ds'] = pd.to_datetime(merged_weather_sales['ds'])
-    # merged_forecast_sales = pd.merge(df,forecast_data[['ds','yhat']],on = 'ds',how='inner')
-    # merged_forecast_sales['residuals'] = merged_forecast_sales['y'] - merged_forecast_sales['yhat']
-    # merged_forecast_sales['y']=merged_forecast_sales['residuals']
-    # merged_forecast_sales.to_csv("merged_forecast_sales.csv")
-    # # prophet_df = merged_forecast_sales[['ds', 'residuals']].rename(columns={'residuals': 'y'})
-    # # prophet_df =pd.merge(prophet_df,merged_forecast_sales,on='ds',how='inner')
-    # # prophet_df.to_csv("prophetdata.csv")
-    # df=merged_forecast_sales
-    # print("har kjørt Oslo City")
-    # df['y'] = np.log(df['y'])
-    'Add a new column to the df called saturday_rain, with a 1 if it is a saturday and the rain_sum sum between 14-23 o clock is more than 5 and month is between 8 and 11'
-
-
-
     df["ds"] = pd.to_datetime(df["ds"])
-    
-    #df["saturday_rain"] = np.where(
-    #    (df["ds"].dt.weekday == 5) & (df["rain_sum"] > 10), 1, 0
-    #)
-    
-
-    # fig = px.histogram(df, x="y")
-    # fig.show()
     df = warm_dry_weather_spring(df)
-    #df = heavy_rain_fall_weekday(df)
     df = heavy_rain_fall_weekend(df)
     df = heavy_rain_winter_weekday(df)
-   # df = heavy_rain_winter_weekend(df)
     df = heavy_rain_spring_weekday(df)
-   # df = heavy_rain_spring_weekend(df)
-    #df = non_heavy_rain_fall_weekend(df)
     m = Prophet()
-   # m1 = Prophet()
 
     ### Holidays and other repeating outliers
     m.add_country_holidays(country_name="NO")
@@ -489,13 +456,16 @@ def oslo_city(prediction_category,restaurant,merged_data,historical_data,future_
     df = calculate_days_30(df, fifteenth_working_days)
 
     # Oslo Spektrum large concerts
+    oslo_spektrum = fetch_events("Oslo City","Oslo Spektrum")
     oslo_spectrum_large_df = pd.DataFrame(oslo_spektrum)
+    oslo_spectrum_large_df = oslo_spectrum_large_df.rename(columns={"date": "ds"})
+
     # filtering by Young audience groups gives a negative expected effect.
     # oslo_spectrum_large_df = oslo_spectrum_large_df.loc[(oslo_spectrum_large_df['Audience Group'] == 'Young')]
     oslo_spectrum_large_df["ds"] = pd.to_datetime(oslo_spectrum_large_df["ds"])
     #oslo_spectrum_large_df should be 1 if there is a concert on that date that has concert size = Large and if the day is within sunday-thursday window and 0 if not using np
     oslo_spectrum_large_df["oslo_spektrum_large_concert"] = np.where(
-        (oslo_spectrum_large_df["concert size"] == "Large")
+        (oslo_spectrum_large_df["event_size"] == "Large")
         & (oslo_spectrum_large_df["ds"].dt.weekday < 4),
         1,
         0,
@@ -541,19 +511,7 @@ def oslo_city(prediction_category,restaurant,merged_data,historical_data,future_
     df['rain_windy_weekend'] = df.apply(is_saturday_rainy_windy,axis = 1)
     #df['rain_weekend'] =df['rain_weekend'].fillna(0)
     df['rain_windy_weekend'] = df['rain_windy_weekend'].fillna(0)
-    # # df = pd.merge(df, prophet_df[['ds', 'rain_weekend']], on='ds', how='left')
-    # # df['rain_weekend'] = df['rain_weekend'].fillna(0)
-    # df.to_csv("residualdf.csv")
-    # def check_conditions(row):
-    #     is_saturday = row['ds'].dayofweek == 5
-    #     is_rainy = row['rain_sum_x'] > 5
-    #     is_windy = row['windspeed_x'] > 4.5
-    #     return all([is_saturday, is_rainy, is_windy])
-    # merged_weather_sales['rain_wind'] = merged_weather_sales.apply(check_conditions, axis=1)
-    # merged_weather_sales['rain_wind'] =merged_weather_sales['rain_wind'].fillna(0)
-    # print(merged_weather_sales.columns)
-
-    # # Add the custom regressor and seasonalities before fitting the model
+     # Add the custom regressor and seasonalities before fitting the model
     if prediction_category == "hour":
         m = Prophet(
             holidays=holidays,
@@ -776,35 +734,6 @@ def oslo_city(prediction_category,restaurant,merged_data,historical_data,future_
  
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date  
-
-
-    # prophet_df['ds'] = pd.to_datetime(prophet_df['ds'])
-    # # future_residual['ds'] = pd.to_datetime(future_residual['ds'])
-    # #future_residual['rain_weekend'] = future_residual['ds'].apply(is_saturday_and_rainy)
-    # future_residual = pd.merge(future_residual,df,on='ds',how='left')
-    # #future_residual['rain_weekend'] =future_residual["rain_weekend"].fillna(0)
-    # future_residual.to_csv("futureresidual.csv")
-    # #future_residual=df
-    # # future_residual = pd.merge(future_residual, df[['ds','y', 'rain_weekend']], on='ds', how='left')
-    # future_residual['rain_weekend'] = future_residual['rain_weekend'].fillna(0)
-    # forecast = pd.read_csv('forecast.csv')
-    # forecast['ds']=pd.to_datetime(forecast['ds'])
-    # future_residual=pd.merge(future_residual,forecast[['ds','yhat']],on='ds',how='left')
-    # future_residual['yhat']=future_residual['yhat'].fillna(0)
-    # future_residual['residual']=future_residual['y']-future_residual['yhat']
-    # future_residual['residual']=future_residual['yhat'].fillna(0)
-    # future_residual['y']=future_residual['residual']
-    # # future_residual['residuals']=future_residual['y']
-    # future_residual = future_residual.dropna(subset=['ds'])
-    # future_residual.to_csv("futureresidual.csv")
-    # #future = pd.merge(future,df[['ds', 'temp_deviation','rain_deviation','wind_deviation']], on='ds', how='left')
-    # future['rain_weekend'] = future['rain_weekend'].fillna(0)
-    # #missing_values = future[['temp_deviation', 'rain_deviation', 'wind_deviation']].isnull().sum()
-    # future['ds'] = pd.to_datetime(future['ds'])
-    # future = pd.merge(future, merged_weather_sales[['ds', 'rain_wind']], on='ds', how='left')
-    # print(future.columns)
-
-    # future['rain_wind']=future['rain_wind'].fillna(0)
 
      # Add relevant weather columns to the future df
     future["rain_sum"] = merged_data["rain_sum"]

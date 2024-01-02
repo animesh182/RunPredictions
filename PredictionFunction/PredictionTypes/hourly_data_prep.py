@@ -169,10 +169,6 @@ def hourly_sales(company, restaurant, start_date, end_date):
     historical_data = merged_data[merged_data['date'] <= end_date]
     future_data = merged_data[merged_data['date'] > end_date]
 
-    historical_data.to_csv('historical_data.csv')
-    future_data.to_csv('future_data.csv')
-    merged_data.to_csv('test.csv')
-
     return merged_data, historical_data, future_data
 
 

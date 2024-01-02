@@ -6,6 +6,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.dataset_holidays import (
     twelfth_working_days,
     last_working_day,
 )
+import logging
 from PredictionFunction.utils.utils import calculate_days_30, calculate_days_15,custom_regressor
 from PredictionFunction.Datasets.OpeningHours.lostacos_opening_hours import restaurant_opening_hours
 from PredictionFunction.Datasets.Seasonalities.LosTacos.weekly_seasonality import weekly_seasonalities
@@ -114,7 +115,6 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
 
     elif prediction_category == "hour":
         df = (
@@ -143,7 +143,6 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
 
     elif prediction_category in ["type", "product"]:
         df = (
@@ -171,22 +170,20 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
             "windspeed",
             "air_temperature",
         ]
-        df.to_csv("test2.csv")
-        # df['y'] = np.log(df['y'])
+
     # df = warm_dry_weather_spring(df)
-    #df = heavy_rain_fall_weekday(df)
+    # df = heavy_rain_fall_weekday(df)
     df = heavy_rain_fall_weekend(df)
     df = heavy_rain_winter_weekday(df)
     df = heavy_rain_winter_weekend(df)
-    #df = heavy_rain_spring_weekday(df)
-    #df = heavy_rain_spring_weekend(df)
+    # df = heavy_rain_spring_weekday(df)
+    # df = heavy_rain_spring_weekend(df)
     df = non_heavy_rain_fall_weekend(df)
     m = Prophet()
 
     ### Holidays and other repeating outliers
     m.add_country_holidays(country_name="NO")
 
-   
     ONS = pd.DataFrame(
         {
             "holiday": "ONS",
@@ -204,8 +201,6 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
             "upper_window": 0,
         }
     )
-
-    
 
     holidays = pd.concat(
         (
@@ -245,14 +240,11 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
 
     ### Conditional seasonality - weekly
 
-
     df["fellesferie"] = df["ds"].apply(is_fellesferie_stavanger)
-
 
     df["is_may"] = df["ds"].apply(is_may)
 
     # Define a function to check if the date is within the period of heavy COVID restrictions
-
 
     # Add new columns in your dataframe to indicate if a date is within or outside the restrictions period
     df["covid_restriction_christmas"] = df["ds"].apply(is_covid_restriction_christmas)
@@ -294,13 +286,10 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
     df.loc[~date_mask, "custom_regressor"] = 0
 
     # Different weekly seasonality for 2 weeks in august related to starting fall semester/work
-    
 
     df["fall_start"] = df["ds"].apply(is_fall_start)
 
-
     df["covid_loose_fall21"] = df["ds"].apply(is_covid_loose_fall21)
-
 
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
 
@@ -356,7 +345,9 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
             holidays=holidays,
             yearly_seasonality=True,
             daily_seasonality=False,
-            changepoint_prior_scale=0.1,
+            changepoint_range=0.95,
+            changepoint_prior_scale=0.15,
+            seasonality_mode="multiplicative",
         )
 
     # m.add_regressor('days_since_last')
@@ -404,47 +395,12 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
     # m.add_regressor("heavy_rain_spring_weekday")
     # m.add_regressor("heavy_rain_spring_weekend")
     m.add_regressor("non_heavy_rain_fall_weekend")
-    
-
-
 
     print("done with seasonalities")
     if prediction_category == "hour":
         df["ds"] = pd.to_datetime(
             df["ds"].astype(str) + " " + df["hour"].astype(str) + ":00:00"
         )
-        weekday_mask = df["ds"].dt.weekday < 5  # Monday to Friday
-        weekend_mask = df["ds"].dt.weekday >= 5  # Saturday and Sunday
-
-        df_weekday = df[weekday_mask]
-        df_weekend = df[weekend_mask]
-        # print(df_weekday)
-        # print(df_weekend)
-        # Set the hours dynamically based on the day of the week
-        df_weekday = df_weekday[
-            (
-                df_weekday["ds"].dt.hour
-                >= int(restaurant_hours["Stavanger"]["weekday"]["starting"])
-            )
-            & (
-                df_weekday["ds"].dt.hour
-                <= int(restaurant_hours["Stavanger"]["weekday"]["ending"])
-            )
-        ]
-
-        df_weekend = df_weekend[
-            (
-                df_weekend["ds"].dt.hour
-                >= int(restaurant_hours["Stavanger"]["weekend"]["starting"])
-            )
-            | (
-                df_weekend["ds"].dt.hour
-                <= int(restaurant_hours["Stavanger"]["weekend"]["ending"])
-            )
-        ]
-
-        # Concatenate the weekday and weekend DataFrames
-        df = pd.concat([df_weekday, df_weekend])
 
     print("før get adjusted")
     """ def get_adjusted_total_net(prediction_category):
@@ -487,39 +443,10 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
 
     if prediction_category == "hour":
         future = m.make_future_dataframe(periods=700, freq="H")
-        # Add the Boolean columns for each weekday to the future DataFrame
         for weekday in range(7):
             future[f"weekday_{weekday}"] = future["ds"].dt.weekday == weekday
-
     else:
         future = m.make_future_dataframe(periods=60, freq="D")
-
-    if prediction_category == "hour":
-        weekday_mask = future["ds"].dt.weekday < 5  # Monday to Friday
-        weekend_mask = future["ds"].dt.weekday >= 5  # Saturday and Sunday
-        df_weekday = future[weekday_mask]
-        df_weekend = future[weekend_mask]
-        df_weekday = df_weekday[
-            (
-                df_weekday["ds"].dt.hour
-                >= int(restaurant_hours["Stavanger"]["weekday"]["starting"])
-            )
-            & (
-                df_weekday["ds"].dt.hour
-                <= int(restaurant_hours["Stavanger"]["weekday"]["ending"])
-            )
-        ]
-        df_weekend = df_weekend[
-            (
-                df_weekend["ds"].dt.hour
-                >= int(restaurant_hours["Stavanger"]["weekend"]["starting"])
-            )
-            | (
-                df_weekend["ds"].dt.hour
-                <= int(restaurant_hours["Stavanger"]["weekend"]["ending"])
-            )
-        ]
-        future = pd.concat([df_weekday, df_weekend])
 
     # Apply the mapping function to the dates in the future DataFrame
     def get_cluster_label(date):
@@ -531,8 +458,8 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
 
     future["cluster_label"] = future["ds"].apply(get_cluster_label)
 
+
     future["sunshine_amount"] = merged_data["sunshine_amount"]
-    future.dropna(inplace=True)
 
     # add the last working day and the +/- 5 days
     # future = calculate_days(future, last_working_day)
@@ -576,7 +503,7 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
 
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
-
+    future.fillna(0, inplace=True)
     return m, future, df
 
 
