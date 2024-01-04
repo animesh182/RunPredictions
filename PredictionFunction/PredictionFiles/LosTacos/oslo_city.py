@@ -623,6 +623,7 @@ def oslo_city(prediction_category,restaurant,merged_data,historical_data,future_
 
         # Concatenate the weekday and weekend DataFrames
         df = pd.concat([df_weekday, df_weekend])
+    df = df.drop_duplicates(subset='ds')
     m.fit(df)
     #m1.fit(df)
     # m1.fit(prophet_df)
@@ -682,13 +683,8 @@ def oslo_city(prediction_category,restaurant,merged_data,historical_data,future_
     future["sunshine_amount"] = merged_data["sunshine_amount"]
     future["rain_sum"] = merged_data["rain_sum"]
 
-
-
-    future.dropna(inplace=True)
-
     #Add weather regressors to the future df
     'Add a new column to the df called saturday_rain, with a 1 if it is a saturday and the rain_sum sum between 14-23 o clock is more than 5'
-    print(future.columns)
     #future["ds"] = pd.to_datetime(future["ds"])
     #future["saturday_rain"] = np.where(
     #    (future["ds"].dt.weekday == 5) & (future["rain_sum"] > 5), 1, 0
@@ -748,7 +744,8 @@ def oslo_city(prediction_category,restaurant,merged_data,historical_data,future_
     future = heavy_rain_spring_weekday_future(future)
     #future = heavy_rain_spring_weekend_future(future)
     #future = non_heavy_rain_fall_weekend_future(future)
-
+    future.fillna(0, inplace=True)
+    future = future.drop_duplicates(subset='ds')
 
     return m, future, df
 

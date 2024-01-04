@@ -7,7 +7,6 @@ from datetime import timedelta,datetime
 from PredictionFunction.utils.params import params
 import psycopg2.extras
 
-
 def save_holiday_params(data,restaurant):
     # Define the query
     raw_query = """    INSERT INTO public."Predictions_holidayparameters"(

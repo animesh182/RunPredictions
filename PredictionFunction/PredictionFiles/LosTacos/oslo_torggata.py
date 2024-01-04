@@ -312,9 +312,10 @@ def oslo_torggata(prediction_category,restaurant,merged_data,historical_data,fut
     # Sentrum scene concerts regressor
     # Convert date strings to datetime format and create separate columns for each weekday
     # after testing, it seems there is only an effect on sun, monn and tue
-    sentrum_scene_oslo_df = fetch_events("Oslo City","Sentrum Scene")
+    sentrum_scene_oslo_df = fetch_events("Oslo Torggata","Sentrum Scene")
     sentrum_scene_oslo_df["date"] = pd.to_datetime(sentrum_scene_oslo_df["date"])
-
+    sentrum_scene_oslo_df = sentrum_scene_oslo_df.drop_duplicates(subset='date')
+    
     # Create separate columns for each weekday
     weekdays = ["Monday", "Tuesday", "Sunday"]
     for day in weekdays:
@@ -474,7 +475,7 @@ def oslo_torggata(prediction_category,restaurant,merged_data,historical_data,fut
 
         # Concatenate the weekday and weekend DataFrames
         df = pd.concat([df_weekday, df_weekend])
-
+    df.to_csv('123.csv')
     m.fit(df)
 
     if prediction_category == "hour":
@@ -584,7 +585,9 @@ def oslo_torggata(prediction_category,restaurant,merged_data,historical_data,fut
     # Add the 'sunshine_amount' column to the future dataframe
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
-
+    future = future.drop_duplicates(subset='ds')
+    future.fillna(0, inplace=True)
+    
     return m, future, df
 
 

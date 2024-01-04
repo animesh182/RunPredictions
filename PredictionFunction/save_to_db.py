@@ -4,6 +4,8 @@ import logging
 import pandas as pd
 from PredictionFunction.PredictionSaver.saveDailyPredictions import save_daily_predictions
 from PredictionFunction.PredictionSaver.saveHolidayParams import save_holiday_params
+from PredictionFunction.utils.fetch_events import fetch_events
+
 def save_to_db(forecast_df,company,restaurant,prediction_category):
     unwanted_columns = [
         "_lower",
@@ -50,10 +52,35 @@ def save_to_db(forecast_df,company,restaurant,prediction_category):
         # save_daily_predictions(prediction_data,restaurant)
         
         # Save the holiday parameters for predictions
+        sentrum_scene_events= fetch_events(restaurant,"Sentrum Scene")
+        oslo_spektrum_events= fetch_events(restaurant,"Oslo Spektrum")
+        fornebu_events= fetch_events(restaurant,"Fornebu")
+        ulleval_events= fetch_events(restaurant,"Ulleval")
+
         holiday_parameter_data = prediction_data
         holiday_parameter_data = holiday_parameter_data.rename(columns={"yhat": "total_gross"})
         id_vars= ['ds']
         melted_data = pd.melt(filtered_df, id_vars=id_vars, var_name='name', value_name='effect')
+        
+        valid_concerts = ['spektrum', 'sentrum', 'fornebu', 'ulleval']
+        concert_dictionary = {
+            'spektrum': oslo_spektrum_events,
+            'sentrum': sentrum_scene_events,
+            'fornebu': fornebu_events,
+            'ulleval': ulleval_events
+        }
+
+        for index, row in melted_data.iterrows():
+            for concert in valid_concerts:
+                if concert in row['name']:
+                    actual_concert = concert_dictionary.get(concert, None)
+                    if actual_concert is not None:
+                        date_matching_df = actual_concert[actual_concert['date'] == row['ds']]
+                        if not date_matching_df.empty:
+                            concert_name = date_matching_df['name'].iloc[0]
+                            melted_data.at[index, 'name'] = concert_name
+
+        
         melted_data = melted_data.rename(columns={"ds": "date"})
         melted_data["date"]=pd.to_datetime(melted_data["date"]).dt.date
         filtered_prediction_data = prediction_data[['id','date','company','restaurant']]
@@ -65,7 +92,6 @@ def save_to_db(forecast_df,company,restaurant,prediction_category):
         joined_data['created_at'] = joined_data['created_at'].apply(lambda x: x.strftime('%Y-%m-%d %H:%M:%S'))
 
         # save_holiday_params(joined_data,restaurant)        
-
     elif prediction_category == "hour":
         latest_hours = defaultdict(dict)
         max_created_at_subquery = (
@@ -179,7 +205,6 @@ def save_to_db(forecast_df,company,restaurant,prediction_category):
                 total_gross=total_gross_value,
             )
             prediction_instance.save()
-
     elif prediction_category == "type":
         for index, row in filtered_df.iterrows():
             date_obj = datetime.datetime.strptime(row["ds"], "%Y-%m-%d")
@@ -193,7 +218,6 @@ def save_to_db(forecast_df,company,restaurant,prediction_category):
             prediction_instance.save()
 
         # Here, you can add logic for saving associated parameters if needed
-
     elif prediction_category == "product":
         for index, row in filtered_df.iterrows():
             date_obj = datetime.datetime.strptime(row["ds"], "%Y-%m-%d")

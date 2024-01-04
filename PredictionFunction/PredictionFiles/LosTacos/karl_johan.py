@@ -298,8 +298,8 @@ def karl_johan(prediction_category,restaurant,merged_data,historical_data,future
     # Fornebu concerts as regressor (Oslo)
     fornebu_large_concerts_df = fetch_events("Karl Johan","Fornebu")
     fornebu_large_concerts_df = pd.DataFrame(fornebu_large_concerts_df) 
-    logging.info(fornebu_large_concerts_df.head(5))
     fornebu_large_concerts_df = fornebu_large_concerts_df[["date","name"]]
+    fornebu_large_concerts_df = fornebu_large_concerts_df.drop_duplicates(subset='date')
  
     fornebu_large_concerts_df["date"] = pd.to_datetime(
         fornebu_large_concerts_df["date"]
@@ -319,6 +319,8 @@ def karl_johan(prediction_category,restaurant,merged_data,historical_data,future
     ullevaal_big_football_games_df["date"] = pd.to_datetime(
         ullevaal_big_football_games_df["date"]
     )
+    ullevaal_big_football_games_df = ullevaal_big_football_games_df.drop_duplicates(subset='date')
+
     # Rename the columns to match the existing DataFrame\
     ullevaal_big_football_games_df = ullevaal_big_football_games_df[["date","name"]]
 
@@ -335,6 +337,8 @@ def karl_johan(prediction_category,restaurant,merged_data,historical_data,future
     oslo_spectrum_large_df = pd.DataFrame(oslo_spektrum) 
     oslo_spectrum_large_df = oslo_spectrum_large_df.rename(columns={"date": "ds"})
     oslo_spectrum_large_df["ds"] = pd.to_datetime(oslo_spectrum_large_df["ds"])
+    oslo_spectrum_large_df = oslo_spectrum_large_df.drop_duplicates(subset='ds')
+
     oslo_spectrum_large_df["oslo_spektrum_large_concert"] = 1
     oslo_spectrum_large_df = oslo_spectrum_large_df[
         ["ds", "name", "oslo_spektrum_large_concert"]
@@ -351,6 +355,7 @@ def karl_johan(prediction_category,restaurant,merged_data,historical_data,future
     # after testing, it seems there is only an effect on sun, monn and tue
     sentrum_scene_oslo_df = fetch_events("Karl Johan","Sentrum Scene")
     sentrum_scene_oslo_df["date"] = pd.to_datetime(sentrum_scene_oslo_df["date"])
+    sentrum_scene_oslo_df = sentrum_scene_oslo_df.drop_duplicates(subset='date')
 
     # def is_campaign_active(ds, campaign_row):
     #      date = pd.to_datetime(ds)
@@ -561,8 +566,6 @@ def karl_johan(prediction_category,restaurant,merged_data,historical_data,future
 
     # Add weather future df
 
-    future.dropna(inplace=True)
-
     # Add relevant columns to the future df
     future["rain_sum"] = merged_data["rain_sum"]
     future["sunshine_amount"] = merged_data["sunshine_amount"]
@@ -581,7 +584,6 @@ def karl_johan(prediction_category,restaurant,merged_data,historical_data,future
     # add the last working day and the +/- 5 days
     future = calculate_days_30(future, last_working_day)
     # future = calculate_days_15(future, fifteenth_working_days)
-    future.dropna(inplace=True)
     future["high_weekend"] = future["ds"].apply(is_high_weekends)
     future = pd.merge(
         future,
@@ -659,6 +661,7 @@ def karl_johan(prediction_category,restaurant,merged_data,historical_data,future
     # Add the 'sunshine_amount' column to the future dataframe
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
+    future.fillna(0, inplace=True)
 
     return m, future, df
 

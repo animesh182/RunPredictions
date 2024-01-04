@@ -647,7 +647,6 @@ def fredrikstad(prediction_category,restaurant,merged_data,historical_data,futur
     #future = calculate_days_15(future, fifteenth_working_days)
 
     future["sunshine_amount"] = merged_data["sunshine_amount"]
-    future.dropna(inplace=True)
 
     future["covid_restriction_christmas"] = future["ds"].apply(
         is_covid_restriction_christmas
@@ -687,6 +686,7 @@ def fredrikstad(prediction_category,restaurant,merged_data,historical_data,futur
     future = heavy_rain_spring_weekend_future(future)
     #future = non_heavy_rain_fall_weekend_future(future)
 
+    future.fillna(0, inplace=True)
 
     return m, future, df
 

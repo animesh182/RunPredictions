@@ -697,6 +697,8 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     #future = heavy_rain_spring_weekday_future(future)
     future = heavy_rain_spring_weekend_future(future)
     future = non_heavy_rain_fall_weekend_future(future)
+    future.fillna(0, inplace=True)
+
     return m, future, df
 
 

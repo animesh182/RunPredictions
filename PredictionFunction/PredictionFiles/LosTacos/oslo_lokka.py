@@ -73,15 +73,9 @@ def oslo_lokka_jtorget_smestad_torggata(prediction_category,restaurant,merged_da
     future_data = future_data.rename(columns={"date": "ds"})
 
     merged_data = merged_data.rename(columns={"date": "ds"})
+    
     sales_data_df["ds"] = pd.to_datetime(sales_data_df["ds"])
     sales_data_df["ds"] = pd.to_datetime(sales_data_df["ds"])
-    # print(sales_data_df.head())
-    # weather_data = pd.read_csv("weatherdataa_oslo_Lokka.csv")
-    # weather_data = weather_data.rename(columns={"date":'ds'})
-    # weather_data['ds']=pd.to_datetime(weather_data['ds'])
-    # #print(weather_data.head())
-    # merged_weather_sales = pd.merge(sales_data_df, weather_data, on='ds', how='inner')
-    # merged_weather_sales=  merged_weather_sales[merged_weather_sales['city'] == 'Oslo']
 
     if prediction_category == "day":
         df = (
@@ -425,7 +419,6 @@ def oslo_lokka_jtorget_smestad_torggata(prediction_category,restaurant,merged_da
     # future = calculate_days_15(future, fifteenth_working_days)
 
     future["sunshine_amount"] = merged_data["sunshine_amount"]
-    future.dropna(inplace=True)
     future["covid_restriction_christmas"] = future["ds"].apply(
         is_covid_restriction_christmas
     )
@@ -466,6 +459,7 @@ def oslo_lokka_jtorget_smestad_torggata(prediction_category,restaurant,merged_da
     future = heavy_rain_spring_weekday_future(future)
     future = heavy_rain_spring_weekend_future(future)
     future = non_heavy_rain_fall_weekend_future(future)
+    future.fillna(0, inplace=True)
 
     return m, future, df
 

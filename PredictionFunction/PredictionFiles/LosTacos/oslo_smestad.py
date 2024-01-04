@@ -68,11 +68,9 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
 def oslo_smestad(prediction_category,restaurant,merged_data,historical_data,future_data):
     sales_data_df = historical_data
     sales_data_df = sales_data_df.rename(columns={"date": "ds"})
-
-    # future_data = pd.read_csv("future_data.csv")
+    
     future_data = future_data.rename(columns={"date": "ds"})
 
-    # merged_data = pd.read_csv("test.csv")
     merged_data = merged_data.rename(columns={"date": "ds"})
     sales_data_df["ds"] = pd.to_datetime(sales_data_df["ds"])
 
@@ -338,7 +336,6 @@ def oslo_smestad(prediction_category,restaurant,merged_data,historical_data,futu
     else:
         future = m.make_future_dataframe(periods=60, freq="D")
 
-    future.dropna(inplace=True)
 
     future["covid_restriction_christmas"] = future["ds"].apply(
         is_covid_restriction_christmas
@@ -376,6 +373,7 @@ def oslo_smestad(prediction_category,restaurant,merged_data,historical_data,futu
     future = heavy_rain_spring_weekday_future(future)
    # future = heavy_rain_spring_weekend_future(future)
     #future = non_heavy_rain_fall_weekend_future(future)
+    future.fillna(0, inplace=True)
 
 
     return m, future, df

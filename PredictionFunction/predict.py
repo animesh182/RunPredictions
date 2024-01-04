@@ -77,6 +77,7 @@ def predict(m,future,df,company,restaurant,start_date,end_date,prediction_catego
 
         # Extract all components from Prophet's forecast
         prophet_variables = forecast[forecast["ds"].isin(df["ds"])]
+        logging.info(restaurant)
         if prediction_category == "hour":
             prophet_variables = prophet_variables.reindex(df.index)
         else:
@@ -104,13 +105,9 @@ def predict(m,future,df,company,restaurant,start_date,end_date,prediction_catego
 
         # set max columns to none and print columns in df_xgb
         pd.set_option("display.max_columns", None)
-        # print("df_xgb columns here:")
-        # print(df_xgb.columns)
 
         # Check for duplicate rows based on 'ds' column
-        # print(df_xgb.shape)
         duplicate_rows = df_xgb[df_xgb.duplicated(subset="ds", keep="first")]
-        # print("Number of duplicate rows based on 'ds' column:", duplicate_rows.shape[0])
 
         # Drop duplicate rows based on 'ds' column
         df_xgb.drop_duplicates(subset="ds", keep="first", inplace=True)
@@ -178,17 +175,6 @@ def predict(m,future,df,company,restaurant,start_date,end_date,prediction_catego
         X_train = training_set.drop(columns=["ds", "residuals", "y"])
         X_test = test_set.drop(columns=["ds", "residuals", "y"])
 
-        # print("X_train shape:", X_train.shape)
-        # print("y_train shape:", y_train.shape)
-        # print("X_test shape:", X_test.shape)
-        # print("y_test shape:", y_test.shape)
-
-        # Find and print duplicate columns
-        duplicate_columns = X_train.columns[X_train.columns.duplicated()]
-        print("Duplicate Columns are as follows:")
-        for col in duplicate_columns:
-            print(col)
-
         # create XGBoost matrices
         valid_index = y_train.notna()
         X_train = X_train[valid_index]
@@ -250,15 +236,6 @@ def predict(m,future,df,company,restaurant,start_date,end_date,prediction_catego
         # MAE and RMSE
         from sklearn.metrics import mean_absolute_error, mean_squared_error
 
-        # print("MAE: ")
-        # print(round(mean_absolute_error(test_set['residuals'], predictions_xgb), 0))
-
-        # print("RMSE: ")
-        # print(round(np.sqrt(mean_squared_error(test_set['residuals'], predictions_xgb)), 0))
-
-        # Plot the feature importance
-        # plt.show()
-
         # Extract feature importances
         gain = model.get_score(importance_type="gain")
         cover = model.get_score(importance_type="cover")
@@ -272,7 +249,6 @@ def predict(m,future,df,company,restaurant,start_date,end_date,prediction_catego
             }
         ).sort_values(by="Gain", ascending=False)
 
-        # print(importance_df)
 
         # how well is the model doing on unseen data?
         # Convert pandas DataFrame to DMatrix format
@@ -286,8 +262,8 @@ def predict(m,future,df,company,restaurant,start_date,end_date,prediction_catego
         train_rmse = mean_squared_error(y_train, train_preds, squared=False)
         val_rmse = mean_squared_error(y_test, val_preds, squared=False)
 
-        print(f"Training RMSE: {train_rmse}")
-        print(f"Validation RMSE: {val_rmse}")
+        logging.info(f"Training RMSE: {train_rmse}")
+        logging.info(f"Validation RMSE: {val_rmse}")
 
         # add manual predictions for holidays we don't have data for. This must be an imported table later
         # Identify the row for the holiday in the forecast DataFrame
@@ -311,12 +287,7 @@ def predict(m,future,df,company,restaurant,start_date,end_date,prediction_catego
         forecast.loc[oslo_pride_mainday.index, "yhat"] *= 1.20
         forecast.loc[oslo_pride_minusone.index, "yhat"] *= 1.20
 
-        # df_cv = cross_validation(m, initial='640 days', period='7 days', horizon='30 days')
 
-        # df_p = performance_metrics(df_cv)
-        # selected_metrics = df_p[['horizon', 'rmse', 'mae', 'smape']]
-        # selected_metrics = df_p[['horizon', 'rmse']]
-        # print(selected_metrics)
 
         from sklearn.metrics import mean_squared_error
         from math import sqrt
@@ -341,9 +312,7 @@ def predict(m,future,df,company,restaurant,start_date,end_date,prediction_catego
         print("Original RMSE: ", rmse_original)
         print("Adjusted RMSE: ", rmse_adjusted)
 
-    # print(forecast[forecast['sentrum_scene_concerts'] != 0]['sentrum_scene_concerts'])
-    # df_p['rmse'] = np.exp(df_p['rmse'])
-    # print(df_p)
+
 
     # forecast[['ds','yhat','yhat_lower','yhat_upper']]
 
@@ -356,7 +325,6 @@ def predict(m,future,df,company,restaurant,start_date,end_date,prediction_catego
     log_median = df["y"].median()
     # Convert the median back to its original scale
     original_median = np.exp(log_median)
-    # print(original_median)
 
     # create a pandas dataframe of the forecasst
     forecast = pd.DataFrame(forecast)
