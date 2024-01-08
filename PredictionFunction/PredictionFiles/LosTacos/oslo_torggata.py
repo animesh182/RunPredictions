@@ -475,7 +475,6 @@ def oslo_torggata(prediction_category,restaurant,merged_data,historical_data,fut
 
         # Concatenate the weekday and weekend DataFrames
         df = pd.concat([df_weekday, df_weekend])
-    df.to_csv('123.csv')
     m.fit(df)
 
     if prediction_category == "hour":
