@@ -10,6 +10,7 @@ from PredictionFunction.Datasets.Regressors.general_regressors import (is_specif
 is_covid_restriction_christmas,
 is_fall_start,
 is_christmas_shopping,
+is_fellesferie
 )
 
 from PredictionFunction.Datasets.OpeningHours.lostacos_opening_hours import restaurant_opening_hours
@@ -59,8 +60,11 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     hostferie_sor_ostlandet_weekdays,
     hostferie_sor_ostlandet_weekdend,
 )
+from PredictionFunction.utils.openinghours import add_opening_hours
+from PredictionFunction.utils.fetch_events import fetch_events
 
 def fredrikstad(prediction_category,restaurant,merged_data,historical_data,future_data):
+    event_holidays=pd.DataFrame(columns=['event_names', 'name'])
     sales_data_df = historical_data
     sales_data_df = sales_data_df.rename(columns={"date": "ds"})
 
@@ -407,7 +411,35 @@ def fredrikstad(prediction_category,restaurant,merged_data,historical_data,futur
 
     # Add custom monthly seasonalities for a specific month
 
-    df["specific_month"] = df["ds"].apply(is_specific_month)
+    df["is_specific_month"] = df["ds"].apply(is_specific_month)
+    df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
+    df = add_opening_hours(df, "Fredrikstad",11, 16)
+
+    fredrikstad_venues = {
+        
+    }
+
+    data = {'name':[], 'effect':[]}
+    regressors_to_add = []
+    for venue in fredrikstad_venues:
+        # for venue in karl_johan_venues:
+        venue_df = fetch_events("Oslo Torggata", venue)
+        event_holidays = pd.concat(objs=[event_holidays, venue_df], ignore_index=True)
+        # event_holidays.to_csv(f"{venue}_holidatest.csv")
+        if 'name' in venue_df.columns:
+            venue_df = venue_df.drop_duplicates('date')
+            venue_df["date"] = pd.to_datetime(venue_df["date"])
+            venue_df = venue_df.rename(columns={"date": "ds"})
+            venue_df["ds"] = pd.to_datetime(venue_df["ds"])
+            venue_df = venue_df[["ds", "name"]]
+            venue_df.columns = ["ds", "event"]
+            dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
+            venue_df[dataframe_name] = 1
+            df = pd.merge(df, venue_df, how="left", on="ds", suffixes=('', '_venue'))
+            df[dataframe_name].fillna(0, inplace=True)
+            regressors_to_add.append((venue_df, dataframe_name))  # Append venue_df along with venue name for regressor addition
+        else:
+            holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True) 
 
     # Define a function to check if the date is within the period of heavy COVID restrictions
 
@@ -536,8 +568,10 @@ def fredrikstad(prediction_category,restaurant,merged_data,historical_data,futur
     m.add_regressor("custom_regressor")
     # m.add_regressor('covid_restriction')
     m.add_regressor("closed_jan")
+
+    m.add_seasonality(name='monthly', period=30.5, fourier_order=5)
     m.add_seasonality(
-        name="monthly", period=30.5, fourier_order=5, condition_name="specific_month"
+        name="is_specific_month", period=30.5, fourier_order=5, condition_name="is_specific_month"
     )
     m.add_seasonality(
         name="covid_restriction_christmas",
@@ -553,7 +587,9 @@ def fredrikstad(prediction_category,restaurant,merged_data,historical_data,futur
     )
     # m.add_seasonality(name='weekly_not_fall_start', period=7, fourier_order=3,
     #                  condition_name='not_fall_start')
-
+    m.add_seasonality(
+        name="is_fellesferie", period=30.5, fourier_order=5, condition_name="is_fellesferie"
+    )
     m.add_seasonality(
         name="christmas_shopping",
         period=7,
@@ -564,7 +600,14 @@ def fredrikstad(prediction_category,restaurant,merged_data,historical_data,futur
     #                  condition_name='not_christmas_shopping')
 
     # Add the conditional regressor to the model
+    m.add_regressor("opening_duration")
     m.add_regressor("sunshine_amount", standardize=False)
+
+    for event_df, regressor_name in regressors_to_add:
+        if 'event' in event_df.columns:
+            m.add_regressor(regressor_name)
+
+
     if prediction_category == "hour":
         df["ds"] = pd.to_datetime(
             df["ds"].astype(str) + " " + df["hour"].astype(str) + ":00:00"
@@ -657,9 +700,10 @@ def fredrikstad(prediction_category,restaurant,merged_data,historical_data,futur
     # future['not_fall_start'] = ~future['ds'].apply(is_fall_start)
 
     future["christmas_shopping"] = future["ds"].apply(is_christmas_shopping)
+    future["is_fellesferie"] = future["ds"].apply(is_fellesferie)
     # future['not_christmas_shopping'] = ~future['ds'].apply(is_christmas_shopping)
 
-    future["specific_month"] = future["ds"].apply(is_specific_month)
+    future["is_specific_month"] = future["ds"].apply(is_specific_month)
     # Calculate the custom regressor values for the future dates
     future["ds"] = pd.to_datetime(future["ds"])
     future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)
@@ -672,11 +716,26 @@ def fredrikstad(prediction_category,restaurant,merged_data,historical_data,futur
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
 
+        
+    for event_df, event_column in regressors_to_add:
+        if 'event' in event_df.columns:
+            event_df= event_df.drop_duplicates('ds')
+            future = pd.merge(
+                future,
+                event_df[["ds", event_column]],
+                how="left",
+                on="ds",
+            )
+            future[event_column].fillna(0, inplace=True)
      # Add relevant weather columns to the future df
     future["rain_sum"] = merged_data["rain_sum"]
     future["sunshine_amount"] = merged_data["sunshine_amount"]
     future["windspeed"] = merged_data["windspeed"]
     future["air_temperature"] = merged_data["air_temperature"]
+    future.fillna(
+        {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
+        inplace=True,
+    )
     future = warm_and_dry_future(future)
     future = heavy_rain_fall_weekday_future(future)
     future = heavy_rain_fall_weekend_future(future)
@@ -684,11 +743,12 @@ def fredrikstad(prediction_category,restaurant,merged_data,historical_data,futur
    # future = heavy_rain_winter_weekend_future(future)
     future = heavy_rain_spring_weekday_future(future)
     future = heavy_rain_spring_weekend_future(future)
+    future = add_opening_hours(future, "Fredrikstad",11, 16)
     #future = non_heavy_rain_fall_weekend_future(future)
 
     future.fillna(0, inplace=True)
 
-    return m, future, df
+    return m, future, df, event_holidays
 
 
 def location_function(prediction_category,restaurant,merged_data,historical_data,future_data):

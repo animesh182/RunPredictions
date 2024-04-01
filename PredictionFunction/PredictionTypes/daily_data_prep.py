@@ -6,14 +6,34 @@ import numpy as np
 from PredictionFunction.utils.fetch_sales_data import fetch_salesdata
 from PredictionFunction.meta_tables import data
 from PredictionFunction.utils.fetch_weather_data import fetch_weather
+from PredictionFunction.utils.trondheim_sales import sales_without_effect
+
 def prepare_data(company, restaurant, start_date, end_date):
     #This function processes the data for the given restaurant and date range.
     print("started on process_data.py")
     # Create a pandas DataFrame
-    filtered_sales_data=fetch_salesdata(company,restaurant,start_date,end_date)
+
     restaurant_list=pd.DataFrame(data)
     # Convert the filtered SalesData to a DataFrame
-    sales_data_df = filtered_sales_data    
+
+    if restaurant=="Trondheim":
+        filtered_sales_data, actual_trondheim_start_date = (
+            sales_without_effect(
+                restaurant_list["Company"].iloc[0],
+                start_date,
+                end_date,
+                restaurant_list["Alcohol Reference"].iloc[0],
+                restaurant_list["Food Reference"].iloc[0],
+            )
+        )
+        filtered_sales_data= filtered_sales_data.rename(columns={'gastronomic_day': 'date'})
+
+    else:
+        filtered_sales_data=fetch_salesdata(company,restaurant,start_date,end_date)
+    sales_data_df = filtered_sales_data  
+    print("Length before dropping duplicates:", len(sales_data_df))
+    sales_data_df.drop_duplicates('date', inplace=True)
+    print("Length after dropping duplicates:", len(sales_data_df))  
     end_date= pd.to_datetime(end_date)
     weather_end_date = end_date + dt.timedelta(days=45)
 
@@ -45,8 +65,6 @@ def prepare_data(company, restaurant, start_date, end_date):
     
     
     weather_data_df = weather_data_df.rename(columns={'time': 'date'})  # Rename 'time' column to 'date'
-    
-
     sales_data_df['date'] = pd.to_datetime(sales_data_df['date'], format='%Y-%m-%d %H').dt.date
 
     #Only use sunshine in the relevant hour intervals based on feedback from the restaurant's manager'

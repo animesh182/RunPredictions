@@ -10,6 +10,7 @@ from PredictionFunction.Datasets.Regressors.general_regressors import(
     is_fall_start,
     is_fellesferie,
     is_first_two_weeks_january_21,
+    is_specific_month
     )
 from PredictionFunction.utils.utils import calculate_days_30, early_semester, calculate_days_15, custom_regressor
 
@@ -56,6 +57,8 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import(
     non_heavy_rain_fall_weekend,
     non_heavy_rain_fall_weekend_future,
 )
+from PredictionFunction.utils.openinghours import add_opening_hours
+from PredictionFunction.utils.fetch_events import fetch_events
 
 def filter_hours(df):
     # Filter the DataFrame based on the day and time
@@ -94,6 +97,7 @@ def filter_hours(df):
 
 def bergen(prediction_category,restaurant,merged_data,historical_data,future_data):
     # Group data in dataset by date to prepare it
+    event_holidays=pd.DataFrame()
     sales_data_df = historical_data
 
     sales_data_df["date"] = pd.to_datetime(sales_data_df["date"])
@@ -193,208 +197,12 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     #df = heavy_rain_spring_weekday(df)
     df = heavy_rain_spring_weekend(df)
     df = non_heavy_rain_fall_weekend(df)
+    df = add_opening_hours(df, "Bergen",12, 17)
 
     m = Prophet()
 
     ### Holidays and other repeating outliers
     m.add_country_holidays(country_name="NO")
-
-    # pre_christmas = pd.DataFrame(
-    #     {
-    #         "holiday": "Pre christmas period",
-    #         "ds": pd.to_datetime(["2022-12-23"]),
-    #         "lower_window": -5,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # pre_christmas_covid21 = pd.DataFrame(
-    #     {
-    #         "holiday": "Pre Christmas covid 21",
-    #         "ds": pd.to_datetime(["2021-12-22"]),
-    #         "lower_window": -6,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # weekendmiddec_21covid = pd.DataFrame(
-    #     {
-    #         "holiday": "weekendmiddec_21covid",
-    #         "ds": pd.to_datetime(["2021-12-12"]),
-    #         "lower_window": -2,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # new_year_romjul = pd.DataFrame(
-    #     {
-    #         "holiday": "New Year romjul",
-    #         "ds": pd.to_datetime(["2022-12-31"]),
-    #         "lower_window": -6,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # firstweek_jan = pd.DataFrame(
-    #     {
-    #         "holiday": "First week of january",
-    #         "ds": pd.to_datetime(["2022-01-10", "2023-01-08", "2024-01-07"]),
-    #         "lower_window": -7,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # new_years_day = pd.DataFrame(
-    #     {
-    #         "holiday": "New years day",
-    #         "ds": pd.to_datetime(["2022-01-01", "2022-01-01", "2023-01-01"]),
-    #         "lower_window": 0,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # fadder_week = pd.DataFrame(
-    #     {
-    #         "holiday": "Fadder week",
-    #         "ds": pd.to_datetime(["2022-08-21", "2023-08-20"]),
-    #         "lower_window": -7,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # only when the holiday is on a weekday. If it is in the weekend there is no effect
-    # first_may = pd.DataFrame(
-    #     {
-    #         "holiday": "First of may",
-    #         "ds": pd.to_datetime(["2021-05-01", "2023-05-01"]),
-    #         "lower_window": -1,
-    #         "upper_window": 0,
-    #     }
-    # )
-    # seventeenth_may = pd.DataFrame(
-    #     {
-    #         "holiday": "Seventeenth of may",
-    #         "ds": pd.to_datetime(
-    #             ["2021-05-17", "2022-05-17", "2023-05-17", "2024-05-17"]
-    #         ),
-    #         "lower_window": -1,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # easter = pd.DataFrame(
-    #     {
-    #         "holiday": "Easter break",
-    #         "ds": pd.to_datetime(
-    #             [
-    #                 "2022-04-14",
-    #                 "2022-04-15",
-    #                 "2022-04-16",
-    #                 "2022-04-17",
-    #                 "2023-04-06",
-    #                 "2023-04-07",
-    #                 "2023-04-08",
-    #                 "2023-04-09",
-    #             ]
-    #         ),
-    #         "lower_window": 0,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # pinse = pd.DataFrame(
-    #     {
-    #         "holiday": "Pinse",
-    #         "ds": pd.to_datetime(["2022-06-06", "2023-05-29"]),
-    #         "lower_window": -4,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # 2023: falls the day after the national independence day, so no effect the day before this year
-    # himmelfart = pd.DataFrame(
-    #     {
-    #         "holiday": "Himmelfart",
-    #         "ds": pd.to_datetime(["2022-05-26"]),
-    #         "lower_window": -1,
-    #         "upper_window": 0,
-    #     }
-    # )
-    # military_excercise = pd.DataFrame(
-    #     {
-    #         "holiday": "Military excercise",
-    #         "ds": pd.to_datetime(
-    #             ["2022-03-12", "2022-03-13", "2022-03-19", "2022-03-20"]
-    #         ),
-    #         "lower_window": 0,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # helg_før_fellesferie = pd.DataFrame(
-    #     {
-    #         "holiday": "Weekends before fellesferie",
-    #         "ds": pd.to_datetime(["2022-07-01", "2022-07-02", "2022-07-03"]),
-    #         "lower_window": 0,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # closed = pd.DataFrame(
-    #     {
-    #         "holiday": "Closed",
-    #         "ds": pd.to_datetime(
-    #             [
-    #                 "2021-12-22",
-    #                 "2021-12-23",
-    #                 "2021-12-24",
-    #                 "2021-12-25",
-    #                 "2021-12-26",
-    #                 "2021-12-31",
-    #                 "2022-12-24",
-    #                 "2022-12-25",
-    #                 "2022-12-31",
-    #             ]
-    #         ),
-    #         "lower_window": 0,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # unknown_outliers = pd.DataFrame(
-    #     {
-    #         "holiday": "unknown_outliers",
-    #         "ds": pd.to_datetime(["2021-09-06", "2022-11-07"]),
-    #         "lower_window": 0,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # covid_christmas21_startjan22 = pd.DataFrame(
-    #     {
-    #         "holiday": "covid_christmas21_startjan22",
-    #         "ds": pd.to_datetime(
-    #             [
-    #                 "2021-12-27",
-    #                 "2021-12-28",
-    #                 "2021-12-29",
-    #                 "2021-12-30",
-    #                 "2021-12-31",
-    #                 "2022-01-01",
-    #                 "2022-01-02",
-    #                 "2022-01-03",
-    #                 "2022-01-04",
-    #                 "2022-01-05",
-    #                 "2022-01-06",
-    #                 "2022-01-07",
-    #                 "2022-01-08",
-    #                 "2022-01-09",
-    #             ]
-    #         ),
-    #         "lower_window": 0,
-    #         "upper_window": 0,
-    #     }
-    # )
 
     holidays = pd.concat(
         (
@@ -427,6 +235,38 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
 
 
     df["fall_start"] = df["ds"].apply(is_fall_start)
+    df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
+    df["is_specific_month"] = df["ds"].apply(is_specific_month)
+
+    bergen_venues = {
+        "Scruffy Murphy's", "USF Shipyard", "Aztec Shawnee Theatre", "Ulleval", 
+        "Gallery Geo", "Lydgalleriet","Madam Felle","Bergenhus Festning", 
+        "Pokémon TCG","St. Mary's Church","Varden Amfi","Håkonshallen",
+        "Festplassen","Åsane kulturhus","Bergen County Plaza","Litteraturhuset",
+        "James Church","Nygårdsparken Pavilion","Ytre Arna Church","Grieghallen",
+        "Teglverket, Kvarteret","Åsane idrettspark","Kulturhuset",
+    }
+    
+    regressors_to_add = []
+    for venue in bergen_venues:
+        venue_df = fetch_events("Bergen", venue)  # Assuming you have a function Events_dict()
+        event_holidays = pd.concat(objs=[event_holidays, venue_df], ignore_index=True)
+        # print(f'{venue}: {venue_df.columns}')
+        if 'name' in venue_df.columns:
+            venue_df = venue_df.drop_duplicates('date')
+            venue_df["date"] = pd.to_datetime(venue_df["date"])
+            venue_df = venue_df.rename(columns={"date": "ds"})
+            venue_df["ds"] = pd.to_datetime(venue_df["ds"])
+            venue_df = venue_df[["ds", "name"]]
+            venue_df.columns = ["ds", "event"]
+            dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
+            venue_df[dataframe_name] = 1
+            df = pd.merge(df, venue_df, how="left", on="ds", suffixes=('', '_venue'))
+            df[dataframe_name].fillna(0, inplace=True)
+            regressors_to_add.append((venue_df, dataframe_name))  # Append venue_df along with venue name for regressor addition
+        else:
+            holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)
+
 
     # The training DataFrame (df) should also include 'days_since_last' and 'days_until_next' columns.
     # df = calculate_days_30(df, fifteenth_working_days)
@@ -522,6 +362,12 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     #m.add_regressor("heavy_rain_spring_weekday")
     m.add_regressor("heavy_rain_spring_weekend")
     m.add_regressor("non_heavy_rain_fall_weekend")
+    m.add_regressor("sunshine_amount", standardize=False)
+    m.add_regressor("opening_duration")
+
+    for event_df, regressor_name in regressors_to_add:
+        if 'event' in event_df.columns:
+            m.add_regressor(regressor_name)
 
     # setting the dates for early semester students goinf out trend/cutting covid restrictions at the same time - 2021
     # start_date_early_semester_21 = pd.to_datetime('2021-09-26')
@@ -544,14 +390,14 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
 
     ### Conditional seasonality - weekly
 
-    df["fellesferie"] = df["ds"].apply(is_fellesferie)
+    # df["fellesferie"] = df["ds"].apply(is_fellesferie)
     # df['not_fellesferie'] = ~df['ds'].apply(is_fellesferie)
 
     m.add_seasonality(
         name="weekly_fellesferie",
         period=7,
         fourier_order=3,
-        condition_name="fellesferie",
+        condition_name="is_fellesferie",
     )
     # m.add_seasonality(name='weekly_not_fellesferie', period=7, fourier_order=3, condition_name='not_fellesferie')
 
@@ -559,17 +405,27 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
         name="weekly_fall_start", period=7, fourier_order=3, condition_name="fall_start"
     )
 
-    # add function for is_first_two_weeks_january
-
-    df["first_two_weeks_january_21"] = df["ds"].apply(is_first_two_weeks_january_21)
-    # df['not_first_two_weeks_january_21'] = ~df['ds'].apply(is_first_two_weeks_january_21)
 
     m.add_seasonality(
-        name="weekly_first_two_weeks_january_21",
-        period=7,
-        fourier_order=3,
-        condition_name="first_two_weeks_january_21",
+        name="is_fellesferie", period=30.5, fourier_order=5, condition_name="is_fellesferie"
     )
+    m.add_seasonality(
+        name="is_specific_month", period=30.5, fourier_order=5, condition_name="is_specific_month"
+    )
+
+    m.add_seasonality(name='monthly', period=30.5, fourier_order=5)
+
+    # add function for is_first_two_weeks_january
+
+    # df["first_two_weeks_january_21"] = df["ds"].apply(is_first_two_weeks_january_21)
+    # df['not_first_two_weeks_january_21'] = ~df['ds'].apply(is_first_two_weeks_january_21)
+
+    # m.add_seasonality(
+    #     name="weekly_first_two_weeks_january_21",
+    #     period=7,
+    #     fourier_order=3,
+    #     condition_name="first_two_weeks_january_21",
+    # )
     # m.add_seasonality(name='weekly_not_first_two_weeks_january_21', period=7, fourier_order=3, condition_name='not_first_two_weeks_january_21')
     if prediction_category == "hour":
         df["ds"] = pd.to_datetime(
@@ -668,7 +524,8 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     )
     ## Add conditional seasonality
     future["fall_start"] = future["ds"].apply(is_fall_start)
-    future["fellesferie"] = future["ds"].apply(is_fellesferie)
+    future["is_fellesferie"] = future["ds"].apply(is_fellesferie)
+    future["is_specific_month"] = future["ds"].apply(is_specific_month)
     # future['not_fellesferie'] = ~future['ds'].apply(is_fellesferie)
     future["early_semester_week"] = future["ds"].apply(
         lambda x: early_semester(x, params)
@@ -681,6 +538,17 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
         is_first_two_weeks_january_21
     )
     future["fall_start"] = future["ds"].apply(is_fall_start)
+    for event_df, event_column in regressors_to_add:
+        if 'event' in event_df.columns:
+            event_df= event_df.drop_duplicates('ds')
+            future = pd.merge(
+                future,
+                event_df[["ds", event_column]],
+                how="left",
+                on="ds",
+            )
+            future[event_column].fillna(0, inplace=True)
+
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
 
@@ -689,6 +557,11 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     future["sunshine_amount"] = merged_data["sunshine_amount"]
     future["windspeed"] = merged_data["windspeed"]
     future["air_temperature"] = merged_data["air_temperature"]
+    future.fillna(
+            {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
+            inplace=True,
+        )
+    future = add_opening_hours(future, "Bergen", 12,17)
     future = warm_and_dry_future(future)
     #future = heavy_rain_fall_weekday_future(future)
     #future = heavy_rain_fall_weekend_future(future)
@@ -698,8 +571,7 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     future = heavy_rain_spring_weekend_future(future)
     future = non_heavy_rain_fall_weekend_future(future)
     future.fillna(0, inplace=True)
-
-    return m, future, df
+    return m, future, df,event_holidays
 
 
 def location_function(prediction_category,restaurant,merged_data,historical_data,future_data):

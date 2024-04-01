@@ -69,6 +69,7 @@ def predict(m,future,df,company,restaurant,start_date,end_date,prediction_catego
         prediction_category == "day"
         and company == "Los Tacos"
         and restaurant != "Sandnes"
+        and restaurant != "Trondheim"
     ):
         # if prediction_category=="day":
         #################### Implement XGBoost model here
@@ -76,7 +77,9 @@ def predict(m,future,df,company,restaurant,start_date,end_date,prediction_catego
 
 
         # Extract all components from Prophet's forecast
+        df = df.drop_duplicates()
         prophet_variables = forecast[forecast["ds"].isin(df["ds"])]
+        prophet_variables = prophet_variables.drop_duplicates(subset=["ds"])
         logging.info(restaurant)
         if prediction_category == "hour":
             prophet_variables = prophet_variables.reindex(df.index)
@@ -332,7 +335,7 @@ def predict(m,future,df,company,restaurant,start_date,end_date,prediction_catego
 
     # create a residual df that we use in a gradient booster model that captures weather effect
     # 2. Subtract those forecasts from your target variable to get the residuals
-    df["residuals"] = df["y"] - forecast["yhat"]
+    # df["residuals"] = df["y"] - forecast["yhat"]
     return forecast
 
    

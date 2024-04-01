@@ -11,6 +11,7 @@ from PredictionFunction.Datasets.Regressors.general_regressors import (
     is_covid_restriction_christmas,
     is_fall_start,
     is_christmas_shopping,
+    is_fellesferie
 )
 from PredictionFunction.Datasets.Regressors.weather_regressors import (
     warm_dry_weather_spring,
@@ -64,9 +65,12 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
 )
 
 from PredictionFunction.utils.utils import calculate_days_30, calculate_days_15, custom_regressor
+from PredictionFunction.utils.fetch_events import fetch_events
+from PredictionFunction.utils.openinghours import add_opening_hours
 
 
 def oslo_lokka_jtorget_smestad_torggata(prediction_category,restaurant,merged_data,historical_data,future_data):
+    event_holidays=pd.DataFrame()
     sales_data_df = historical_data
     sales_data_df = sales_data_df.rename(columns={"date": "ds"})
 
@@ -197,10 +201,12 @@ def oslo_lokka_jtorget_smestad_torggata(prediction_category,restaurant,merged_da
     # Add custom monthly seasonalities for a specific month
 
     df["specific_month"] = df["ds"].apply(is_specific_month)
+    df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
 
     # Define a function to check if the date is within the period of heavy COVID restrictions
     # Add new columns in your dataframe to indicate if a date is within or outside the restrictions period
     df["covid_restriction_christmas"] = df["ds"].apply(is_covid_restriction_christmas)
+    df= add_opening_hours(df,"Oslo Lokka",12,17)
 
     # Some weeks have the same weekly seasonality but more extreme and just higher. Add that here
     # Convert 'ds' column to datetime if it is not already
@@ -249,6 +255,33 @@ def oslo_lokka_jtorget_smestad_torggata(prediction_category,restaurant,merged_da
 
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
 
+    oslo_lokka_venues = {
+            "Rockefeller", "Cosmopolite, Oslo","Parkteatret Scene",
+            "Nordic Black Theatre","Oslo Concert Hall","Salt Langhuset",
+        }
+
+    data = {'name':[], 'effect':[]}
+    for venue in oslo_lokka_venues:
+        regressors_to_add = []
+        # for venue in karl_johan_venues:
+        venue_df = fetch_events("Oslo Torggata", venue)
+        event_holidays = pd.concat(objs=[event_holidays, venue_df], ignore_index=True)
+        # event_holidays.to_csv(f"{venue}_holidatest.csv")
+        if 'name' in venue_df.columns:
+            venue_df = venue_df.drop_duplicates('date')
+            venue_df["date"] = pd.to_datetime(venue_df["date"])
+            venue_df = venue_df.rename(columns={"date": "ds"})
+            venue_df["ds"] = pd.to_datetime(venue_df["ds"])
+            venue_df = venue_df[["ds", "name"]]
+            venue_df.columns = ["ds", "event"]
+            dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
+            venue_df[dataframe_name] = 1
+            df = pd.merge(df, venue_df, how="left", on="ds", suffixes=('', '_venue'))
+            df[dataframe_name].fillna(0, inplace=True)
+            regressors_to_add.append((venue_df, dataframe_name))  # Append venue_df along with venue name for regressor addition
+        else:
+            holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True) 
+
     ## calculating the paydays and the days before and after. Used in regressions
 
     # The training DataFrame (df) should also include 'days_since_last' and 'days_until_next' columns.
@@ -284,10 +317,9 @@ def oslo_lokka_jtorget_smestad_torggata(prediction_category,restaurant,merged_da
     else:
         m = Prophet(
             holidays=holidays,
-            yearly_seasonality=True,
+            yearly_seasonality=5,
             daily_seasonality=False,
             changepoint_prior_scale=0.1,
-            seasonality_mode="multiplicative",
         )
 
     # Add the payday columns as regressors
@@ -311,9 +343,19 @@ def oslo_lokka_jtorget_smestad_torggata(prediction_category,restaurant,merged_da
     m.add_regressor("non_heavy_rain_fall_weekend")
 
     m.add_regressor("custom_regressor")
+    m.add_regressor("opening_duration")
+    m.add_regressor("sunshine_amount", standardize=False)
+
+    for event_df, regressor_name in regressors_to_add:
+        if 'event' in event_df.columns:
+            m.add_regressor(regressor_name)
+
     # m.add_regressor('covid_restriction')
     m.add_seasonality(
         name="monthly", period=30.5, fourier_order=5, condition_name="specific_month"
+    )
+    m.add_seasonality(
+        name="is_fellesferie", period=30.5, fourier_order=5, condition_name="is_fellesferie"
     )
 
     m.add_seasonality(
@@ -338,7 +380,7 @@ def oslo_lokka_jtorget_smestad_torggata(prediction_category,restaurant,merged_da
     pd.set_option("display.max_rows", None)
 
     # Add the conditional regressor to the model
-    m.add_regressor("sunshine_amount", standardize=False)
+
     if prediction_category == "hour":
         df["ds"] = pd.to_datetime(
             df["ds"].astype(str) + " " + df["hour"].astype(str) + ":00:00"
@@ -417,6 +459,17 @@ def oslo_lokka_jtorget_smestad_torggata(prediction_category,restaurant,merged_da
     # add the last working day and the +/- 5 days
     # future = calculate_days_30(future, last_working_day)
     # future = calculate_days_15(future, fifteenth_working_days)
+    
+    for event_df, event_column in regressors_to_add:
+        if 'event' in event_df.columns:
+            event_df= event_df.drop_duplicates('ds')
+            future = pd.merge(
+                future,
+                event_df[["ds", event_column]],
+                how="left",
+                on="ds",
+            )
+            future[event_column].fillna(0, inplace=True)
 
     future["sunshine_amount"] = merged_data["sunshine_amount"]
     future["covid_restriction_christmas"] = future["ds"].apply(
@@ -425,6 +478,7 @@ def oslo_lokka_jtorget_smestad_torggata(prediction_category,restaurant,merged_da
     future["fall_start"] = future["ds"].apply(is_fall_start)
     future["christmas_shopping"] = future["ds"].apply(is_christmas_shopping)
     future["specific_month"] = future["ds"].apply(is_specific_month)
+    future["is_fellesferie"] = future["ds"].apply(is_fellesferie)
     # Calculate the custom regressor values for the future dates
     future["ds"] = pd.to_datetime(future["ds"])
     future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)
@@ -451,6 +505,11 @@ def oslo_lokka_jtorget_smestad_torggata(prediction_category,restaurant,merged_da
     future["sunshine_amount"] = merged_data["sunshine_amount"]
     future["windspeed"] = merged_data["windspeed"]
     future["air_temperature"] = merged_data["air_temperature"]
+    future.fillna(
+        {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
+        inplace=True,
+    )
+    future= add_opening_hours(future,"Oslo Lokka",12,17)
     future = warm_and_dry_future(future)
     future = heavy_rain_fall_weekday_future(future)
     future = heavy_rain_fall_weekend_future(future)
@@ -461,7 +520,7 @@ def oslo_lokka_jtorget_smestad_torggata(prediction_category,restaurant,merged_da
     future = non_heavy_rain_fall_weekend_future(future)
     future.fillna(0, inplace=True)
 
-    return m, future, df
+    return m, future, df, event_holidays
 
 
 def location_function(prediction_category,restaurant,merged_data,historical_data,future_data):

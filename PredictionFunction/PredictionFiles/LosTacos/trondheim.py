@@ -81,8 +81,9 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import(
 from PredictionFunction.utils.openinghours import add_opening_hours
 from PredictionFunction.utils.fetch_events import fetch_events
 
-def stavanger(prediction_category,restaurant,merged_data,historical_data,future_data):
-    event_holidays=pd.DataFrame()
+
+def trondheim(prediction_category,restaurant,merged_data,historical_data,future_data):
+    event_holidays=pd.DataFrame(columns=['event_names', 'name'])
     sales_data_df = historical_data
     sales_data_df = sales_data_df.rename(columns={"date": "ds"})
     sales_data_df["ds"] = pd.to_datetime(sales_data_df["ds"])
@@ -92,6 +93,8 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
 
     merged_data = merged_data.rename(columns={"date": "ds"})
     merged_data["ds"] = pd.to_datetime(merged_data["ds"])
+
+
     if prediction_category == "day":
         df = (
             sales_data_df.groupby(["ds"])
@@ -118,7 +121,6 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
             "windspeed",
             "air_temperature",
         ]
-
     elif prediction_category == "hour":
         df = (
             sales_data_df.groupby(["ds", "hour"])
@@ -174,15 +176,13 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
             "air_temperature",
         ]
 
-    # df = warm_dry_weather_spring(df)
-    # df = heavy_rain_fall_weekday(df)
+
     df = heavy_rain_fall_weekend(df)
     df = heavy_rain_winter_weekday(df)
     df = heavy_rain_winter_weekend(df)
     # df = heavy_rain_spring_weekday(df)
     # df = heavy_rain_spring_weekend(df)
     df = non_heavy_rain_fall_weekend(df)
-    df = add_opening_hours(df,"Stavanger",12,17)
     m = Prophet()
 
     ### Holidays and other repeating outliers
@@ -203,6 +203,15 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
             "ds": pd.to_datetime([""]),
             "lower_window": 0,
             "upper_window": 0,
+        }
+    )
+    seventh_feb = pd.DataFrame(
+        {
+            "holiday": "unexpected_closure",
+            "ds": pd.to_datetime(["2024-02-07"]),
+            "lower_window": 0,
+            "upper_window": 0,
+            "prior_scale":1
         }
     )
 
@@ -237,12 +246,9 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
             vinterferie_vestlandet_weekend_before,
             vinterferie_vestlandet_weekend,
             first_weekend_christmas_school_vacation,
+            seventh_feb,
         )
     )
-
-    print("done with holidays")
-
-    ### Conditional seasonality - weekly
 
     df["fellesferie"] = df["ds"].apply(is_fellesferie_stavanger)
 
@@ -278,59 +284,19 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
 
     # Calculate the week number for each date
     df["week_number"] = df["ds"].dt.isocalendar().week
-
-    # Define a function to calculate the custom regressor value based on the week number
-
     # Calculate the custom regressor values for the specific date interval
     df.loc[date_mask, "custom_regressor"] = df.loc[date_mask, "week_number"].apply(
         custom_regressor
     )
-
     # Fill the custom regressor with zeros for the rows outside the specific date interval
     df.loc[~date_mask, "custom_regressor"] = 0
 
     # Different weekly seasonality for 2 weeks in august related to starting fall semester/work
-
     df["fall_start"] = df["ds"].apply(is_fall_start)
-
     df["covid_loose_fall21"] = df["ds"].apply(is_covid_loose_fall21)
-
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
+    df= add_opening_hours(df,"Trondheim",12,17)
 
-    stavanger_venues = {
-        "Nedre Strandgate","Martinique","Nærbø","Ræge Kirke", 
-        "Løkkeveien","University of Stavanger","Clarion Hotel Energy",
-        "Nordic Black Theatre","Oslo Concert Hall","Salt Langhuset",
-        "Vaisenhusgata","Campus Bjergsted","Fargegaten - Øvre Holmegate",
-        "Folken, Løkkeveien","Gamle Stavanger","Tou Scene","Bryne",
-        "Ølberg harbour","City Centre","Sangerlosjen","Zetlitz",
-        "Kinokino","Kongsgata","UIS Business School","Fiskepiren",
-
-    }
-
-    data = {'name':[], 'effect':[]}
-    for venue in stavanger_venues:
-        regressors_to_add = []
-        # for venue in karl_johan_venues:
-        venue_df = fetch_events("Stavanger", venue)
-        event_holidays = pd.concat(objs=[event_holidays, venue_df], ignore_index=True)
-        # event_holidays.to_csv(f"{venue}_holidatest.csv")
-        if 'name' in venue_df.columns:
-            venue_df = venue_df.drop_duplicates('date')
-            venue_df["date"] = pd.to_datetime(venue_df["date"])
-            venue_df = venue_df.rename(columns={"date": "ds"})
-            venue_df["ds"] = pd.to_datetime(venue_df["ds"])
-            venue_df = venue_df[["ds", "name"]]
-            venue_df.columns = ["ds", "event"]
-            dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
-            venue_df[dataframe_name] = 1
-            df = pd.merge(df, venue_df, how="left", on="ds", suffixes=('', '_venue'))
-            df[dataframe_name].fillna(0, inplace=True)
-            regressors_to_add.append((venue_df, dataframe_name))  # Append venue_df along with venue name for regressor addition
-        else:
-            holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)
-
-    # function for calculating the days before and after the last workday
     def calculate_days(df, last_working_day):
         # Convert 'ds' column to datetime if it's not already
         df["ds"] = pd.to_datetime(df["ds"])
@@ -358,7 +324,7 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
     for weekday in range(7):
         df[f"weekday_{weekday}"] = df["ds"].dt.weekday == weekday
 
-    # Add the custom regressor and seasonalities before fitting the model
+
     if prediction_category == "hour":
         m = Prophet(
             holidays=holidays,
@@ -376,35 +342,31 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
                 fourier_order=10,
                 condition_name=f"weekday_{weekday}",
             )
+        # Add a conditional seasonality for each weekday
+        for weekday in range(7):
+            m.add_seasonality(
+                name=f"hourly_weekday_{weekday}",
+                period=1,
+                fourier_order=10,
+                condition_name=f"weekday_{weekday}",
+            )
 
     else:
         m = Prophet(
             holidays=holidays,
             yearly_seasonality=5,
             daily_seasonality=False,
-            n_changepoints=12,
-            changepoint_range=0.95,
-            changepoint_prior_scale=1.3,
-            seasonality_prior_scale=2,
-            holidays_prior_scale=5,
-            seasonality_mode="additive",
+            changepoint_prior_scale=0.5,
+            seasonality_prior_scale=0.4,
         )
-
-    # m.add_regressor('days_since_last')
-
+    
     m.add_regressor("custom_regressor")
-    # m.add_regressor('covid_restriction')
-    # m.add_seasonality(name='monthly', period=30.5, fourier_order=5, condition_name='specific_month')
     m.add_seasonality(
         name="covid_restriction_christmas",
         period=7,
         fourier_order=1000,
         condition_name="covid_restriction_christmas",
     )
-
-    # m.add_seasonality(name='weekly_fall_start', period=7, fourier_order=3,
-    #                  condition_name='fall_start')
-
     m.add_seasonality(
         name="covid_loose_fall21",
         period=7,
@@ -419,71 +381,30 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
         condition_name="christmas_shopping",
     )
 
-    # m.add_seasonality(name='weekly_fellesferie', period=7, fourier_order=3, condition_name='fellesferie')
-
-    # m.add_seasonality(name='weekly_in_may', period=7, fourier_order=3, condition_name='is_may')
-
-    # m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
-
-    # Add the conditional regressor to the model
     m.add_regressor("sunshine_amount", standardize=False)
-    # m.add_regressor("warm_and_dry")
-    # m.add_regressor("heavy_rain_fall_weekday")
+    m.add_regressor("opening_duration")
     m.add_regressor("heavy_rain_fall_weekend")
     m.add_regressor("heavy_rain_winter_weekday")
     m.add_regressor("heavy_rain_winter_weekend")
-    # m.add_regressor("heavy_rain_spring_weekday")
-    # m.add_regressor("heavy_rain_spring_weekend")
     m.add_regressor("non_heavy_rain_fall_weekend")
-    m.add_regressor("opening_duration")
-    for event_df, regressor_name in regressors_to_add:
-        if 'event' in event_df.columns:
-            m.add_regressor(regressor_name)
 
-    print("done with seasonalities")
-    if prediction_category == "hour":
-        df["ds"] = pd.to_datetime(
-            df["ds"].astype(str) + " " + df["hour"].astype(str) + ":00:00"
-        )
+    # clusters = weekly_seasonalities(df)
 
-    print("før get adjusted")
-    """ def get_adjusted_total_net(prediction_category):
-        m, future, _ = location_function(prediction_category)
-        # Predict the total net
-        forecast = m.predict(future)
-        # Extract the predicted total net
-        adjusted_total_net = forecast['yhat']
-        return adjusted_total_net
+    # for cluster_label, weeks in clusters.items():
+    #     # Here, you would define the custom seasonality parameters for each cluster
+    #     # You might want to define a custom seasonality function, or apply different parameters based on the cluster label
+    #     seasonality_params = {
+    #         "name": f"weekly_{cluster_label}",
+    #         "period": 7,
+    #         "fourier_order": 3,  # Adjust as needed
+    #         # Other parameters may go here as needed
+    #     }
 
+    #     # Add the custom seasonality to the model
+    #     m.add_seasonality(**seasonality_params)
+    
     m.fit(df)
-    print("etter adjusted")
 
-    # Call the function with the appropriate prediction category
-    adjusted_total_net = get_adjusted_total_net(prediction_category="day")
-
-    #add adjusted total_net to the df
-    df['adjusted_total_net'] = adjusted_total_net """
-
-    # get the weekly_seasonalities
-    print("kommet til cluster")
-    clusters = weekly_seasonalities(df)
-
-    for cluster_label, weeks in clusters.items():
-        # Here, you would define the custom seasonality parameters for each cluster
-        # You might want to define a custom seasonality function, or apply different parameters based on the cluster label
-        seasonality_params = {
-            "name": f"weekly_{cluster_label}",
-            "period": 7,
-            "fourier_order": 3,  # Adjust as needed
-            # Other parameters may go here as needed
-        }
-
-        # Add the custom seasonality to the model
-        m.add_seasonality(**seasonality_params)
-
-    # Fit the model to your data
-    m.fit(df)
-    print("klar for future")
 
     if prediction_category == "hour":
         future = m.make_future_dataframe(periods=700, freq="H")
@@ -493,59 +414,35 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
         future = m.make_future_dataframe(periods=60, freq="D")
 
     # Apply the mapping function to the dates in the future DataFrame
-    def get_cluster_label(date):
-        week_number = date.isocalendar().week
-        for cluster_label, weeks in clusters.items():
-            if week_number in weeks:
-                return cluster_label
-        return None  # Default if week number not found in clusters
+    # def get_cluster_label(date):
+    #     week_number = date.isocalendar().week
+    #     for cluster_label, weeks in clusters.items():
+    #         if week_number in weeks:
+    #             return cluster_label
+    #     return None  # Default if week number not found in clusters
 
-    future["cluster_label"] = future["ds"].apply(get_cluster_label)
-
+    # future["cluster_label"] = future["ds"].apply(get_cluster_label)
+    future.dropna(inplace=True)
 
     future["sunshine_amount"] = merged_data["sunshine_amount"]
-
-    # add the last working day and the +/- 5 days
-    # future = calculate_days(future, last_working_day)
-
-    ## Add conditional seasonality
     future["fellesferie"] = future["ds"].apply(is_fellesferie_stavanger)
-
-    # Add 'is_may' column to future DataFrame
     future["is_may"] = future["ds"].apply(is_may)
-
     future["covid_restriction_christmas"] = future["ds"].apply(
         is_covid_restriction_christmas
     )
-
     future["fall_start"] = future["ds"].apply(is_fall_start)
-
     future["covid_loose_fall21"] = future["ds"].apply(is_covid_loose_fall21)
-
     future["christmas_shopping"] = future["ds"].apply(is_christmas_shopping)
-
+    future["christmas_shopping"] = future["ds"].apply(is_christmas_shopping)
+    future= add_opening_hours(future,"Trondheim",12,17)
     future["rain_sum"] = merged_data["rain_sum"]
-    future["sunshine_amount"] = merged_data["sunshine_amount"]
     future["windspeed"] = merged_data["windspeed"]
     future["air_temperature"] = merged_data["air_temperature"]
     future.fillna(
-        {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
-        inplace=True,
-    )
+            {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
+            inplace=True,
+        )
 
-    for event_df, event_column in regressors_to_add:
-        if 'event' in event_df.columns:
-            event_df= event_df.drop_duplicates('ds')
-            future = pd.merge(
-                future,
-                event_df[["ds", event_column]],
-                how="left",
-                on="ds",
-            )
-            future[event_column].fillna(0, inplace=True)
-
-    # future = warm_and_dry_future(future)
-    # future = heavy_rain_fall_weekday_future(future)
     future = heavy_rain_fall_weekend_future(future)
     future = heavy_rain_winter_weekday_future(future)
     future = heavy_rain_winter_weekend_future(future)
@@ -567,6 +464,5 @@ def stavanger(prediction_category,restaurant,merged_data,historical_data,future_
     future.fillna(0, inplace=True)
     return m, future, df,event_holidays
 
-
 def location_function(prediction_category,restaurant,merged_data,historical_data,future_data):
-    return stavanger(prediction_category,restaurant,merged_data,historical_data,future_data)
+    return trondheim(prediction_category,restaurant,merged_data,historical_data,future_data)
