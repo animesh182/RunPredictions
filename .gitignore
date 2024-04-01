@@ -126,10 +126,10 @@ dmypy.json
 bin
 obj
 appsettings.json
-# local.settings.json
-
+local.settings.json
 # Azurite artifacts
 __blobstorage__
 __queuestorage__
 __azurite_db*__.json
 .python_packages
+*.csv
