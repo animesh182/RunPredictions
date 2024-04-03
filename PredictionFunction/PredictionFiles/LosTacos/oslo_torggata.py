@@ -344,20 +344,20 @@ def oslo_torggata(prediction_category,restaurant,merged_data,historical_data,fut
     # Sentrum scene concerts regressor
     # Convert date strings to datetime format and create separate columns for each weekday
     # after testing, it seems there is only an effect on sun, monn and tue
-    sentrum_scene_oslo_df = fetch_events("Oslo Torggata","Sentrum Scene")
-    sentrum_scene_oslo_df["date"] = pd.to_datetime(sentrum_scene_oslo_df["date"])
-    sentrum_scene_oslo_df = sentrum_scene_oslo_df.drop_duplicates(subset='date')
+    # sentrum_scene_oslo_df = fetch_events("Oslo Torggata","Sentrum Scene")
+    # sentrum_scene_oslo_df["date"] = pd.to_datetime(sentrum_scene_oslo_df["date"])
+    # sentrum_scene_oslo_df = sentrum_scene_oslo_df.drop_duplicates(subset='date')
     
-    # Create separate columns for each weekday
-    weekdays = ["Monday", "Tuesday", "Sunday"]
-    for day in weekdays:
-        sentrum_scene_oslo_df[f"sentrum_scene_concert_{day}"] = 0
+    # # Create separate columns for each weekday
+    # weekdays = ["Monday", "Tuesday", "Sunday"]
+    # for day in weekdays:
+    #     sentrum_scene_oslo_df[f"sentrum_scene_concert_{day}"] = 0
 
-    for index, row in sentrum_scene_oslo_df.iterrows():
-        day_of_week = row["date"].day_name()
-        sentrum_scene_oslo_df.at[index, f"sentrum_scene_concert_{day_of_week}"] = 1
+    # for index, row in sentrum_scene_oslo_df.iterrows():
+    #     day_of_week = row["date"].day_name()
+    #     sentrum_scene_oslo_df.at[index, f"sentrum_scene_concert_{day_of_week}"] = 1
 
-    df = pd.merge(df, sentrum_scene_oslo_df, how="left", left_on="ds", right_on="date")
+    # df = pd.merge(df, sentrum_scene_oslo_df, how="left", left_on="ds", right_on="date")
 
     # I commented out this until we actually add for hours. This needs to be rewritten since we now to separate regressor for each weekday
 

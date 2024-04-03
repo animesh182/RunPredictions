@@ -449,7 +449,7 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
     # future = heavy_rain_spring_weekday_future(future)
     # future = heavy_rain_spring_weekend_future(future)
     future = non_heavy_rain_fall_weekend_future(future)
-    future = add_opening_hours(future,"Stavanger",12,17)
+    future = add_opening_hours(future,"Trondheim",12,17)
     # Calculate the custom regressor values for the future dates
     future["ds"] = pd.to_datetime(future["ds"])
     future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)
