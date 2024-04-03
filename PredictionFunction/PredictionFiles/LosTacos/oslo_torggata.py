@@ -422,9 +422,9 @@ def oslo_torggata(prediction_category,restaurant,merged_data,historical_data,fut
     # Sentrum scene
     # Add each weekday as a separate regressor
     weekdays = ["Monday", "Tuesday", "Sunday"]
-    for day in weekdays:
-        df[f"sentrum_scene_concert_{day}"].fillna(0, inplace=True)
-        m.add_regressor(f"sentrum_scene_concert_{day}")
+    # for day in weekdays:
+    #     df[f"sentrum_scene_concert_{day}"].fillna(0, inplace=True)
+    #     m.add_regressor(f"sentrum_scene_concert_{day}")
 
     m.add_regressor("custom_regressor")
     # m.add_regressor('covid_restriction')
@@ -602,19 +602,19 @@ def oslo_torggata(prediction_category,restaurant,merged_data,historical_data,fut
 
     # Adding events
 
-    for day in weekdays:
-        # Merge the future dataframe with the sentrum_scene_oslo_df for the specific day
-        future = pd.merge(
-            future,
-            sentrum_scene_oslo_df[["date", f"sentrum_scene_concert_{day}"]],
-            how="left",
-            left_on="ds",
-            right_on="date",
-        )
-        # Fill missing values with 0
-        future[f"sentrum_scene_concert_{day}"].fillna(0, inplace=True)
-        # Drop the date column
-        future.drop("date", axis=1, inplace=True)
+    # for day in weekdays:
+    #     # Merge the future dataframe with the sentrum_scene_oslo_df for the specific day
+    #     future = pd.merge(
+    #         future,
+    #         sentrum_scene_oslo_df[["date", f"sentrum_scene_concert_{day}"]],
+    #         how="left",
+    #         left_on="ds",
+    #         right_on="date",
+    #     )
+    #     # Fill missing values with 0
+    #     future[f"sentrum_scene_concert_{day}"].fillna(0, inplace=True)
+    #     # Drop the date column
+    #     future.drop("date", axis=1, inplace=True)
 
     merged_data["ds"] = pd.to_datetime(merged_data["ds"], format="%Y", errors="coerce")
 

@@ -22,8 +22,8 @@ def prepare_data(company, restaurant, start_date, end_date):
                 restaurant_list["Company"].iloc[0],
                 start_date,
                 end_date,
-                restaurant_list["Alcohol Reference"].iloc[0],
-                restaurant_list["Food Reference"].iloc[0],
+                'Karl Johan',
+                'Stavanger',
             )
         )
         filtered_sales_data= filtered_sales_data.rename(columns={'gastronomic_day': 'date'})
