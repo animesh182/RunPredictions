@@ -6,23 +6,32 @@ from PredictionFunction.Datasets.Holidays.LosTacos.dataset_holidays import (
     twelfth_working_days,
     last_working_day,
 )
-from PredictionFunction.Datasets.OpeningHours.lostacos_opening_hours import restaurant_opening_hours
-from PredictionFunction.Datasets.Seasonalities.LosTacos.weekly_seasonality import weekly_seasonalities
-from PredictionFunction.utils.utils import calculate_days_30, calculate_days_15,custom_regressor
-from PredictionFunction.Datasets.Regressors.general_regressors import(is_fellesferie_sandnes,
-is_covid_restriction_christmas,
-is_fall_start,
-is_covid_loose_fall21,
-is_christmas_shopping,
- )
-from PredictionFunction.Datasets.Regressors.weather_regressors import(
+from PredictionFunction.Datasets.OpeningHours.lostacos_opening_hours import (
+    restaurant_opening_hours,
+)
+from PredictionFunction.Datasets.Seasonalities.LosTacos.weekly_seasonality import (
+    weekly_seasonalities,
+)
+from PredictionFunction.utils.utils import (
+    calculate_days_30,
+    calculate_days_15,
+    custom_regressor,
+)
+from PredictionFunction.Datasets.Regressors.general_regressors import (
+    is_fellesferie_sandnes,
+    is_covid_restriction_christmas,
+    is_fall_start,
+    is_covid_loose_fall21,
+    is_christmas_shopping,
+)
+from PredictionFunction.Datasets.Regressors.weather_regressors import (
     warm_dry_weather_spring,
     warm_and_dry_future,
     heavy_rain_fall_weekday,
     heavy_rain_fall_weekday_future,
     heavy_rain_fall_weekend,
     heavy_rain_fall_weekend_future,
-    heavy_rain_winter_weekday, 
+    heavy_rain_winter_weekday,
     heavy_rain_winter_weekday_future,
     heavy_rain_winter_weekend,
     heavy_rain_winter_weekend_future,
@@ -32,33 +41,32 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import(
     heavy_rain_spring_weekend_future,
     non_heavy_rain_fall_weekend,
     non_heavy_rain_fall_weekend_future,
-
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.sandnes_holidays import (
     christmas_day,
-     new_year_eve, 
+    new_year_eve,
     #  firstweek_jan,
     #  new_years_day,
-     fadder_week,
-    #  first_may, 
-     eight_may,
-     seventeenth_may,
-     easter, 
-     easter_mondaydayoff,
-     landstreff_russ,
-    #  pinse, 
-    #  himmelfart, 
-     fjoge, 
-     stor_konsert_ukedag, 
-     maijazz_lørdag, 
-     outliers, 
-     closed_days, 
-     cruise_ship_arrivals_holiday, 
-     pay_day, 
-     utopia_friday,
-     utopia_saturday, 
-     skeiva_natta,
+    fadder_week,
+    #  first_may,
+    eight_may,
+    seventeenth_may,
+    easter,
+    easter_mondaydayoff,
+    landstreff_russ,
+    #  pinse,
+    #  himmelfart,
+    fjoge,
+    stor_konsert_ukedag,
+    maijazz_lørdag,
+    outliers,
+    closed_days,
+    cruise_ship_arrivals_holiday,
+    pay_day,
+    utopia_friday,
+    utopia_saturday,
+    skeiva_natta,
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     first_may,
@@ -72,8 +80,9 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
 from PredictionFunction.utils.fetch_events import fetch_events
 from PredictionFunction.utils.openinghours import add_opening_hours
 
-def sandnes(prediction_category,restaurant,merged_data,historical_data,future_data):
-    event_holidays=pd.DataFrame(columns=['event_names', 'name'])
+
+def sandnes(prediction_category, restaurant, merged_data, historical_data, future_data):
+    event_holidays = pd.DataFrame(columns=["event_names", "name"])
     sales_data_df = historical_data
     sales_data_df = sales_data_df.rename(columns={"date": "ds"})
     sales_data_df["ds"] = pd.to_datetime(sales_data_df["ds"])
@@ -172,12 +181,10 @@ def sandnes(prediction_category,restaurant,merged_data,historical_data,future_da
     df = heavy_rain_spring_weekend(df)
     df = non_heavy_rain_fall_weekend(df)
 
-
     m = Prophet()
 
     ### Holidays and other repeating outliers
     m.add_country_holidays(country_name="NO")
-
 
     ONS = pd.DataFrame(
         {
@@ -196,8 +203,6 @@ def sandnes(prediction_category,restaurant,merged_data,historical_data,future_da
             "upper_window": 0,
         }
     )
-
-
 
     holidays = pd.concat(
         (
@@ -231,7 +236,7 @@ def sandnes(prediction_category,restaurant,merged_data,historical_data,future_da
     print("done with holidays")
 
     ### Conditional seasonality - weekly
-    
+
     df["fellesferie"] = df["ds"].apply(is_fellesferie_sandnes)
 
     def is_may(ds):
@@ -273,7 +278,6 @@ def sandnes(prediction_category,restaurant,merged_data,historical_data,future_da
 
     # Define a function to calculate the custom regressor value based on the week number
 
-
     # Calculate the custom regressor values for the specific date interval
     df.loc[date_mask, "custom_regressor"] = df.loc[date_mask, "week_number"].apply(
         custom_regressor
@@ -283,43 +287,40 @@ def sandnes(prediction_category,restaurant,merged_data,historical_data,future_da
     df.loc[~date_mask, "custom_regressor"] = 0
 
     # Different weekly seasonality for 2 weeks in august related to starting fall semester/work
-    
 
     df["fall_start"] = df["ds"].apply(is_fall_start)
 
-
     df["covid_loose_fall21"] = df["ds"].apply(is_covid_loose_fall21)
 
-
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
-    df = add_opening_hours(df,"Sandnes",11,9)
+    df = add_opening_hours(df, "Sandnes", 11, 9)
 
     sandnes_venues = {
-       "Bryne", "Campus Bjergsted",
-    # "Cementen, Stavanger", "City Centre", "Clarion Hotel Energy", "DNB Arena",
-    # "Egersund kirke", "Elefantteateret", "Fargegaten - Øvre Holmegate", "Fiskepiren",
-    # "Folken, Løkkeveien", "Gamle Stavanger", "Grand Hotell Egersund", "Haugesund Theater",
-    # "Hovedgata", "Hundvåg kirke, Ulsnesveien", "Høvleriet", "Jæren Bluesklubb", "Kinokino",
-    # "Kirkegata Stavanger", "Kongsgata", "Løkkeveien", "Mackkjelleren", "Maritim Hall",
-    # "Martinique", "Nasjonal turistveg Jæren", "Nedre Strandgate", "Nærbø", "Ogna Scene",
-    # "Ovenpaa", "Petri Kirke", "Påfyll, Kirkegata", "Radisson Blu Atlantic Hotel", "Ræge Kirke",
-    # "Sandness", "Sangerlosjen", "Sivert Høyem", "Skakke", "Skansegata", "Sola kulturhus",
-    # "Stavanger", "Stavanger Forum", "Stavanger Konserthus", "Stavanger Sentrum",
-    # "Stavanger kunstmuseum", "Sølvberget Library", "Søregaten", "Testing creation",
-    # "Tom And Lello, Stavanger", "Tou Scene", "Tungenes Fyr", "UIS Business School",
-    # "University of Stavanger", "Vaisenhusgata", "Varhaughallen", "Western Plus Victoria Hotel",
-    # "Zetlitz", "Åkra kirke", "Ølberg harbour"
+        "Bryne",
+        "Campus Bjergsted",
+        # "Cementen, Stavanger", "City Centre", "Clarion Hotel Energy", "DNB Arena",
+        # "Egersund kirke", "Elefantteateret", "Fargegaten - Øvre Holmegate", "Fiskepiren",
+        # "Folken, Løkkeveien", "Gamle Stavanger", "Grand Hotell Egersund", "Haugesund Theater",
+        # "Hovedgata", "Hundvåg kirke, Ulsnesveien", "Høvleriet", "Jæren Bluesklubb", "Kinokino",
+        # "Kirkegata Stavanger", "Kongsgata", "Løkkeveien", "Mackkjelleren", "Maritim Hall",
+        # "Martinique", "Nasjonal turistveg Jæren", "Nedre Strandgate", "Nærbø", "Ogna Scene",
+        # "Ovenpaa", "Petri Kirke", "Påfyll, Kirkegata", "Radisson Blu Atlantic Hotel", "Ræge Kirke",
+        # "Sandness", "Sangerlosjen", "Sivert Høyem", "Skakke", "Skansegata", "Sola kulturhus",
+        # "Stavanger", "Stavanger Forum", "Stavanger Konserthus", "Stavanger Sentrum",
+        # "Stavanger kunstmuseum", "Sølvberget Library", "Søregaten", "Testing creation",
+        # "Tom And Lello, Stavanger", "Tou Scene", "Tungenes Fyr", "UIS Business School",
+        # "University of Stavanger", "Vaisenhusgata", "Varhaughallen", "Western Plus Victoria Hotel",
+        # "Zetlitz", "Åkra kirke", "Ølberg harbour"
     }
 
-    data = {'name':[], 'effect':[]}
+    data = {"name": [], "effect": []}
     regressors_to_add = []
     for venue in sandnes_venues:
         # for venue in karl_johan_venues:
         venue_df = fetch_events("Stavanger", venue)
         event_holidays = pd.concat(objs=[event_holidays, venue_df], ignore_index=True)
-        # event_holidays.to_csv(f"{venue}_holidatest.csv")
-        if 'name' in venue_df.columns:
-            venue_df = venue_df.drop_duplicates('date')
+        if "name" in venue_df.columns:
+            venue_df = venue_df.drop_duplicates("date")
             venue_df["date"] = pd.to_datetime(venue_df["date"])
             venue_df = venue_df.rename(columns={"date": "ds"})
             venue_df["ds"] = pd.to_datetime(venue_df["ds"])
@@ -327,11 +328,13 @@ def sandnes(prediction_category,restaurant,merged_data,historical_data,future_da
             venue_df.columns = ["ds", "event"]
             dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
             venue_df[dataframe_name] = 1
-            df = pd.merge(df, venue_df, how="left", on="ds", suffixes=('', '_venue'))
+            df = pd.merge(df, venue_df, how="left", on="ds", suffixes=("", "_venue"))
             df[dataframe_name].fillna(0, inplace=True)
-            regressors_to_add.append((venue_df, dataframe_name))  # Append venue_df along with venue name for regressor addition
+            regressors_to_add.append(
+                (venue_df, dataframe_name)
+            )  # Append venue_df along with venue name for regressor addition
         else:
-            holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)  
+            holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)
 
     # function for calculating the days before and after the last workday
     def calculate_days(df, last_working_day):
@@ -342,10 +345,14 @@ def sandnes(prediction_category,restaurant,merged_data,historical_data,future_da
         last_working_day = pd.to_datetime(pd.Series(last_working_day))
 
         df["days_since_last"] = df["ds"].apply(
-            lambda x: min([abs(x - y).days for y in last_working_day if x >= y],default=0)
+            lambda x: min(
+                [abs(x - y).days for y in last_working_day if x >= y], default=0
+            )
         )
         df["days_until_next"] = df["ds"].apply(
-            lambda x: min([abs(x - y).days for y in last_working_day if x <= y],default=0)
+            lambda x: min(
+                [abs(x - y).days for y in last_working_day if x <= y], default=0
+            )
         )
 
         # Set 'days_since_last' and 'days_until_next' to 0 for days that are not within the -5 to +5 range
@@ -385,7 +392,7 @@ def sandnes(prediction_category,restaurant,merged_data,historical_data,future_da
             holidays=holidays,
             yearly_seasonality=5,
             daily_seasonality=False,
-            # changepoint_range=0.5, 
+            # changepoint_range=0.5,
             seasonality_prior_scale=0.15,
             changepoint_prior_scale=1,
         )
@@ -405,7 +412,6 @@ def sandnes(prediction_category,restaurant,merged_data,historical_data,future_da
     m.add_regressor("non_heavy_rain_fall_weekend")
     m.add_regressor("opening_duration")
     m.add_regressor("sunshine_amount", standardize=False)
-
 
     # m.add_seasonality(name='monthly', period=30.5, fourier_order=5, condition_name='specific_month')
     m.add_seasonality(
@@ -442,7 +448,7 @@ def sandnes(prediction_category,restaurant,merged_data,historical_data,future_da
     m.add_regressor("sunshine_amount", standardize=False)
 
     for event_df, regressor_name in regressors_to_add:
-        if 'event' in event_df.columns:
+        if "event" in event_df.columns:
             m.add_regressor(regressor_name)
 
     print("done with seasonalities")
@@ -579,8 +585,8 @@ def sandnes(prediction_category,restaurant,merged_data,historical_data,future_da
         inplace=True,
     )
     for event_df, event_column in regressors_to_add:
-        if 'event' in event_df.columns:
-            event_df= event_df.drop_duplicates('ds')
+        if "event" in event_df.columns:
+            event_df = event_df.drop_duplicates("ds")
             future = pd.merge(
                 future,
                 event_df[["ds", event_column]],
@@ -596,11 +602,15 @@ def sandnes(prediction_category,restaurant,merged_data,historical_data,future_da
     future = heavy_rain_spring_weekday_future(future)
     future = heavy_rain_spring_weekend_future(future)
     future = non_heavy_rain_fall_weekend_future(future)
-    future = add_opening_hours(future,"Sandnes",11,9)
+    future = add_opening_hours(future, "Sandnes", 11, 9)
     future.fillna(0, inplace=True)
 
-    return m, future, df,event_holidays
+    return m, future, df, event_holidays
 
 
-def location_function(prediction_category,restaurant,merged_data,historical_data,future_data):
-    return sandnes(prediction_category,restaurant,merged_data,historical_data,future_data)
+def location_function(
+    prediction_category, restaurant, merged_data, historical_data, future_data
+):
+    return sandnes(
+        prediction_category, restaurant, merged_data, historical_data, future_data
+    )
