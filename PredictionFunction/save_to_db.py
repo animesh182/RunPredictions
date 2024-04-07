@@ -348,15 +348,15 @@ def save_to_db(forecast_df, company, restaurant, prediction_category, event_holi
             event_holidays['event_date'] = event_holidays['date']
             event_holidays['event_date'] = event_holidays['event_date'].dt.strftime('%Y-%m-%d').astype(str)
         # event_holidays.to_csv("holidays.csv")
-        for index, row in filtered_df.iterrows():
-            # date_obj = datetime.strptime(row["ds"], "%Y-%m-%d")
-            date_obj = row["ds"].to_pydatetime()
-            total_gross_value = round(float(row["yhat"] / 500)) * 500
+        with psycopg2.connect(**params) as conn:
+            with conn.cursor() as cursor:
+                for index, row in filtered_df.iterrows():
+                    # date_obj = datetime.strptime(row["ds"], "%Y-%m-%d")
+                    date_obj = row["ds"].to_pydatetime()
+                    total_gross_value = round(float(row["yhat"] / 500)) * 500
 
-            insert_prediction = """INSERT INTO public."Predictions_predictions" (id, date, restaurant, total_gross, created_at, company, parent_restaurant)
-                    VALUES (gen_random_uuid(),%s,%s,%s,%s,%s,%s) RETURNING id"""
-            with psycopg2.connect(**params) as conn:
-                with conn.cursor() as cursor:
+                    insert_prediction = """INSERT INTO public."Predictions_predictions" (id, date, restaurant, total_gross, created_at, company, parent_restaurant)
+                            VALUES (gen_random_uuid(),%s,%s,%s,%s,%s,%s) RETURNING id"""
                     cursor.execute(
                         insert_prediction,
                         (
@@ -369,40 +369,36 @@ def save_to_db(forecast_df, company, restaurant, prediction_category, event_holi
                         ),
                     )
                     prediction_id = cursor.fetchone()[0]
-                    conn.commit()
 
-            date_key = date_obj.date()
-            for name in filtered_df.columns:
-                if name in ["ds", "yhat"]:
-                    continue
-                try:
-                    effect_value = (
-                        round(float(row[name]))
-                        if row[name] not in [None, "", np.nan]
-                        else 0
-                    )
-                except ValueError:
-                    print(f"Error converting value to float for column '{name}'")
-                    effect_value = 0  # Assign a default valu
-                for concert in valid_concerts:
-                    if concert in name:
-                        actual_concert = concert_dictionary[concert]
-                        date_matching_df = actual_concert[
-                            actual_concert["date"] == date_key
-                        ]
-                        if not date_matching_df.empty:
-                            concert_name = date_matching_df["name"].iloc[0]
-                            name = concert_name
-                if ( effect_value > 2000
-                        and name in event_holidays["event_names"].values
-                    ):
-                    # print(f'upper {restaurant}: {name}')
+                    date_key = date_obj.date()
+                    for name in filtered_df.columns:
+                        if name in ["ds", "yhat"]:
+                            continue
+                        try:
+                            effect_value = (
+                                round(float(row[name]))
+                                if row[name] not in [None, "", np.nan]
+                                else 0
+                            )
+                        except ValueError:
+                            print(f"Error converting value to float for column '{name}'")
+                            effect_value = 0  # Assign a default valu
+                        for concert in valid_concerts:
+                            if concert in name:
+                                actual_concert = concert_dictionary[concert]
+                                date_matching_df = actual_concert[
+                                    actual_concert["date"] == date_key
+                                ]
+                                if not date_matching_df.empty:
+                                    concert_name = date_matching_df["name"].iloc[0]
+                                    name = concert_name
+                        if ( effect_value > 2000
+                                and name in event_holidays["event_names"].values
+                            ):
+                            # print(f'upper {restaurant}: {name}')
 
-                    holiday_param_insert = """ INSERT INTO public."Predictions_holidayparameters" (id,prediction_id, name, effect, type, date, restaurant, company, parent_restaurant,created_at)
-                    VALUES (gen_random_uuid(),%s, %s, %s,'event', %s, %s, %s, %s,%s)"""
-
-                    with psycopg2.connect(**params) as conn:
-                        with conn.cursor() as cursor:
+                            holiday_param_insert = """ INSERT INTO public."Predictions_holidayparameters" (id,prediction_id, name, effect, type, date, restaurant, company, parent_restaurant,created_at)
+                            VALUES (gen_random_uuid(),%s, %s, %s,'event', %s, %s, %s, %s,%s)"""
                             cursor.execute(
                                 holiday_param_insert,
                                 (
@@ -416,24 +412,21 @@ def save_to_db(forecast_df, company, restaurant, prediction_category, event_holi
                                     datetime.now(),
                                 ),
                             )
-                            conn.commit()
 
-                elif (
-                        effect_value != 0
-                        and name not in concert_dictionary
-                        and name not in event_holidays["event_names"].values
-                    ):
-                    # print(f'lower {restaurant}: {name}')
-                    try:
-                        type = holiday_parameter_type_categorization[name]
-                    except:
-                        type = None
+                        elif (
+                                effect_value != 0
+                                and name not in concert_dictionary
+                                and name not in event_holidays["event_names"].values
+                            ):
+                            # print(f'lower {restaurant}: {name}')
+                            try:
+                                type = holiday_parameter_type_categorization[name]
+                            except:
+                                type = None
 
-                    holiday_param_insert_categorized = """ INSERT INTO public."Predictions_holidayparameters" (id,prediction_id, name, effect, type, date, restaurant, company, parent_restaurant,created_at)
-                    VALUES (gen_random_uuid(),%s, %s, %s,%s, %s, %s, %s, %s, %s)"""
+                            holiday_param_insert_categorized = """ INSERT INTO public."Predictions_holidayparameters" (id,prediction_id, name, effect, type, date, restaurant, company, parent_restaurant,created_at)
+                            VALUES (gen_random_uuid(),%s, %s, %s,%s, %s, %s, %s, %s, %s)"""
 
-                    with psycopg2.connect(**params) as conn:
-                        with conn.cursor() as cursor:
                             cursor.execute(
                                 holiday_param_insert_categorized,
                                 (
@@ -448,7 +441,9 @@ def save_to_db(forecast_df, company, restaurant, prediction_category, event_holi
                                     datetime.now(),
                                 ),
                             )
-                            conn.commit()
+        conn.commit()
+        conn.close()
+
 
         # for index, row in melted_data.iterrows():
         #     for concert in valid_concerts:
