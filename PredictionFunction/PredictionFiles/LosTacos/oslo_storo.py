@@ -498,7 +498,7 @@ def oslo_storo(
     future = add_opening_hours(future, "Oslo Storo", 11, 11)
     # future = non_heavy_rain_fall_weekend_future(future)
     future.fillna(0, inplace=True)
-    event_holidays.to_csv("event_holidaysall.csv")
+    # event_holidays.to_csv("event_holidaysall.csv")
 
     return m, future, df, event_holidays
 
