@@ -341,12 +341,12 @@ def save_to_db(forecast_df, company, restaurant, prediction_category, event_holi
             # event_holidays.to_csv("events_before.csv")
             event_holidays['event_date'] = event_holidays['date'].fillna(event_holidays['ds'].dt.date)
             event_holidays['event_date'] = event_holidays['event_date'].dt.strftime('%Y-%m-%d').astype(str)
-        else:
-            event_holidays['event_names'] = event_holidays['name']
-            event_holidays['date'] = pd.to_datetime(event_holidays['date'])
-            # event_holidays.to_csv("events_before.csv")
-            event_holidays['event_date'] = event_holidays['date']
-            event_holidays['event_date'] = event_holidays['event_date'].dt.strftime('%Y-%m-%d').astype(str)
+        # elif 'name' in event_holidays.columns:
+        #     event_holidays['event_names'] = event_holidays['name']
+        #     event_holidays['date'] = pd.to_datetime(event_holidays['date'])
+        #     # event_holidays.to_csv("events_before.csv")
+        #     event_holidays['event_date'] = event_holidays['date']
+        #     event_holidays['event_date'] = event_holidays['event_date'].dt.strftime('%Y-%m-%d').astype(str)
         # event_holidays.to_csv("holidays.csv")
         with psycopg2.connect(**params) as conn:
             with conn.cursor() as cursor:
