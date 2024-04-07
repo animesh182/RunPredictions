@@ -336,11 +336,17 @@ def save_to_db(forecast_df, company, restaurant, prediction_category, event_holi
         # event_holidays.to_csv("event_holidays.csv") 
         if 'holiday' in event_holidays.columns:
             event_holidays['event_names'] = event_holidays['holiday'].fillna(event_holidays['name'])
-        event_holidays['ds'] = pd.to_datetime(event_holidays['ds'])
-        event_holidays['date'] = pd.to_datetime(event_holidays['date'])
-        # event_holidays.to_csv("events_before.csv")
-        event_holidays['event_date'] = event_holidays['date'].fillna(event_holidays['ds'].dt.date)
-        event_holidays['event_date'] = event_holidays['event_date'].dt.strftime('%Y-%m-%d').astype(str)
+            event_holidays['ds'] = pd.to_datetime(event_holidays['ds'])
+            event_holidays['date'] = pd.to_datetime(event_holidays['date'])
+            # event_holidays.to_csv("events_before.csv")
+            event_holidays['event_date'] = event_holidays['date'].fillna(event_holidays['ds'].dt.date)
+            event_holidays['event_date'] = event_holidays['event_date'].dt.strftime('%Y-%m-%d').astype(str)
+        else:
+            event_holidays['event_names'] = event_holidays['name']
+            event_holidays['date'] = pd.to_datetime(event_holidays['date'])
+            # event_holidays.to_csv("events_before.csv")
+            event_holidays['event_date'] = event_holidays['date']
+            event_holidays['event_date'] = event_holidays['event_date'].dt.strftime('%Y-%m-%d').astype(str)
         # event_holidays.to_csv("holidays.csv")
         for index, row in filtered_df.iterrows():
             # date_obj = datetime.strptime(row["ds"], "%Y-%m-%d")
