@@ -3,10 +3,14 @@ import numpy as np
 from prophet import Prophet
 import plotly.express as px
 from PredictionFunction.Datasets.Concerts.concerts import sentrum_scene_oslo
-from PredictionFunction.utils.utils import calculate_days_30, custom_regressor, calculate_days_15
+from PredictionFunction.utils.utils import (
+    calculate_days_30,
+    custom_regressor,
+    calculate_days_15,
+)
 from PredictionFunction.Datasets.Regressors.weather_regressors import (
-    heavy_rain_fall_weekday, 
-    heavy_rain_fall_weekend, 
+    heavy_rain_fall_weekday,
+    heavy_rain_fall_weekend,
     heavy_rain_spring_weekday,
     heavy_rain_spring_weekend,
     heavy_rain_winter_weekday,
@@ -26,15 +30,17 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import (
     # warm_dry_weekend_fall_future,
     # warm_dry_weekday_fall,
     # warm_dry_weekday_fall_future,
-    )
+)
 
-from PredictionFunction.Datasets.OpeningHours.lostacos_opening_hours import restaurant_opening_hours
+from PredictionFunction.Datasets.OpeningHours.lostacos_opening_hours import (
+    restaurant_opening_hours,
+)
 from PredictionFunction.Datasets.Regressors.general_regressors import (
     is_specific_month,
     is_covid_restriction_christmas,
     is_fall_start,
     is_christmas_shopping,
-    )
+)
 from PredictionFunction.Datasets.Holidays.LosTacos.dataset_holidays import (
     last_working_day,
     fifteenth_working_days,
@@ -76,9 +82,12 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
 from PredictionFunction.utils.fetch_events import fetch_events
 from PredictionFunction.utils.openinghours import add_opening_hours
 
-def oslo_torggata(prediction_category,restaurant,merged_data,historical_data,future_data):
+
+def oslo_torggata(
+    prediction_category, restaurant, merged_data, historical_data, future_data
+):
     # Import sales data
-    event_holidays=pd.DataFrame()
+    event_holidays = pd.DataFrame()
     sales_data_df = historical_data
     sales_data_df = sales_data_df.rename(columns={"date": "ds"})
 
@@ -182,10 +191,7 @@ def oslo_torggata(prediction_category,restaurant,merged_data,historical_data,fut
     # df = warm_dry_weekend_spring(df)
     # df = warm_dry_weekday_spring(df)
     # df = warm_dry_weekend_fall(df)
-    df = add_opening_hours(df,"Oslo Torggata",13,17)
-
-
-
+    df = add_opening_hours(df, "Oslo Torggata", 13, 17)
 
     # Initialize Prophet
     m = Prophet()
@@ -249,7 +255,6 @@ def oslo_torggata(prediction_category,restaurant,merged_data,historical_data,fut
 
     # Add custom monthly seasonalities for a specific month
 
-
     df["specific_month"] = df["ds"].apply(is_specific_month)
 
     # Define a function to check if the date is within the period of heavy COVID restrictions
@@ -305,27 +310,35 @@ def oslo_torggata(prediction_category,restaurant,merged_data,historical_data,fut
 
     # Different weekly seasonality for 2 weeks in august related to starting fall semester/work
 
-
     df["fall_start"] = df["ds"].apply(is_fall_start)
 
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
 
     oslo_torggata_venues = {
-        "Sentrum Scene","Rockefeller","Fornebu","Dronning Sonja KunstStall",
-        "Langkaia", "Maihaugsalen","The Norwegian Theatre","Oslo Concert Hall", 
-        "Oslo Central Station", "Oslo Cathedral","Sommerrogata", "St. Olavs",
-        "Tøyenparken", "University of Oslo" 
+        "Sentrum Scene",
+        "Rockefeller",
+        "Fornebu",
+        "Dronning Sonja KunstStall",
+        "Langkaia",
+        "Maihaugsalen",
+        "The Norwegian Theatre",
+        "Oslo Concert Hall",
+        "Oslo Central Station",
+        "Oslo Cathedral",
+        "Sommerrogata",
+        "St. Olavs",
+        "Tøyenparken",
+        "University of Oslo",
     }
 
-    data = {'name':[], 'effect':[]}
+    data = {"name": [], "effect": []}
     regressors_to_add = []
     for venue in oslo_torggata_venues:
         # for venue in karl_johan_venues:
         venue_df = fetch_events("Oslo Torggata", venue)
         event_holidays = pd.concat(objs=[event_holidays, venue_df], ignore_index=True)
-        # event_holidays.to_csv(f"{venue}_holidatest.csv")
-        if 'name' in venue_df.columns:
-            venue_df = venue_df.drop_duplicates('date')
+        if "name" in venue_df.columns:
+            venue_df = venue_df.drop_duplicates("date")
             venue_df["date"] = pd.to_datetime(venue_df["date"])
             venue_df = venue_df.rename(columns={"date": "ds"})
             venue_df["ds"] = pd.to_datetime(venue_df["ds"])
@@ -333,11 +346,13 @@ def oslo_torggata(prediction_category,restaurant,merged_data,historical_data,fut
             venue_df.columns = ["ds", "event"]
             dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
             venue_df[dataframe_name] = 1
-            df = pd.merge(df, venue_df, how="left", on="ds", suffixes=('', '_venue'))
+            df = pd.merge(df, venue_df, how="left", on="ds", suffixes=("", "_venue"))
             df[dataframe_name].fillna(0, inplace=True)
-            regressors_to_add.append((venue_df, dataframe_name))  # Append venue_df along with venue name for regressor addition
+            regressors_to_add.append(
+                (venue_df, dataframe_name)
+            )  # Append venue_df along with venue name for regressor addition
         else:
-            holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True) 
+            holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)
 
     # Event regressors here
 
@@ -347,7 +362,7 @@ def oslo_torggata(prediction_category,restaurant,merged_data,historical_data,fut
     # sentrum_scene_oslo_df = fetch_events("Oslo Torggata","Sentrum Scene")
     # sentrum_scene_oslo_df["date"] = pd.to_datetime(sentrum_scene_oslo_df["date"])
     # sentrum_scene_oslo_df = sentrum_scene_oslo_df.drop_duplicates(subset='date')
-    
+
     # # Create separate columns for each weekday
     # weekdays = ["Monday", "Tuesday", "Sunday"]
     # for day in weekdays:
@@ -431,21 +446,20 @@ def oslo_torggata(prediction_category,restaurant,merged_data,historical_data,fut
 
     # Weather regressors
     # Add the 'warm_and_dry' and 'cold_and_wet' as additional regressors
-    m.add_regressor('heavy_rain_fall_weekday')
-    m.add_regressor('heavy_rain_fall_weekend')
-    m.add_regressor('heavy_rain_spring_weekday')
-    m.add_regressor('heavy_rain_spring_weekend')
-    m.add_regressor('heavy_rain_winter_weekday')
+    m.add_regressor("heavy_rain_fall_weekday")
+    m.add_regressor("heavy_rain_fall_weekend")
+    m.add_regressor("heavy_rain_spring_weekday")
+    m.add_regressor("heavy_rain_spring_weekend")
+    m.add_regressor("heavy_rain_winter_weekday")
     # m.add_regressor('warm_dry_weekend_spring')
     # m.add_regressor('warm_dry_weekday_spring')
     # m.add_regressor('warm_dry_weekend_fall')
     m.add_regressor("opening_duration")
     m.add_regressor("sunshine_amount", standardize=False)
 
-
     for event_df, regressor_name in regressors_to_add:
-            if 'event' in event_df.columns:
-                m.add_regressor(regressor_name)
+        if "event" in event_df.columns:
+            m.add_regressor(regressor_name)
 
     # m.add_regressor('heavy_rain_winter_weekend')
 
@@ -570,17 +584,17 @@ def oslo_torggata(prediction_category,restaurant,merged_data,historical_data,fut
     future.fillna(
         {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
         inplace=True,
-        )
+    )
     for event_df, event_column in regressors_to_add:
-            if 'event' in event_df.columns:
-                event_df= event_df.drop_duplicates('ds')
-                future = pd.merge(
-                    future,
-                    event_df[["ds", event_column]],
-                    how="left",
-                    on="ds",
-                )
-                future[event_column].fillna(0, inplace=True)
+        if "event" in event_df.columns:
+            event_df = event_df.drop_duplicates("ds")
+            future = pd.merge(
+                future,
+                event_df[["ds", event_column]],
+                how="left",
+                on="ds",
+            )
+            future[event_column].fillna(0, inplace=True)
 
     # Apply the future functions for weather regressions here
     future = heavy_rain_spring_weekend_future(future)
@@ -592,10 +606,6 @@ def oslo_torggata(prediction_category,restaurant,merged_data,historical_data,fut
     # future = warm_dry_weekday_spring_future(future)
     # future = warm_dry_weekend_spring_future(future)
     # future = warm_dry_weekend_fall_future(future)
-
-
-
-
 
     # add the last working day and the +/- 5 days
     future = calculate_days_30(future, last_working_day)
@@ -625,7 +635,7 @@ def oslo_torggata(prediction_category,restaurant,merged_data,historical_data,fut
     future["fall_start"] = future["ds"].apply(is_fall_start)
     future["christmas_shopping"] = future["ds"].apply(is_christmas_shopping)
     future["specific_month"] = future["ds"].apply(is_specific_month)
-    future = add_opening_hours(future,"Oslo Torggata",13,17)
+    future = add_opening_hours(future, "Oslo Torggata", 13, 17)
     # Calculate the custom regressor values for the future dates
     future["ds"] = pd.to_datetime(future["ds"])
     future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)
@@ -638,10 +648,15 @@ def oslo_torggata(prediction_category,restaurant,merged_data,historical_data,fut
     # Add the 'sunshine_amount' column to the future dataframe
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
-    future = future.drop_duplicates(subset='ds')
+    future = future.drop_duplicates(subset="ds")
     future.fillna(0, inplace=True)
-    
-    return m, future, df,event_holidays
 
-def location_function(prediction_category,restaurant,merged_data,historical_data,future_data):
-    return oslo_torggata(prediction_category,restaurant,merged_data,historical_data,future_data)
+    return m, future, df, event_holidays
+
+
+def location_function(
+    prediction_category, restaurant, merged_data, historical_data, future_data
+):
+    return oslo_torggata(
+        prediction_category, restaurant, merged_data, historical_data, future_data
+    )

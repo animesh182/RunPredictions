@@ -2,7 +2,9 @@
 import uuid
 import logging
 import pandas as pd
-from PredictionFunction.PredictionSaver.saveDailyPredictions import save_daily_predictions
+from PredictionFunction.PredictionSaver.saveDailyPredictions import (
+    save_daily_predictions,
+)
 from PredictionFunction.PredictionSaver.saveHolidayParams import save_holiday_params
 from PredictionFunction.utils.fetch_events import fetch_events
 from PredictionFunction.utils.constants import opening_hours_dict
@@ -14,10 +16,10 @@ import numpy as np
 from PredictionFunction.utils.constants import holiday_parameter_type_categorization
 from PredictionFunction.utils.trondheim_events import trondheim_events
 
-def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays):
-    # logging.info("running")
+
+def save_to_db(forecast_df, company, restaurant, prediction_category, event_holidays):
     # end_date = datetime.now().strftime("%Y-%m-%d")
-    end_date = '2024-03-24'
+    end_date = "2024-03-24"
     unwanted_columns = [
         "_lower",
         "_upper",
@@ -37,7 +39,7 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
         "weekly_5",
         "weekly_6",
         "weekly",
-        "monthly"
+        "monthly",
     ]
     filtered_columns = [
         col
@@ -56,15 +58,18 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
             restaurant_name = restaurant
             with psycopg2.connect(**params) as conn:
                 with conn.cursor() as cursor:
-                    cursor.execute('SELECT id FROM public."accounts_restaurant" WHERE name = %s', [restaurant_name])
+                    cursor.execute(
+                        'SELECT id FROM public."accounts_restaurant" WHERE name = %s',
+                        [restaurant_name],
+                    )
                     restaurant_uuid = cursor.fetchone()[0]
-                # restaurant_uuid = Restaurant.objects.get(name=restaurant_name).id
-        #     opening_hours = OpeningHours.objects.filter(
-        #         restaurant=restaurant_uuid,
-        #         day_of_week=day_type,
-        #         start_date__lte=date_obj,
-        #         end_date__gte=date_obj,
-        #     ).latest("created_at")
+                    # restaurant_uuid = Restaurant.objects.get(name=restaurant_name).id
+                    #     opening_hours = OpeningHours.objects.filter(
+                    #         restaurant=restaurant_uuid,
+                    #         day_of_week=day_type,
+                    #         start_date__lte=date_obj,
+                    #         end_date__gte=date_obj,
+                    #     ).latest("created_at")
                     opening_hour_query = """
                             SELECT *
                             FROM public."accounts_openinghours"
@@ -75,45 +80,56 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
                             ORDER BY created_at DESC
                             LIMIT 1
                         """
-                    cursor.execute(opening_hour_query, [restaurant_uuid, day_type, date_obj, date_obj])
-                    opening_hours= cursor.fetchone()
+                    cursor.execute(
+                        opening_hour_query,
+                        [restaurant_uuid, day_type, date_obj, date_obj],
+                    )
+                    opening_hours = cursor.fetchone()
             if opening_hours:
                 start = opening_hours[1]
                 end = opening_hours[2]
                 if start > end:
                     duration = (24 - start) + end
-                elif start==end:
-                    duration=0
-                    filtered_df.at[index,"yhat"]= 0
+                elif start == end:
+                    duration = 0
+                    filtered_df.at[index, "yhat"] = 0
                 else:
                     duration = end - start
-            filtered_df.at[index, 'duration'] = duration
-            common_duration = filtered_df['duration'].value_counts().idxmax()
-            filtered_df.at[index, 'common_duration'] = common_duration
+            filtered_df.at[index, "duration"] = duration
+            common_duration = filtered_df["duration"].value_counts().idxmax()
+            filtered_df.at[index, "common_duration"] = common_duration
 
-        normal_hour = opening_hours_dict[restaurant_name]['normal_hours']
-        normal_hour_2 = opening_hours_dict[restaurant_name]['special_hours']
-        filtered_df["special_opening_hour"]= 0
-        filtered_df['new_yhat'] = filtered_df['yhat']
+        normal_hour = opening_hours_dict[restaurant_name]["normal_hours"]
+        normal_hour_2 = opening_hours_dict[restaurant_name]["special_hours"]
+        filtered_df["special_opening_hour"] = 0
+        filtered_df["new_yhat"] = filtered_df["yhat"]
 
         for index, row in filtered_df.iterrows():
-            if (row['duration'] != normal_hour) and (row['duration'] != normal_hour_2):
-                duration_scale = row['duration'] / row["common_duration"]  # Scaling based on common duration and normal hour
+            if (row["duration"] != normal_hour) and (row["duration"] != normal_hour_2):
+                duration_scale = (
+                    row["duration"] / row["common_duration"]
+                )  # Scaling based on common duration and normal hour
                 logging.info(duration_scale)
-                filtered_df.at[index, 'new_yhat'] = row['yhat'] * duration_scale * 0.8
-                filtered_df.at[index,'opening_duration']=0
-                filtered_df['special_opening_hour'] = filtered_df['special_opening_hour'].fillna(0)
+                filtered_df.at[index, "new_yhat"] = row["yhat"] * duration_scale * 0.8
+                filtered_df.at[index, "opening_duration"] = 0
+                filtered_df["special_opening_hour"] = filtered_df[
+                    "special_opening_hour"
+                ].fillna(0)
             else:
-                filtered_df.at[index, 'new_yhat'] = row['yhat']  # Keeping yhat as it is for normal or special hours
+                filtered_df.at[index, "new_yhat"] = row[
+                    "yhat"
+                ]  # Keeping yhat as it is for normal or special hours
 
-        filtered_df['new_yhat'] = filtered_df['new_yhat'].fillna(filtered_df['yhat'])
-        filtered_df['special_opening_hour'] = filtered_df['new_yhat'] - filtered_df['yhat']  
-        filtered_df.drop(['yhat'], axis=1, inplace=True)
-        filtered_df['yhat'] = filtered_df["new_yhat"]
-        filtered_df.drop(['new_yhat'],axis=1,inplace=True)
-        filtered_df.drop(['duration', 'common_duration'], axis=1, inplace=True)
-        filtered_df['opening_duration'].fillna(0,inplace=True)
-    
+        filtered_df["new_yhat"] = filtered_df["new_yhat"].fillna(filtered_df["yhat"])
+        filtered_df["special_opening_hour"] = (
+            filtered_df["new_yhat"] - filtered_df["yhat"]
+        )
+        filtered_df.drop(["yhat"], axis=1, inplace=True)
+        filtered_df["yhat"] = filtered_df["new_yhat"]
+        filtered_df.drop(["new_yhat"], axis=1, inplace=True)
+        filtered_df.drop(["duration", "common_duration"], axis=1, inplace=True)
+        filtered_df["opening_duration"].fillna(0, inplace=True)
+
     if prediction_category == "day":
         if restaurant not in ["Trondheim"]:
             filtered_df.loc[
@@ -134,7 +150,8 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
             filtered_df.drop(
                 [
                     # "opening_duration",
-                    "students_early_semester"],
+                    "students_early_semester"
+                ],
                 axis=1,
                 inplace=True,
             )
@@ -148,17 +165,29 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
             #         parent_restaurant=None,
             #         effect = 0
             #     )
-        filtered_df = filtered_df[filtered_df['ds'] >= datetime.now()]
+        filtered_df = filtered_df[filtered_df["ds"] >= datetime.now()]
         concert_dictionary = {}
-        valid_concerts =[]
+        valid_concerts = []
 
-        if restaurant_name in ["Oslo Storo","Oslo City","Oslo Torggata","Karl Johan",
-                                   "Oslo Lokka","Oslo Steen_Strom","Oslo Smestad"]:
+        if restaurant_name in [
+            "Oslo Storo",
+            "Oslo City",
+            "Oslo Torggata",
+            "Karl Johan",
+            "Oslo Lokka",
+            "Oslo Steen_Strom",
+            "Oslo Smestad",
+        ]:
             with psycopg2.connect(**params) as conn:
                 with conn.cursor() as cursor:
-                    cursor.execute(""" select id from public."accounts_city" where name ='Oslo' """)
+                    cursor.execute(
+                        """ select id from public."accounts_city" where name ='Oslo' """
+                    )
                     city_uuid = cursor.fetchone()[0]
-                    cursor.execute(' select name from public."Predictions_location" where cities_id = %s ',[city_uuid])
+                    cursor.execute(
+                        ' select name from public."Predictions_location" where cities_id = %s ',
+                        [city_uuid],
+                    )
                     oslo_venues = cursor.fetchall()
             for venue in oslo_venues:
                 dataframe_name = venue[0].lower().replace(" ", "_").replace(",", "")
@@ -166,12 +195,22 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
                 concert_dictionary[dataframe_name] = dataframe
                 valid_concerts.append(dataframe_name)
 
-        if restaurant_name in ["Stavanger","Sandnes","Restaurant","Fisketorget Utsalg"]:
+        if restaurant_name in [
+            "Stavanger",
+            "Sandnes",
+            "Restaurant",
+            "Fisketorget Utsalg",
+        ]:
             with psycopg2.connect(**params) as conn:
                 with conn.cursor() as cursor:
-                    cursor.execute(""" select id from public."accounts_city" where name ='Stavanger' """)
+                    cursor.execute(
+                        """ select id from public."accounts_city" where name ='Stavanger' """
+                    )
                     city_uuid = cursor.fetchone()[0]
-                    cursor.execute(' select name from public."Predictions_location" where cities_id = %s ',[city_uuid])
+                    cursor.execute(
+                        ' select name from public."Predictions_location" where cities_id = %s ',
+                        [city_uuid],
+                    )
                     oslo_venues = cursor.fetchall()
             for venue in oslo_venues:
                 dataframe_name = venue[0].lower().replace(" ", "_").replace(",", "")
@@ -182,9 +221,14 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
         if restaurant_name in ["Bergen"]:
             with psycopg2.connect(**params) as conn:
                 with conn.cursor() as cursor:
-                    cursor.execute(""" select id from public."accounts_city" where name ='Bergen' """)
+                    cursor.execute(
+                        """ select id from public."accounts_city" where name ='Bergen' """
+                    )
                     city_uuid = cursor.fetchone()[0]
-                    cursor.execute(' select name from public."Predictions_location" where cities_id = %s ',[city_uuid])
+                    cursor.execute(
+                        ' select name from public."Predictions_location" where cities_id = %s ',
+                        [city_uuid],
+                    )
                     oslo_venues = cursor.fetchall()
             for venue in oslo_venues:
                 dataframe_name = venue[0].lower().replace(" ", "_").replace(",", "")
@@ -195,9 +239,14 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
         if restaurant_name in ["Fredrikstad"]:
             with psycopg2.connect(**params) as conn:
                 with conn.cursor() as cursor:
-                    cursor.execute(""" select id from public."accounts_city" where name ='Fredrikstad' """)
+                    cursor.execute(
+                        """ select id from public."accounts_city" where name ='Fredrikstad' """
+                    )
                     city_uuid = cursor.fetchone()[0]
-                    cursor.execute(' select name from public."Predictions_location" where cities_id = %s ',[city_uuid])
+                    cursor.execute(
+                        ' select name from public."Predictions_location" where cities_id = %s ',
+                        [city_uuid],
+                    )
                     oslo_venues = cursor.fetchall()
             for venue in oslo_venues:
                 dataframe_name = venue[0].lower().replace(" ", "_").replace(",", "")
@@ -205,7 +254,7 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
                 concert_dictionary[dataframe_name] = dataframe
                 valid_concerts.append(dataframe_name)
 
-        #SAVE DAILY PREDICTIONS
+        # SAVE DAILY PREDICTIONS
         # prediction_data = filtered_df[['ds', 'yhat']]
         # prediction_data = prediction_data.rename(columns={"ds": "date", "yhat": "total_gross"})
         # prediction_data["date"]=pd.to_datetime(prediction_data["date"]).dt.date
@@ -217,7 +266,7 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
         # prediction_data['created_at'] = prediction_data['created_at'].apply(lambda x: x.strftime('%Y-%m-%d %H:%M:%S'))
         # prediction_data['total_gross'] = prediction_data['total_gross'].astype(float)
         # prediction_data['id'] = prediction_data['id'].apply(str)
-        
+
         # save_daily_predictions(prediction_data,restaurant)
         # logging.info("saved daily predictions")
         
@@ -231,7 +280,7 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
         # holiday_parameter_data = holiday_parameter_data.rename(columns={"yhat": "total_gross"})
         # id_vars= ['ds']
         # melted_data = pd.melt(filtered_df, id_vars=id_vars, var_name='name', value_name='effect')
-        
+
         # valid_concerts = ['spektrum', 'sentrum', 'fornebu', 'ulleval']
         # concert_dictionary = {
         #     # 'spektrum': oslo_spektrum_events,
@@ -240,7 +289,7 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
         #     # 'ulleval': ulleval_events
         # }
 
-#--------------------------------------SAVE HOLIDAY PARAMS----------------------------------------
+        # --------------------------------------SAVE HOLIDAY PARAMS----------------------------------------
         restaurant_city_df = pd.DataFrame(data)
         if "Parent Restaurant" in restaurant_city_df.columns:
             parent_restaurant_series = restaurant_city_df.loc[
@@ -253,23 +302,35 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
 
         if restaurant == "Trondheim":
             event_holidays_trondheim = trondheim_events()
-            event_holidays_trondheim = event_holidays_trondheim[pd.to_datetime(event_holidays_trondheim['event_date']) >= datetime.now()]
-            holiday_param_insert_trondheim= """ INSERT INTO public."Predictions_holidayparameters" (id,prediction_id, name, effect, type, date, restaurant, company, parent_restaurant,created_at)
+            event_holidays_trondheim = event_holidays_trondheim[
+                pd.to_datetime(event_holidays_trondheim["event_date"]) >= datetime.now()
+            ]
+            holiday_param_insert_trondheim = """ INSERT INTO public."Predictions_holidayparameters" (id,prediction_id, name, effect, type, date, restaurant, company, parent_restaurant,created_at)
                 VALUES (gen_random_uuid(),%s, %s, %s,'event', %s, %s, %s, %s,%s)"""
             with psycopg2.connect(**params) as conn:
                 with conn.cursor() as cursor:
                     for index, row in event_holidays_trondheim.iterrows():
                         prediction_id = None
-                        event_name = row['event_names']
-                        event_date = row['event_date'] 
-                        restaurant="Trondheim"
-                        company="Los Tacos"
-                        parent_restaurant=parent_restaurant
-                        effect_value=0
+                        event_name = row["event_names"]
+                        event_date = row["event_date"]
+                        restaurant = "Trondheim"
+                        company = "Los Tacos"
+                        parent_restaurant = parent_restaurant
+                        effect_value = 0
                         created_at = datetime.now()
-                        cursor.execute(holiday_param_insert_trondheim,(
-                            prediction_id,event_name,effect_value,event_date,restaurant,company,parent_restaurant,created_at
-                        ),)
+                        cursor.execute(
+                            holiday_param_insert_trondheim,
+                            (
+                                prediction_id,
+                                event_name,
+                                effect_value,
+                                event_date,
+                                restaurant,
+                                company,
+                                parent_restaurant,
+                                created_at,
+                            ),
+                        )
                     conn.commit()
         filtered_df.to_csv('filtered_df.csv')   
         event_holidays.to_csv("event_holidays.csv") 
@@ -284,24 +345,30 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
         for index, row in filtered_df.iterrows():
             # date_obj = datetime.strptime(row["ds"], "%Y-%m-%d")
             date_obj = row["ds"].to_pydatetime()
-            total_gross_value = (
-                    round(float(row["yhat"] / 500)) * 500
-                )
-            
+            total_gross_value = round(float(row["yhat"] / 500)) * 500
+
             insert_prediction = """INSERT INTO public."Predictions_predictions" (id, date, restaurant, total_gross, created_at, company, parent_restaurant)
                     VALUES (gen_random_uuid(),%s,%s,%s,%s,%s,%s) RETURNING id"""
             with psycopg2.connect(**params) as conn:
                 with conn.cursor() as cursor:
-                    cursor.execute(insert_prediction,(
-                        date_obj.date(),restaurant,total_gross_value,datetime.now(),company,parent_restaurant
-                    ),)
+                    cursor.execute(
+                        insert_prediction,
+                        (
+                            date_obj.date(),
+                            restaurant,
+                            total_gross_value,
+                            datetime.now(),
+                            company,
+                            parent_restaurant,
+                        ),
+                    )
                     prediction_id = cursor.fetchone()[0]
                     conn.commit()
 
             date_key = date_obj.date()
             for name in filtered_df.columns:
                 if name in ["ds", "yhat"]:
-                        continue    
+                    continue
                 try:
                     effect_value = (
                         round(float(row[name]))
@@ -325,16 +392,26 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
                     ):
                     # print(f'upper {restaurant}: {name}')
 
-                    holiday_param_insert= """ INSERT INTO public."Predictions_holidayparameters" (id,prediction_id, name, effect, type, date, restaurant, company, parent_restaurant,created_at)
+                    holiday_param_insert = """ INSERT INTO public."Predictions_holidayparameters" (id,prediction_id, name, effect, type, date, restaurant, company, parent_restaurant,created_at)
                     VALUES (gen_random_uuid(),%s, %s, %s,'event', %s, %s, %s, %s,%s)"""
 
                     with psycopg2.connect(**params) as conn:
-                         with conn.cursor() as cursor:
-                             cursor.execute(holiday_param_insert,(
-                                 prediction_id,name,effect_value,date_obj,restaurant,company,parent_restaurant,datetime.now()
-                             ),)
-                             conn.commit()
-                
+                        with conn.cursor() as cursor:
+                            cursor.execute(
+                                holiday_param_insert,
+                                (
+                                    prediction_id,
+                                    name,
+                                    effect_value,
+                                    date_obj,
+                                    restaurant,
+                                    company,
+                                    parent_restaurant,
+                                    datetime.now(),
+                                ),
+                            )
+                            conn.commit()
+
                 elif (
                         effect_value != 0
                         and name not in concert_dictionary
@@ -345,23 +422,27 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
                         type = holiday_parameter_type_categorization[name]
                     except:
                         type = None
-                    
-                    holiday_param_insert_categorized= """ INSERT INTO public."Predictions_holidayparameters" (id,prediction_id, name, effect, type, date, restaurant, company, parent_restaurant,created_at)
+
+                    holiday_param_insert_categorized = """ INSERT INTO public."Predictions_holidayparameters" (id,prediction_id, name, effect, type, date, restaurant, company, parent_restaurant,created_at)
                     VALUES (gen_random_uuid(),%s, %s, %s,%s, %s, %s, %s, %s, %s)"""
 
                     with psycopg2.connect(**params) as conn:
-                         with conn.cursor() as cursor:
-                             cursor.execute(holiday_param_insert_categorized,(
-                                 prediction_id,name,effect_value,type,date_obj,restaurant,company,parent_restaurant,datetime.now()
-                             ),)
-                             conn.commit()
-                else:
-                    continue
-                    
-
-
-
-
+                        with conn.cursor() as cursor:
+                            cursor.execute(
+                                holiday_param_insert_categorized,
+                                (
+                                    prediction_id,
+                                    name,
+                                    effect_value,
+                                    type,
+                                    date_obj,
+                                    restaurant,
+                                    company,
+                                    parent_restaurant,
+                                    datetime.now(),
+                                ),
+                            )
+                            conn.commit()
 
         # for index, row in melted_data.iterrows():
         #     for concert in valid_concerts:
@@ -373,7 +454,6 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
         #                     concert_name = date_matching_df['name'].iloc[0]
         #                     melted_data.at[index, 'name'] = concert_name
 
-        
         # melted_data = melted_data.rename(columns={"ds": "date"})
         # melted_data["date"]=pd.to_datetime(melted_data["date"]).dt.date
         # filtered_prediction_data = prediction_data[['id','date','company','restaurant']]
@@ -384,7 +464,7 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
         # joined_data['created_at']=datetime.now()
         # joined_data['created_at'] = joined_data['created_at'].apply(lambda x: x.strftime('%Y-%m-%d %H:%M:%S'))
 
-        # save_holiday_params(joined_data,restaurant)        
+        # save_holiday_params(joined_data,restaurant)
     elif prediction_category == "hour":
         latest_hours = defaultdict(dict)
         max_created_at_subquery = (
@@ -446,25 +526,19 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
                 filtered_df.at[index, "yhat"] = 0
 
         for index, row in filtered_df.iterrows():
-            date_obj = datetime.datetime.strptime(
-                row["ds"], "%Y-%m-%d %H:%M:%S"
-            ).date()
+            date_obj = datetime.datetime.strptime(row["ds"], "%Y-%m-%d %H:%M:%S").date()
             daily_hourly_sum[date_obj] += float(row["yhat"])
         scaling_factors = {}
         for date, hourly_sum in daily_hourly_sum.items():
             # Replace 'Predictions' with the actual model name if needed
-            daily_total = (
-                predictions.filter(date=date).values("total_gross").first()
-            )
+            daily_total = predictions.filter(date=date).values("total_gross").first()
             daily_total = daily_total["total_gross"] if daily_total else 0
 
             # Convert both 'daily_total' and 'hourly_sum' to the Decimal data type
             daily_total = Decimal(str(daily_total))  # Convert to Decimal
             hourly_sum = Decimal(str(hourly_sum))  # Convert to Decimal
 
-            scaling_factors[date] = (
-                daily_total / hourly_sum if hourly_sum != 0 else 0
-            )
+            scaling_factors[date] = daily_total / hourly_sum if hourly_sum != 0 else 0
 
         # print(scaling_factors)
         for index, row in filtered_df.iterrows():
@@ -511,7 +585,7 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
     #         )
     #         prediction_instance.save()
 
-        # Here, you can add logic for saving associated parameters if needed
+    # Here, you can add logic for saving associated parameters if needed
     # elif prediction_category == "product":
     #     for index, row in filtered_df.iterrows():
     #         date_obj = datetime.datetime.strptime(row["ds"], "%Y-%m-%d")
