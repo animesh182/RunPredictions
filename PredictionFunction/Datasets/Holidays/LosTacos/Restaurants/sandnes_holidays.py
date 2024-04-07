@@ -260,3 +260,12 @@ skeiva_natta = pd.DataFrame(
             "upper_window": 0,
         }
     )    
+
+closed_march = pd.DataFrame(
+        {
+            "holiday": "march closed",
+            "ds": pd.to_datetime(["2023-04-30"]),
+            "lower_window": -12,
+            "upper_window": 0,
+        }
+    ) 

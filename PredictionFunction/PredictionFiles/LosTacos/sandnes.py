@@ -59,6 +59,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.sandnes_holidays 
      utopia_friday,
      utopia_saturday, 
      skeiva_natta,
+     closed_march
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     first_may,
@@ -225,6 +226,7 @@ def sandnes(prediction_category,restaurant,merged_data,historical_data,future_da
             skeiva_natta,
             halloween_weekend,
             halloween_day,
+            closed_march
         )
     )
 
@@ -295,7 +297,7 @@ def sandnes(prediction_category,restaurant,merged_data,historical_data,future_da
     df = add_opening_hours(df,"Sandnes",11,9)
 
     sandnes_venues = {
-       "Bryne", "Campus Bjergsted",
+    #    "Bryne", "Campus Bjergsted",
     # "Cementen, Stavanger", "City Centre", "Clarion Hotel Energy", "DNB Arena",
     # "Egersund kirke", "Elefantteateret", "Fargegaten - Øvre Holmegate", "Fiskepiren",
     # "Folken, Løkkeveien", "Gamle Stavanger", "Grand Hotell Egersund", "Haugesund Theater",
@@ -441,9 +443,9 @@ def sandnes(prediction_category,restaurant,merged_data,historical_data,future_da
     # Add the conditional regressor to the model
     m.add_regressor("sunshine_amount", standardize=False)
 
-    for event_df, regressor_name in regressors_to_add:
-        if 'event' in event_df.columns:
-            m.add_regressor(regressor_name)
+    # for event_df, regressor_name in regressors_to_add:
+    #     if 'event' in event_df.columns:
+    #         m.add_regressor(regressor_name)
 
     print("done with seasonalities")
     if prediction_category == "hour":
@@ -578,16 +580,16 @@ def sandnes(prediction_category,restaurant,merged_data,historical_data,future_da
         {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
         inplace=True,
     )
-    for event_df, event_column in regressors_to_add:
-        if 'event' in event_df.columns:
-            event_df= event_df.drop_duplicates('ds')
-            future = pd.merge(
-                future,
-                event_df[["ds", event_column]],
-                how="left",
-                on="ds",
-            )
-            future[event_column].fillna(0, inplace=True)
+    # for event_df, event_column in regressors_to_add:
+    #     if 'event' in event_df.columns:
+    #         event_df= event_df.drop_duplicates('ds')
+    #         future = pd.merge(
+    #             future,
+    #             event_df[["ds", event_column]],
+    #             how="left",
+    #             on="ds",
+    #         )
+    #         future[event_column].fillna(0, inplace=True)
     future = warm_and_dry_future(future)
     future = heavy_rain_fall_weekday_future(future)
     future = heavy_rain_fall_weekend_future(future)

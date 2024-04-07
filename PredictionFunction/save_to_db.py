@@ -15,6 +15,7 @@ from PredictionFunction.utils.constants import holiday_parameter_type_categoriza
 from PredictionFunction.utils.trondheim_events import trondheim_events
 
 def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays):
+    # logging.info("running")
     # end_date = datetime.now().strftime("%Y-%m-%d")
     end_date = '2024-03-24'
     unwanted_columns = [
@@ -218,7 +219,7 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
         # prediction_data['id'] = prediction_data['id'].apply(str)
         
         # save_daily_predictions(prediction_data,restaurant)
-        logging.info("saved daily predictions")
+        # logging.info("saved daily predictions")
         
         # Save the holiday parameters for predictions
         # sentrum_scene_events= fetch_events(restaurant,"Sentrum Scene")
@@ -270,7 +271,16 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
                             prediction_id,event_name,effect_value,event_date,restaurant,company,parent_restaurant,created_at
                         ),)
                     conn.commit()
-        filtered_df.to_csv('filtered_df.csv')          
+        filtered_df.to_csv('filtered_df.csv')   
+        event_holidays.to_csv("event_holidays.csv") 
+        if 'holiday' in event_holidays.columns:
+            event_holidays['event_names'] = event_holidays['holiday'].fillna(event_holidays['name'])
+        event_holidays['ds'] = pd.to_datetime(event_holidays['ds'])
+        event_holidays['date'] = pd.to_datetime(event_holidays['date'])
+        # event_holidays.to_csv("events_before.csv")
+        event_holidays['event_date'] = event_holidays['date'].fillna(event_holidays['ds'].dt.date)
+        event_holidays['event_date'] = event_holidays['event_date'].dt.strftime('%Y-%m-%d').astype(str)
+        event_holidays.to_csv("holidays.csv")
         for index, row in filtered_df.iterrows():
             # date_obj = datetime.strptime(row["ds"], "%Y-%m-%d")
             date_obj = row["ds"].to_pydatetime()
@@ -311,8 +321,9 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
                             concert_name = date_matching_df["name"].iloc[0]
                             name = concert_name
                 if ( effect_value > 2000
-                        and name in event_holidays["name"].values
+                        and name in event_holidays["event_names"].values
                     ):
+                    # print(f'upper {restaurant}: {name}')
 
                     holiday_param_insert= """ INSERT INTO public."Predictions_holidayparameters" (id,prediction_id, name, effect, type, date, restaurant, company, parent_restaurant,created_at)
                     VALUES (gen_random_uuid(),%s, %s, %s,'event', %s, %s, %s, %s,%s)"""
@@ -327,9 +338,9 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
                 elif (
                         effect_value != 0
                         and name not in concert_dictionary
-                        and name not in event_holidays["name"].values
+                        and name not in event_holidays["event_names"].values
                     ):
-                    print(name)
+                    # print(f'lower {restaurant}: {name}')
                     try:
                         type = holiday_parameter_type_categorization[name]
                     except:
@@ -344,6 +355,8 @@ def save_to_db(forecast_df,company,restaurant,prediction_category,event_holidays
                                  prediction_id,name,effect_value,type,date_obj,restaurant,company,parent_restaurant,datetime.now()
                              ),)
                              conn.commit()
+                else:
+                    continue
                     
 
 

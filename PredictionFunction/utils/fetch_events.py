@@ -28,7 +28,8 @@ def fetch_events(restaurant,location_name):
                     "end_date": row[3]
                 }
                 events_dict.append(event_dict)
-
+    new_events= pd.DataFrame(events_dict)
+    new_events.to_csv("all_eventslist.csv")
     formatted_events = []
     formatted_holidays =[]
     threshold=20

@@ -6,20 +6,20 @@
 #     'host': 'sales-prediction-svr-v2.postgres.database.azure.com',
 #     'port': '5432'
 # }
-#staging
-# params = {
-#     'dbname': 'salesdb1',
-#     'user': 'salespredstaging',
-#     'password': 'Shajir86@ms9',
-#     'host': 'krunch-staging-svr.postgres.database.azure.com',
-#     'port': '5432'
-# }
-
-#local
+# staging
 params = {
-    'dbname': 'salesdb',
-    'user': 'postgres',
-    'password': '',
-    'host': 'localhost',
+    'dbname': 'salesdb1',
+    'user': 'salespredstaging',
+    'password': 'Shajir86@ms9',
+    'host': 'krunch-staging-svr.postgres.database.azure.com',
     'port': '5432'
 }
+
+#local
+# params = {
+#     'dbname': 'salesdb',
+#     'user': 'postgres',
+#     'password': '',
+#     'host': 'localhost',
+#     'port': '5432'
+# }

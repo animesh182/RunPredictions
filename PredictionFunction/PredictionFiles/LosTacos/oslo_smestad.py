@@ -248,7 +248,7 @@ def oslo_smestad(prediction_category,restaurant,merged_data,historical_data,futu
 
     df["fall_start"] = df["ds"].apply(is_fall_start)
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
-    df = add_opening_hours(df,"Oslo Storo",11,11)
+    df = add_opening_hours(df,"Oslo Smestad",7,7)
 
     oslo_smestad_venues = {
         "Sentrum Scene", "Fornebu","Oslo Storgata",
@@ -308,7 +308,11 @@ def oslo_smestad(prediction_category,restaurant,merged_data,historical_data,futu
             holidays=holidays,
             yearly_seasonality=True,
             daily_seasonality=False,
-            changepoint_prior_scale=0.1,
+            changepoint_range=0.7,
+            changepoint_prior_scale=1,
+            # seasonality_prior_scale=1,
+            # holidays_prior_scale=1,
+            seasonality_mode="additive",
         )
 
     m.add_regressor("custom_regressor")
