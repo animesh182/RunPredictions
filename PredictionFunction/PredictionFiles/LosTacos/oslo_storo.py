@@ -442,7 +442,7 @@ def oslo_storo(
     # add the last working day and the +/- 5 days
     # future = calculate_days_30(future, last_working_day)
 
-    future["sunshine_amount"] = merged_data["sunshine_amount"]
+    # future["sunshine_amount"] = merged_data["sunshine_amount"]
 
     future["covid_restriction_christmas"] = future["ds"].apply(
         is_covid_restriction_christmas
