@@ -319,6 +319,7 @@ def sales_without_effect(
         "end_date",
         "event_category_id",
         "location_id",
+        "created_at"
     ]
 
     matching_events = []
