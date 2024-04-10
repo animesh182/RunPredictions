@@ -31,18 +31,16 @@ def sales_without_effect(
 
     actual_trondheim_start_date = date(2024, 2, 1)
 
-    alcohol_query = """
-        SELECT *
-        FROM public."SalesData" 
-        WHERE company = %s 
-            AND restaurant = %s 
-            AND date >= %s 
-            AND date <= %s 
-            AND article_supergroup IN %s
-            group by 1;
-    """
-
     with psycopg2.connect(**params) as conn:
+        alcohol_query = """
+                SELECT *
+                FROM public."SalesData" 
+                WHERE company = %s 
+                    AND restaurant = %s 
+                    AND date >= %s 
+                    AND date <= %s 
+                    AND article_supergroup IN %s
+            """
         alcohol_sales_data = pd.read_sql_query(
             alcohol_query,
             conn,
@@ -54,19 +52,18 @@ def sales_without_effect(
                 tuple(article_supergroup_values),
             ],
         )
+        logging.info('alcohol_sales fetched ')
 
-    food_query = """
-        SELECT *
-        FROM public."SalesData" 
-        WHERE company = %s 
-            AND restaurant = %s 
-            AND date >= %s 
-            AND date <= %s 
-            AND article_supergroup not IN %s
-            group by 1;
-    """
+        food_query = """
+            SELECT *
+            FROM public."SalesData" 
+            WHERE company = %s 
+                AND restaurant = %s 
+                AND date >= %s 
+                AND date <= %s 
+                AND article_supergroup not IN %s
+        """
 
-    with psycopg2.connect(**params) as conn:
         food_sales_data = pd.read_sql_query(
             food_query,
             conn,
@@ -78,23 +75,24 @@ def sales_without_effect(
                 tuple(article_supergroup_values),
             ],
         )
+        logging.info('food_sales fetched ')
 
-    trondheim_query = """
-        SELECT *
-        FROM public."SalesData" 
-        WHERE company = %s 
-            AND restaurant = 'Trondheim' 
-            AND date >= %s 
-            AND date <= %s 
-            group by 1;
-    """
+        trondheim_query = """
+            SELECT *
+            FROM public."SalesData" 
+            WHERE company = %s 
+                AND restaurant = 'Trondheim' 
+                AND date >= %s 
+                AND date <= %s 
+        """
 
-    with psycopg2.connect(**params) as conn:
         actual_trondheim_sales = pd.read_sql_query(
             trondheim_query,
             conn,
             params=[company, actual_trondheim_start_date, end_date],
         )
+
+        logging.info('actual_sales fetched ')
     # alcohol_sales_data = SalesData.objects.filter(
     #     company=company,
     #     restaurant=alcohol_reference_restaurant,
@@ -131,7 +129,7 @@ def sales_without_effect(
         actual_sales_alcohol.groupby("gastronomic_day")["total_net"].sum().reset_index()
     )
     actual_alcohol_sum = average_sales_new_alcohol["total_net"].sum()
-    print(f"actual alcohol sales for trondheim in feb is {actual_alcohol_sum}")
+    logging.info(f"actual alcohol sales for trondheim in feb is {actual_alcohol_sum}")
 
     actual_sales_food = actual_trondheim_sales[
         ~actual_trondheim_sales["article_supergroup"].isin(article_supergroup_values)
@@ -141,7 +139,7 @@ def sales_without_effect(
         actual_sales_food.groupby("gastronomic_day")["total_net"].sum().reset_index()
     )
     actual_food_sum = average_sales_new_food["total_net"].sum()
-    print(f"actual food sales for trondheim in feb is {actual_food_sum}")
+    # logging.info(f"actual food sales for trondheim in feb is {actual_food_sum}")
 
     # get sales of food and alcohol in reference restaurant for a month------------------------------------------------------
     reference_sales = filtered_sales_reference
@@ -158,7 +156,7 @@ def sales_without_effect(
         feb_alcohol_sales["gastronomic_day"].dt.year
     )["total_net"].sum()
     average_sum_feb_alcohol = sums_per_feb_alcohol.mean()
-    print(f"actual alcohol sales for reference in feb is {average_sum_feb_alcohol}")
+    logging.info(f"actual alcohol sales for reference in feb is {average_sum_feb_alcohol}")
 
     reference_food_sales = reference_sales[
         ~reference_sales["article_supergroup"].isin(article_supergroup_values)
@@ -173,13 +171,13 @@ def sales_without_effect(
         feb_food_sales["gastronomic_day"].dt.year
     )["total_net"].sum()
     average_sum_feb_food = sums_per_feb_food.mean()
-    print(f"actual food sales for reference in feb is {average_sum_feb_food}")
+    logging.info(f"actual food sales for reference in feb is {average_sum_feb_food}")
     # ----------------------------------------------------------------------------------------------------------------------------
     scale_factor_for_food = float(actual_food_sum) / average_sum_feb_food
     scale_factor_for_alcohol = float(actual_alcohol_sum) / average_sum_feb_alcohol
 
-    print(f"Scale factor for food is {scale_factor_for_food}")
-    print(f"Scale factor for alcohol is {scale_factor_for_alcohol}")
+    logging.info(f"Scale factor for food is {scale_factor_for_food}")
+    logging.info(f"Scale factor for alcohol is {scale_factor_for_alcohol}")
     reference_alcohol_sales["total_net"] = reference_alcohol_sales["total_net"].astype(
         float
     ) * float(scale_factor_for_alcohol)
@@ -233,7 +231,7 @@ def sales_without_effect(
     #     'Saturday': 1  # Scale for Saturday is assumed to be 1
     # }
 
-    #     # print(f'The scales are: sunday{scale_of_sunday},monday{scale_of_monday},tuesday{scale_of_tuesday},wednesday{scale_of_wednesday},thursday{scale_of_thursday},friday{scale_of_friday}')
+    #     # logging.info(f'The scales are: sunday{scale_of_sunday},monday{scale_of_monday},tuesday{scale_of_tuesday},wednesday{scale_of_wednesday},thursday{scale_of_thursday},friday{scale_of_friday}')
     #     final_sales_grouped['day_type'] = final_sales_grouped['gastronomic_day'].dt.day_name()
     #     final_sales_grouped['total_net'] = final_sales_grouped.apply(lambda row: row['total_net'] * scales[row['day_type']], axis=1)
 
@@ -310,6 +308,7 @@ def sales_without_effect(
                     """
     with psycopg2.connect(**params) as conn:
         events_df = pd.read_sql_query(event_query, conn)
+        logging.info('events fetched')
     events_df.columns = [
         "id",
         "name",
@@ -398,4 +397,5 @@ def sales_without_effect(
     final_merged.drop(columns=["old_total_net", "effect", "index"], inplace=True)
     final_merged.fillna(0, inplace=True)
     filtered_sales = final_merged.copy()
+    logging.info('filterd_df creation for trondheim finished')
     return filtered_sales, actual_trondheim_start_date

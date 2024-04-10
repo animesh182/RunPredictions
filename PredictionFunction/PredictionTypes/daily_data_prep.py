@@ -7,10 +7,11 @@ from PredictionFunction.utils.fetch_sales_data import fetch_salesdata
 from PredictionFunction.meta_tables import data
 from PredictionFunction.utils.fetch_weather_data import fetch_weather
 from PredictionFunction.utils.trondheim_sales import sales_without_effect
+import logging
 
 def prepare_data(company, restaurant, start_date, end_date):
     #This function processes the data for the given restaurant and date range.
-    print("started on process_data.py")
+    logging.info("started on process_data.py")
     # Create a pandas DataFrame
 
     restaurant_list=pd.DataFrame(data)
