@@ -474,7 +474,7 @@ def save_to_db(forecast_df, company, restaurant, prediction_category, event_holi
                 restaurant=restaurant,
                 company=company,
             )
-            .order_by("-created_at")
+            # .order_by("-created_at")
             .values("created_at")[:1]
         )
 
