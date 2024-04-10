@@ -1,34 +1,62 @@
-from PredictionFunction.PredictionFiles.LosTacos.bergen import location_function as bergen_function
-from PredictionFunction.PredictionFiles.LosTacos.fredrikstad import location_function as fredrikstad_function
-from PredictionFunction.PredictionFiles.LosTacos.karl_johan import location_function as karl_johan_function
-from PredictionFunction.PredictionFiles.LosTacos.oslo_city import location_function as oslo_city_function
-from PredictionFunction.PredictionFiles.LosTacos.oslo_lokka import location_function as oslo_lokka_function
-from PredictionFunction.PredictionFiles.LosTacos.oslo_smestad import location_function as oslo_smestad_function
-from PredictionFunction.PredictionFiles.LosTacos.oslo_steenstrom import location_function as oslo_steenstrom_function
-from PredictionFunction.PredictionFiles.LosTacos.oslo_storo import location_function as oslo_storo_function
-from PredictionFunction.PredictionFiles.LosTacos.oslo_torggata import location_function as oslo_torggata_function
-from PredictionFunction.PredictionFiles.LosTacos.sandnes import location_function as sandnes_function
-from PredictionFunction.PredictionFiles.LosTacos.stavanger import location_function as stavanger_function
-from PredictionFunction.PredictionFiles.Fisketorget.fisketorget_restaurant import location_function as restaurant_function
-from PredictionFunction.PredictionFiles.Fisketorget.fisketorget_utsalg import location_function as fisketorget_utsalg_function
-from PredictionFunction.PredictionFiles.LosTacos.trondheim import location_function as trondheim_function
+from PredictionFunction.PredictionFiles.LosTacos.bergen import (
+    location_function as bergen_function,
+)
+from PredictionFunction.PredictionFiles.LosTacos.fredrikstad import (
+    location_function as fredrikstad_function,
+)
+from PredictionFunction.PredictionFiles.LosTacos.karl_johan import (
+    location_function as karl_johan_function,
+)
+from PredictionFunction.PredictionFiles.LosTacos.oslo_city import (
+    location_function as oslo_city_function,
+)
+from PredictionFunction.PredictionFiles.LosTacos.oslo_lokka import (
+    location_function as oslo_lokka_function,
+)
+from PredictionFunction.PredictionFiles.LosTacos.oslo_smestad import (
+    location_function as oslo_smestad_function,
+)
+from PredictionFunction.PredictionFiles.LosTacos.oslo_steenstrom import (
+    location_function as oslo_steenstrom_function,
+)
+from PredictionFunction.PredictionFiles.LosTacos.oslo_storo import (
+    location_function as oslo_storo_function,
+)
+from PredictionFunction.PredictionFiles.LosTacos.oslo_torggata import (
+    location_function as oslo_torggata_function,
+)
+from PredictionFunction.PredictionFiles.LosTacos.sandnes import (
+    location_function as sandnes_function,
+)
+from PredictionFunction.PredictionFiles.LosTacos.stavanger import (
+    location_function as stavanger_function,
+)
+from PredictionFunction.PredictionFiles.Fisketorget.fisketorget_restaurant import (
+    location_function as restaurant_function,
+)
+from PredictionFunction.PredictionFiles.Fisketorget.fisketorget_utsalg import (
+    location_function as fisketorget_utsalg_function,
+)
+from PredictionFunction.PredictionFiles.LosTacos.trondheim import (
+    location_function as trondheim_function,
+)
 
 
 # This is a datatable showing which city each restaurant locations is in
 data = [
-   {"Restaurant": "Oslo Storo", "City": "Oslo", "Company": "Los Tacos"},
-    {"Restaurant": "Oslo City", "City": "Oslo", "Company": "Los Tacos"},
-     {"Restaurant": "Oslo Torggata", "City": "Oslo", "Company": "Los Tacos"},
-     {"Restaurant": "Karl Johan", "City": "Oslo", "Company": "Los Tacos"},
-   {"Restaurant": "Fredrikstad", "City": "Fredrikstad", "Company": "Los Tacos"},
-   {"Restaurant": "Oslo Lokka", "City": "Oslo", "Company": "Los Tacos"},
-    {"Restaurant": "Stavanger", "City": "Stavanger", "Company": "Los Tacos"},
-    {"Restaurant": "Bergen", "City": "Bergen", "Company": "Los Tacos"},
-   {"Restaurant": "Oslo Steen_Strom", "City": "Oslo", "Company": "Los Tacos"},
-    {"Restaurant": "Oslo Smestad", "City": "Oslo", "Company": "Los Tacos"},
-    {"Restaurant": "Sandnes", "City": "Stavanger", "Company": "Los Tacos"},
-    {"Restaurant": "Restaurant","City": "Stavanger","Company": "Fisketorget","Parent Restaurant": "Fisketorget Stavanger",},
-    {"Restaurant": "Fisketorget Utsalg","City": "Stavanger","Company": "Fisketorget","Parent Restaurant": "Fisketorget Stavanger",},
+    #    {"Restaurant": "Oslo Storo", "City": "Oslo", "Company": "Los Tacos"},
+    #     {"Restaurant": "Oslo City", "City": "Oslo", "Company": "Los Tacos"},
+    #      {"Restaurant": "Oslo Torggata", "City": "Oslo", "Company": "Los Tacos"},
+    #      {"Restaurant": "Karl Johan", "City": "Oslo", "Company": "Los Tacos"},
+    #    {"Restaurant": "Fredrikstad", "City": "Fredrikstad", "Company": "Los Tacos"},
+    #    {"Restaurant": "Oslo Lokka", "City": "Oslo", "Company": "Los Tacos"},
+    #     {"Restaurant": "Stavanger", "City": "Stavanger", "Company": "Los Tacos"},
+    #     {"Restaurant": "Bergen", "City": "Bergen", "Company": "Los Tacos"},
+    #    {"Restaurant": "Oslo Steen_Strom", "City": "Oslo", "Company": "Los Tacos"},
+    #     {"Restaurant": "Oslo Smestad", "City": "Oslo", "Company": "Los Tacos"},
+    #     {"Restaurant": "Sandnes", "City": "Stavanger", "Company": "Los Tacos"},
+    #     {"Restaurant": "Restaurant","City": "Stavanger","Company": "Fisketorget","Parent Restaurant": "Fisketorget Stavanger",},
+    #     {"Restaurant": "Fisketorget Utsalg","City": "Stavanger","Company": "Fisketorget","Parent Restaurant": "Fisketorget Stavanger",},
     {
         "Restaurant": "Trondheim",
         "City": "Trondheim",
@@ -36,7 +64,7 @@ data = [
         "Alcohol Reference": "Karl Johan",
         "Food Reference": "Stavanger",
         "Alcohol City": "Oslo",
-        "Food City": "Stavanger"
+        "Food City": "Stavanger",
     }
 ]
 location_specific_dictionary = {
