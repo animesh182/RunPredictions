@@ -62,20 +62,36 @@ def sales_without_effect(
                 AND date >= %s 
                 AND date <= %s 
                 AND article_supergroup not IN %s
+                LIMIT %s OFFSET %s
         """
+        chunk_size = 100000
+        food_sales_data = pd.DataFrame()
+        offset = 0
+        while True:
+            logging.info(f"Fetching data from offset: {offset}")
+            chunk = pd.read_sql_query(
+                food_query,
+                conn,
+                params=[
+                    company,
+                    food_reference_restaurant,
+                    start_date,
+                    actual_trondheim_start_date - timedelta(days=1),
+                    tuple(article_supergroup_values),
+                    chunk_size,
+                    offset
+                ],
+            )
+            if chunk.empty:
+                # No more data to fetch, exit the loop
+                logging.info("No more data to fetch, exiting the loop.")
+                break
+            else:
+                # Append the chunk to the result DataFrame
+                food_sales_data = pd.concat([food_sales_data, chunk], ignore_index=True)
+                offset += chunk_size
 
-        food_sales_data = pd.read_sql_query(
-            food_query,
-            conn,
-            params=[
-                company,
-                food_reference_restaurant,
-                start_date,
-                actual_trondheim_start_date - timedelta(days=1),
-                tuple(article_supergroup_values),
-            ],
-        )
-        logging.info('food_sales fetched ')
+        logging.info("Data fetching completed.")
 
         trondheim_query = """
             SELECT *
