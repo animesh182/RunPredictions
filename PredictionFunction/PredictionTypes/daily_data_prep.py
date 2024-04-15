@@ -18,13 +18,18 @@ def prepare_data(company, restaurant, start_date, end_date):
     # Convert the filtered SalesData to a DataFrame
 
     if restaurant=="Trondheim":
-        filtered_sales_data, actual_trondheim_start_date = (
+        alcohol_reference = restaurant_list[restaurant_list["Restaurant"] == restaurant]["Alcohol Reference"].values[0]
+        food_reference = restaurant_list[restaurant_list["Restaurant"] == restaurant]["Food Reference"].values[0]
+        restaurant = restaurant_list[restaurant_list["Restaurant"] == restaurant]["Restaurant"].values[0]
+        company = restaurant_list[restaurant_list["Restaurant"] == restaurant]["Company"].values[0]
+        filtered_sales_data= (
             sales_without_effect(
-                restaurant_list["Company"].iloc[0],
+                company,
                 start_date,
                 end_date,
-                'Karl Johan',
-                'Stavanger',
+                alcohol_reference,
+                food_reference,
+                restaurant
             )
         )
         filtered_sales_data= filtered_sales_data.rename(columns={'gastronomic_day': 'date'})

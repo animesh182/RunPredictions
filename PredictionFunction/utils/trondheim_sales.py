@@ -17,6 +17,7 @@ def sales_without_effect(
     end_date,
     alcohol_reference_restaurant,
     food_reference_restaurant,
+    restaurant
 ):
     sales_forecast_stavanger = pd.read_csv(
         "https://salespredictionstorage.blob.core.windows.net/csv/stavanger_forecast.csv"
@@ -97,7 +98,7 @@ def sales_without_effect(
             SELECT *
             FROM public."SalesData" 
             WHERE company = %s 
-                AND restaurant = 'Trondheim' 
+                AND restaurant = %s
                 AND date >= %s 
                 AND date <= %s 
         """
@@ -105,7 +106,7 @@ def sales_without_effect(
         actual_trondheim_sales = pd.read_sql_query(
             trondheim_query,
             conn,
-            params=[company, actual_trondheim_start_date, end_date],
+            params=[company,restaurant,actual_trondheim_start_date, end_date],
         )
 
         logging.info('actual_sales fetched ')
@@ -415,4 +416,4 @@ def sales_without_effect(
     final_merged.fillna(0, inplace=True)
     filtered_sales = final_merged.copy()
     logging.info('filterd_df creation for trondheim finished')
-    return filtered_sales, actual_trondheim_start_date
+    return filtered_sales
