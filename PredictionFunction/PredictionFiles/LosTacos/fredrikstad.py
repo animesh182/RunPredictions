@@ -74,7 +74,7 @@ from PredictionFunction.utils.fetch_events import fetch_events
 def fredrikstad(
     prediction_category, restaurant, merged_data, historical_data, future_data
 ):
-    event_holidays = pd.DataFrame(columns=["event_names", "name"])
+    event_holidays = pd.DataFrame(columns=["event_names", "name","date",])
     sales_data_df = historical_data
     sales_data_df = sales_data_df.rename(columns={"date": "ds"})
 

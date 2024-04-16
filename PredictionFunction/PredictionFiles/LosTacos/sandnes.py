@@ -83,7 +83,7 @@ from PredictionFunction.utils.openinghours import add_opening_hours
 
 
 def sandnes(prediction_category, restaurant, merged_data, historical_data, future_data):
-    event_holidays = pd.DataFrame(columns=["event_names", "name"])
+    event_holidays = pd.DataFrame(columns=["event_names", "name","date"])
     sales_data_df = historical_data
     sales_data_df = sales_data_df.rename(columns={"date": "ds"})
     sales_data_df["ds"] = pd.to_datetime(sales_data_df["ds"])
