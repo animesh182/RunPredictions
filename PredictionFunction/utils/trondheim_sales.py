@@ -5,7 +5,7 @@ import random
 import numpy as np
 from PredictionFunction.utils.constants import article_supergroup_values
 import psycopg2
-from PredictionFunction.utils.params import params#prod_params
+from PredictionFunction.utils.params import params,prod_params
 from PredictionFunction.utils.fetch_sales_data import fetch_salesdata
 from io import BytesIO
 import logging
@@ -33,7 +33,7 @@ def sales_without_effect(
     actual_trondheim_start_date = date(2024, 2, 1)
     start_date = date(2021,9,1)
 
-    with psycopg2.connect(**params) as conn:
+    with psycopg2.connect(**prod_params) as conn:
         alcohol_query = """
                 SELECT *
                 FROM public."SalesData" 
@@ -342,7 +342,7 @@ def sales_without_effect(
                     WHERE ac.id IN ('14bf2c63-7fbe-4480-8b22-4dc21d9f4195', '1b298f0c-4696-40ac-baa2-b1fa4784faff')
                     AND start_date < '2024-02-29';
                     """
-    with psycopg2.connect(**params) as conn:
+    with psycopg2.connect(**prod_params) as conn:
         events_df = pd.read_sql_query(event_query, conn)
         logging.info('events fetched')
     events_df.columns = [
