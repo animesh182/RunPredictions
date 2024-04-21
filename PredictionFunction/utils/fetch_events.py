@@ -2,7 +2,7 @@ import psycopg2
 import logging
 import pandas as pd
 from datetime import timedelta, datetime
-from PredictionFunction.utils.params import params
+from PredictionFunction.utils.params import params,prod_params
 
 
 def fetch_events(restaurant, location_name):
@@ -15,7 +15,7 @@ def fetch_events(restaurant, location_name):
                     WHERE ar.name = %s
                         AND pl.name = %s
                         """
-    with psycopg2.connect(**params) as conn:
+    with psycopg2.connect(**prod_params) as conn:
         with conn.cursor() as cursor:
             cursor.execute(raw_query, [restaurant, location_name])
             rows = cursor.fetchall()

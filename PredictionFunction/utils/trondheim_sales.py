@@ -5,7 +5,7 @@ import random
 import numpy as np
 from PredictionFunction.utils.constants import article_supergroup_values
 import psycopg2
-from PredictionFunction.utils.params import params
+from PredictionFunction.utils.params import params,prod_params
 from PredictionFunction.utils.fetch_sales_data import fetch_salesdata
 from io import BytesIO
 import logging
@@ -31,8 +31,9 @@ def sales_without_effect(
     # ).aggregate(min_day=Min("gastronomic_day"))["min_day"]
 
     actual_trondheim_start_date = date(2024, 2, 1)
+    start_date = date(2021,9,1)
 
-    with psycopg2.connect(**params) as conn:
+    with psycopg2.connect(**prod_params) as conn:
         alcohol_query = """
                 SELECT *
                 FROM public."SalesData" 
@@ -63,34 +64,30 @@ def sales_without_effect(
                 AND date >= %s 
                 AND date <= %s 
                 AND article_supergroup not IN %s
-                LIMIT %s OFFSET %s
         """
-        chunk_size = 100000
+        # chunk_size = 100000
         food_sales_data = pd.DataFrame()
-        offset = 0
-        while True:
-            logging.info(f"Fetching data from offset: {offset}")
-            chunk = pd.read_sql_query(
-                food_query,
-                conn,
-                params=[
-                    company,
-                    food_reference_restaurant,
-                    start_date,
-                    actual_trondheim_start_date - timedelta(days=1),
-                    tuple(article_supergroup_values),
-                    chunk_size,
-                    offset
-                ],
-            )
-            if chunk.empty:
-                # No more data to fetch, exit the loop
-                logging.info("No more data to fetch, exiting the loop.")
-                break
-            else:
-                # Append the chunk to the result DataFrame
-                food_sales_data = pd.concat([food_sales_data, chunk], ignore_index=True)
-                offset += chunk_size
+        # offset = 0
+        # while True:
+        food_sales_data = pd.read_sql_query(
+            food_query,
+            conn,
+            params=[
+                company,
+                food_reference_restaurant,
+                start_date,
+                actual_trondheim_start_date - timedelta(days=1),
+                tuple(article_supergroup_values),
+            ],
+        )
+            # if chunk.empty:
+            #     # No more data to fetch, exit the loop
+            #     logging.info("No more data to fetch, exiting the loop.")
+            #     break
+            # else:
+            #     # Append the chunk to the result DataFrame
+            #     food_sales_data = pd.concat([food_sales_data, chunk], ignore_index=True)
+            #     offset += chunk_size
 
         logging.info("Data fetching completed.")
 
@@ -136,6 +133,7 @@ def sales_without_effect(
     )
 
     filtered_sales_reference = pd.concat([alcohol_sales_data, food_sales_data])
+    # filtered_sales_reference.to_csv("test_csv_trondheim_allsales.csv")
 
     # get actual sales of food and alcohol in trondheim for a month---------------------------------------------------------------
     actual_sales_alcohol = actual_trondheim_sales[
@@ -167,8 +165,9 @@ def sales_without_effect(
         reference_alcohol_sales["gastronomic_day"]
     )
     feb_alcohol_sales = reference_alcohol_sales[
-        reference_alcohol_sales["gastronomic_day"].dt.month == 2
-    ]
+    reference_alcohol_sales['gastronomic_day'].dt.month == 2
+    ]   
+    
     sums_per_feb_alcohol = feb_alcohol_sales.groupby(
         feb_alcohol_sales["gastronomic_day"].dt.year
     )["total_net"].sum()
@@ -187,6 +186,7 @@ def sales_without_effect(
     sums_per_feb_food = feb_food_sales.groupby(
         feb_food_sales["gastronomic_day"].dt.year
     )["total_net"].sum()
+    # sums_per_feb_food.to_csv("test_csv_trondheim.csv")
     average_sum_feb_food = sums_per_feb_food.mean()
     logging.info(f"actual food sales for reference in feb is {average_sum_feb_food}")
     # ----------------------------------------------------------------------------------------------------------------------------
@@ -323,7 +323,7 @@ def sales_without_effect(
                     WHERE ac.id IN ('14bf2c63-7fbe-4480-8b22-4dc21d9f4195', '1b298f0c-4696-40ac-baa2-b1fa4784faff')
                     AND start_date < '2024-02-29';
                     """
-    with psycopg2.connect(**params) as conn:
+    with psycopg2.connect(**prod_params) as conn:
         events_df = pd.read_sql_query(event_query, conn)
         logging.info('events fetched')
     events_df.columns = [

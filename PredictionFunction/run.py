@@ -55,10 +55,11 @@ async def main(mytimer: func.TimerRequest) -> None:
             merged_data, historical_data, future_data = prepare_daily_data(
                 company, restaurant, start_date, end_date
             )
-        logging.info(f"Running predictions for {restaurant}")
+        logging.info(f"Running predictions for now {restaurant}")
         model, future_df, current_df, event_holidays = restaurant_func(
             prediction_category, restaurant, merged_data, historical_data, future_data
         )
+        logging.info(f"done")
         forecast = predict(
             model,
             future_df,
@@ -77,4 +78,5 @@ async def main(mytimer: func.TimerRequest) -> None:
         )
         forecast["historical_sale"].fillna(0, inplace=True)
         forecast["historical_sale"] = forecast["historical_sale"].astype(int)
+        logging.info(f"done")
         save_to_db(forecast, company, restaurant, prediction_category, event_holidays)

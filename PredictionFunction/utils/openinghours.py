@@ -1,22 +1,23 @@
 from datetime import datetime
 import pandas as pd
 import psycopg2
-from PredictionFunction.utils.params import params
+from PredictionFunction.utils.params import params,prod_params
 
 
 def add_opening_hours(df, restaurant_name,normal_hour,special_hour):
     # restaurant_id = Restaurant.objects.get(name=restaurant_name).id
-    with psycopg2.connect(**params) as conn:
+    with psycopg2.connect(**prod_params) as conn:
         with conn.cursor() as cursor:
             cursor.execute(""" select id from public."accounts_restaurant" where name=%s """,[restaurant_name])
             restaurant_id= cursor.fetchone()[0]
 
     def get_opening_duration(date):
         day_type = int(date.strftime("%w"))
-        with conn.cursor() as cursor:
-            cursor.execute(""" select * from public."accounts_openinghours" where restaurant_id=%s and start_date <= %s and end_date >= %s and day_of_week=%s """,
-                           [restaurant_id,date,date,day_type])
-            rows= cursor.fetchall()
+        with psycopg2.connect(**prod_params) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(""" select * from public."accounts_openinghours" where restaurant_id=%s and start_date <= %s and end_date >= %s and day_of_week=%s """,
+                            [restaurant_id,date,date,day_type])
+                rows= cursor.fetchall()
             opening_hours = []
             for row in rows:
                 hour = {

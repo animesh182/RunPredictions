@@ -9,7 +9,7 @@ from PredictionFunction.PredictionSaver.saveHolidayParams import save_holiday_pa
 from PredictionFunction.utils.fetch_events import fetch_events
 from PredictionFunction.utils.constants import opening_hours_dict
 import psycopg2
-from PredictionFunction.utils.params import params
+from PredictionFunction.utils.params import params,prod_params
 from datetime import datetime
 from PredictionFunction.meta_tables import data
 import numpy as np
@@ -19,6 +19,7 @@ from PredictionFunction.utils.trondheim_events import trondheim_events
 
 def save_to_db(forecast_df, company, restaurant, prediction_category, event_holidays):
     # end_date = datetime.now().strftime("%Y-%m-%d")
+    logging.info(f"started for {restaurant} in save_to_db")
     end_date = "2024-03-24"
     unwanted_columns = [
         "_lower",
@@ -56,20 +57,13 @@ def save_to_db(forecast_df, company, restaurant, prediction_category, event_holi
             date_obj = datetime.strptime(str(row["ds"]).split()[0], "%Y-%m-%d")
             day_type = date_obj.strftime("%w")  # 5 and 6 are Saturday and Sunday
             restaurant_name = restaurant
-            with psycopg2.connect(**params) as conn:
+            with psycopg2.connect(**prod_params) as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(
                         'SELECT id FROM public."accounts_restaurant" WHERE name = %s',
                         [restaurant_name],
                     )
                     restaurant_uuid = cursor.fetchone()[0]
-                    # restaurant_uuid = Restaurant.objects.get(name=restaurant_name).id
-                    #     opening_hours = OpeningHours.objects.filter(
-                    #         restaurant=restaurant_uuid,
-                    #         day_of_week=day_type,
-                    #         start_date__lte=date_obj,
-                    #         end_date__gte=date_obj,
-                    #     ).latest("created_at")
                     opening_hour_query = """
                             SELECT *
                             FROM public."accounts_openinghours"
@@ -85,19 +79,19 @@ def save_to_db(forecast_df, company, restaurant, prediction_category, event_holi
                         [restaurant_uuid, day_type, date_obj, date_obj],
                     )
                     opening_hours = cursor.fetchone()
-            if opening_hours:
-                start = opening_hours[1]
-                end = opening_hours[2]
-                if start > end:
-                    duration = (24 - start) + end
-                elif start == end:
-                    duration = 0
-                    filtered_df.at[index, "yhat"] = 0
-                else:
-                    duration = end - start
-            filtered_df.at[index, "duration"] = duration
-            common_duration = filtered_df["duration"].value_counts().idxmax()
-            filtered_df.at[index, "common_duration"] = common_duration
+                    if opening_hours:
+                        start = opening_hours[1]
+                        end = opening_hours[2]
+                        if start > end:
+                            duration = (24 - start) + end
+                        elif start == end:
+                            duration = 0
+                            filtered_df.at[index, "yhat"] = 0
+                        else:
+                            duration = end - start
+                    filtered_df.at[index, "duration"] = duration
+                    common_duration = filtered_df["duration"].value_counts().idxmax()
+                    filtered_df.at[index, "common_duration"] = common_duration
 
         normal_hour = opening_hours_dict[restaurant_name]["normal_hours"]
         normal_hour_2 = opening_hours_dict[restaurant_name]["special_hours"]
@@ -178,7 +172,7 @@ def save_to_db(forecast_df, company, restaurant, prediction_category, event_holi
             "Oslo Steen_Strom",
             "Oslo Smestad",
         ]:
-            with psycopg2.connect(**params) as conn:
+            with psycopg2.connect(**prod_params) as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(
                         """ select id from public."accounts_city" where name ='Oslo' """
@@ -201,7 +195,7 @@ def save_to_db(forecast_df, company, restaurant, prediction_category, event_holi
             "Restaurant",
             "Fisketorget Utsalg",
         ]:
-            with psycopg2.connect(**params) as conn:
+            with psycopg2.connect(**prod_params) as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(
                         """ select id from public."accounts_city" where name ='Stavanger' """
@@ -219,7 +213,7 @@ def save_to_db(forecast_df, company, restaurant, prediction_category, event_holi
                 valid_concerts.append(dataframe_name)
 
         if restaurant_name in ["Bergen"]:
-            with psycopg2.connect(**params) as conn:
+            with psycopg2.connect(**prod_params) as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(
                         """ select id from public."accounts_city" where name ='Bergen' """
@@ -237,7 +231,7 @@ def save_to_db(forecast_df, company, restaurant, prediction_category, event_holi
                 valid_concerts.append(dataframe_name)
 
         if restaurant_name in ["Fredrikstad"]:
-            with psycopg2.connect(**params) as conn:
+            with psycopg2.connect(**prod_params) as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(
                         """ select id from public."accounts_city" where name ='Fredrikstad' """

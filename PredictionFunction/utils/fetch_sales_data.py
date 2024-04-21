@@ -3,7 +3,7 @@ import logging
 import pandas as pd
 from datetime import timedelta,datetime
 # Define your database parameters here
-from PredictionFunction.utils.params import params
+from PredictionFunction.utils.params import params,prod_params
 
 
 def fetch_salesdata(company,restaurant,start_date,end_date):
@@ -20,7 +20,7 @@ def fetch_salesdata(company,restaurant,start_date,end_date):
                     group by 1;
                         """
     try:
-        with psycopg2.connect(**params) as conn:
+        with psycopg2.connect(**prod_params) as conn:
             # Use Pandas to directly read the SQL query into a DataFrame
             df = pd.read_sql_query(raw_query, conn, params=[company,restaurant,start_date,end_date])
             return df
