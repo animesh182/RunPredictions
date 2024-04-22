@@ -33,7 +33,83 @@ def sales_without_effect(
     actual_trondheim_start_date = date(2024, 2, 1)
     start_date = date(2021,9,1)
 
-    with psycopg2.connect(**prod_params) as conn:
+    with psycopg2.connect(**params) as conn:
+        alcohol_query = """
+                SELECT *
+                FROM public."SalesData" 
+                WHERE company = %s 
+                    AND restaurant = %s 
+                    AND date >= %s 
+                    AND date <= %s 
+                    AND article_supergroup IN %s
+            """
+        alcohol_sales_data = pd.read_sql_query(
+            alcohol_query,
+            conn,
+            params=[
+                company,
+                alcohol_reference_restaurant,
+                start_date,
+                actual_trondheim_start_date - timedelta(days=1),
+                tuple(article_supergroup_values),
+            ],
+        )
+        logging.info('alcohol_sales fetched ')
+
+        food_query = """
+            SELECT *
+            FROM public."SalesData" 
+            WHERE company = %s 
+                AND restaurant = %s 
+                AND date >= %s 
+                AND date <= %s 
+                AND article_supergroup not IN %s
+        """
+        # chunk_size = 100000
+        food_sales_data = pd.DataFrame()
+        # offset = 0
+        # while True:
+        # food_sales_data = pd.read_sql_query(
+        #     food_query,
+        #     conn,
+        #     params=[
+        #         company,
+        #         food_reference_restaurant,
+        #         start_date,
+        #         actual_trondheim_start_date - timedelta(days=1),
+        #         tuple(article_supergroup_values),
+        #     ],
+        #     chunksize=100000
+        # )
+
+        food_sales_data_chunks = []
+        for chunk in pd.read_sql_query(
+            food_query,
+            conn,
+            params=[
+                company,
+                food_reference_restaurant,
+                start_date,
+                actual_trondheim_start_date - timedelta(days=1),
+                tuple(article_supergroup_values),
+            ],
+            chunksize=50000
+        ):
+            food_sales_data_chunks.append(chunk)
+
+        food_sales_data = pd.concat(food_sales_data_chunks)
+        # food_sales_data.to_csv("food_sales.csv")
+            # if chunk.empty:
+            #     # No more data to fetch, exit the loop
+            #     logging.info("No more data to fetch, exiting the loop.")
+            #     break
+            # else:
+            #     # Append the chunk to the result DataFrame
+            #     food_sales_data = pd.concat([food_sales_data, chunk], ignore_index=True)
+            #     offset += chunk_size
+
+        logging.info("Data fetching completed.")
+
         trondheim_query = """
             SELECT *
             FROM public."SalesData" 
@@ -50,11 +126,33 @@ def sales_without_effect(
         )
 
         logging.info('actual_sales fetched ')
+    # alcohol_sales_data = SalesData.objects.filter(
+    #     company=company,
+    #     restaurant=alcohol_reference_restaurant,
+    #     date__gte=start_date,
+    #     date__lte=end_date,
+    # ).filter(article_supergroup__in=article_supergroup_values)
+
+    # food_sales_data = SalesData.objects.filter(
+    #     company=company,
+    #     restaurant=food_reference_restaurant,
+    #     date__gte=start_date,
+    #     date__lte=end_date,
+    # ).exclude(article_supergroup__in=article_supergroup_values)
+
+    # actual_trondheim = SalesData.objects.filter(
+    #     company=company,
+    #     restaurant="Trondheim",
+    #     date__gte=actual_trondheim_start_date,
+    #     date__lte=date(2024,2,29),
+    # ).exclude(article_group="Catering")
 
     actual_trondheim_sales["gastronomic_day"] = pd.to_datetime(
         actual_trondheim_sales["gastronomic_day"]
     )
 
+    filtered_sales_reference = pd.concat([alcohol_sales_data, food_sales_data])
+    # filtered_sales_reference.to_csv("test_csv_trondheim_allsales.csv")
 
     # get actual sales of food and alcohol in trondheim for a month---------------------------------------------------------------
     actual_sales_alcohol = actual_trondheim_sales[
@@ -75,8 +173,103 @@ def sales_without_effect(
         actual_sales_food.groupby("gastronomic_day")["total_net"].sum().reset_index()
     )
     actual_food_sum = average_sales_new_food["total_net"].sum()
-    logging.info(f"actual food sales for trondheim in feb is {actual_food_sum}")
+    # logging.info(f"actual food sales for trondheim in feb is {actual_food_sum}")
+
+    # get sales of food and alcohol in reference restaurant for a month------------------------------------------------------
+    reference_sales = filtered_sales_reference
+    reference_alcohol_sales = reference_sales[
+        reference_sales["article_supergroup"].isin(article_supergroup_values)
+    ]
+    reference_alcohol_sales["gastronomic_day"] = pd.to_datetime(
+        reference_alcohol_sales["gastronomic_day"]
+    )
+    feb_alcohol_sales = reference_alcohol_sales[
+    reference_alcohol_sales['gastronomic_day'].dt.month == 2
+    ]   
+    
+    sums_per_feb_alcohol = feb_alcohol_sales.groupby(
+        feb_alcohol_sales["gastronomic_day"].dt.year
+    )["total_net"].sum()
+    average_sum_feb_alcohol = sums_per_feb_alcohol.mean()
+    logging.info(f"actual alcohol sales for reference in feb is {average_sum_feb_alcohol}")
+
+    reference_food_sales = reference_sales[
+        ~reference_sales["article_supergroup"].isin(article_supergroup_values)
+    ]
+    reference_food_sales["gastronomic_day"] = pd.to_datetime(
+        reference_food_sales["gastronomic_day"]
+    )
+    feb_food_sales = reference_food_sales[
+        reference_food_sales["gastronomic_day"].dt.month == 2
+    ]
+    sums_per_feb_food = feb_food_sales.groupby(
+        feb_food_sales["gastronomic_day"].dt.year
+    )["total_net"].sum()
+    # sums_per_feb_food.to_csv("test_csv_trondheim.csv")
+    average_sum_feb_food = sums_per_feb_food.mean()
+    logging.info(f"actual food sales for reference in feb is {average_sum_feb_food}")
     # ----------------------------------------------------------------------------------------------------------------------------
+    scale_factor_for_food = float(actual_food_sum) / average_sum_feb_food
+    scale_factor_for_alcohol = float(actual_alcohol_sum) / average_sum_feb_alcohol
+
+    logging.info(f"Scale factor for food is {scale_factor_for_food}")
+    logging.info(f"Scale factor for alcohol is {scale_factor_for_alcohol}")
+    reference_alcohol_sales["total_net"] = reference_alcohol_sales["total_net"].astype(
+        float
+    ) * float(scale_factor_for_alcohol)
+    reference_food_sales["total_net"] = reference_food_sales["total_net"].astype(
+        float
+    ) * float(scale_factor_for_food)
+
+    final_scaled_scales = pd.concat([reference_alcohol_sales, reference_food_sales])
+    final_sales_grouped = (
+        final_scaled_scales.groupby("gastronomic_day")["total_net"].sum().reset_index()
+    )
+
+    # We take a baseline (peak value which we can scale other days by) for now take saturday----------------------------------------------------------------------------------------------------
+    #     daily_sales = actual_trondheim_sales.groupby(actual_trondheim_sales['gastronomic_day'].dt.date)['total_net'].sum().reset_index()
+    #     daily_sales['gastronomic_day']= pd.to_datetime(daily_sales['gastronomic_day'])
+    #     saturday_sales = daily_sales[daily_sales['gastronomic_day'].dt.dayofweek == 5]
+    #     saturday_average_sale = saturday_sales['total_net'].mean()
+
+    #     sunday_sales = daily_sales[daily_sales['gastronomic_day'].dt.dayofweek == 6]
+    #     sunday_average_sale = sunday_sales['total_net'].mean()
+
+    #     monday_sales = daily_sales[daily_sales['gastronomic_day'].dt.dayofweek == 0]
+    #     monday_average_sale = monday_sales['total_net'].mean()
+
+    #     tuesday_sales = daily_sales[daily_sales['gastronomic_day'].dt.dayofweek == 1]
+    #     tuesday_average_sale = tuesday_sales['total_net'].mean()
+
+    #     wednesday_sales = daily_sales[daily_sales['gastronomic_day'].dt.dayofweek == 2]
+    #     wednesday_average_sale = wednesday_sales['total_net'].mean()
+
+    #     thursday_sales = daily_sales[daily_sales['gastronomic_day'].dt.dayofweek == 3]
+    #     thursday_average_sale = thursday_sales['total_net'].mean()
+
+    #     friday_sales = daily_sales[daily_sales['gastronomic_day'].dt.dayofweek == 4]
+    #     friday_average_sale = friday_sales['total_net'].mean()
+
+    #     scale_of_sunday = sunday_average_sale/saturday_average_sale
+    #     scale_of_monday = monday_average_sale/saturday_average_sale
+    #     scale_of_tuesday = tuesday_average_sale/saturday_average_sale
+    #     scale_of_wednesday = wednesday_average_sale/saturday_average_sale
+    #     scale_of_thursday= thursday_average_sale/saturday_average_sale
+    #     scale_of_friday = friday_average_sale/saturday_average_sale
+
+    #     scales = {
+    #     'Sunday': scale_of_sunday,
+    #     'Monday': scale_of_monday,
+    #     'Tuesday': scale_of_tuesday,
+    #     'Wednesday': scale_of_wednesday,
+    #     'Thursday': scale_of_thursday,
+    #     'Friday': scale_of_friday,
+    #     'Saturday': 1  # Scale for Saturday is assumed to be 1
+    # }
+
+    #     # logging.info(f'The scales are: sunday{scale_of_sunday},monday{scale_of_monday},tuesday{scale_of_tuesday},wednesday{scale_of_wednesday},thursday{scale_of_thursday},friday{scale_of_friday}')
+    #     final_sales_grouped['day_type'] = final_sales_grouped['gastronomic_day'].dt.day_name()
+    #     final_sales_grouped['total_net'] = final_sales_grouped.apply(lambda row: row['total_net'] * scales[row['day_type']], axis=1)
 
     daily_sales = (
         actual_trondheim_sales.groupby(
@@ -123,11 +316,10 @@ def sales_without_effect(
     for day in range(7):
         scales[(day, 1)] = february_scales.get((day, 2), 1)
 
-    final_sales_grouped = pd.read_csv(
-        "https://salespredictionstorage.blob.core.windows.net/csv/reference_trondheim_grouped.csv"
-    )
-    final_sales_grouped["gastronomic_day"]= pd.to_datetime(final_sales_grouped['gastronomic_day'])
-        
+
+    final_sales_grouped.to_csv("final_sales_merged_karl_johan_stavanger.csv")
+    
+    # Apply the new scales to the sales data
     final_sales_grouped["day_of_week"] = final_sales_grouped[
         "gastronomic_day"
     ].dt.dayofweek
@@ -138,8 +330,6 @@ def sales_without_effect(
     final_sales_grouped["scaled_total_net"] = (
         final_sales_grouped["total_net"] * final_sales_grouped["scaling_factor"]
     )
-
-
     # ------------------------Get all the event Names for reference locations and their effects on the reference restaurant forecasts-------------------------------------------
     # events = Events.objects.filter(
     # location_id__cities_id__in=[
@@ -155,7 +345,7 @@ def sales_without_effect(
                     WHERE ac.id IN ('14bf2c63-7fbe-4480-8b22-4dc21d9f4195', '1b298f0c-4696-40ac-baa2-b1fa4784faff')
                     AND start_date < '2024-02-29';
                     """
-    with psycopg2.connect(**prod_params) as conn:
+    with psycopg2.connect(**params) as conn:
         events_df = pd.read_sql_query(event_query, conn)
         logging.info('events fetched')
     events_df.columns = [
