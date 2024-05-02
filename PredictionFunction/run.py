@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone,date
 import logging
 import azure.functions as func
 import pandas as pd
@@ -21,13 +21,14 @@ from PredictionFunction.PredictionTypes.take_out_data_prep import (
 )
 from PredictionFunction.predict import predict
 from PredictionFunction.save_to_db import save_to_db
+from datetime import timedelta
 
 
 async def main(mytimer: func.TimerRequest) -> None:
     utc_timestamp = datetime.utcnow().replace(tzinfo=timezone.utc).isoformat()
     start_date = "2021-09-01"
-    # end_date = datetime.now().strftime("%Y-%m-%d")
-    end_date = "2024-03-24"
+    end_date = (datetime.now()-timedelta(days=1)).strftime("%Y-%m-%d")
+    # end_date = "2024-03-24"
     prediction_category = "day"
     # prediction category is either hour, type, alcohol or day
     company = "Los Tacos"
@@ -38,6 +39,18 @@ async def main(mytimer: func.TimerRequest) -> None:
         restaurant = instance["Restaurant"]
         city = instance["City"]
         company = instance["Company"]
+
+        if company == "Fisketorget":
+            start_date = date(2021, 9, 1)
+            end_date = (datetime.now()-timedelta(days=2)).strftime("%Y-%m-%d")
+        if restaurant == "Oslo Torggata":
+            start_date = date(2022, 5, 10)
+        elif restaurant == "Sandnes":
+            start_date = date(2023, 4, 18)
+        else:
+            start_date = date(2021, 9, 1)
+        end_date = (datetime.now()-timedelta(days=2)).strftime("%Y-%m-%d")
+
         restaurant_func = location_specific_dictionary[restaurant]
         if prediction_category == "hour":
             merged_data, historical_data, future_data = prepare_hourly_data(

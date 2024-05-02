@@ -389,13 +389,21 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
             )
 
     else:
+        # m = Prophet(
+        #     holidays=holidays,
+        #     yearly_seasonality=5,
+        #     daily_seasonality=False,
+        #     # changepoint_range=0.5,
+        #     seasonality_prior_scale=0.15,
+        #     changepoint_prior_scale=1,
+        # )
         m = Prophet(
             holidays=holidays,
             yearly_seasonality=5,
             daily_seasonality=False,
-            # changepoint_range=0.5,
+            # changepoint_range=0.5, 
             seasonality_prior_scale=0.15,
-            changepoint_prior_scale=1,
+            # changepoint_prior_scale=1,
         )
 
     # m.add_regressor('days_since_last')

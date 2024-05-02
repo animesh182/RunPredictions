@@ -18,9 +18,9 @@ from PredictionFunction.utils.trondheim_events import trondheim_events
 
 
 def save_to_db(forecast_df, company, restaurant, prediction_category, event_holidays):
-    # end_date = datetime.now().strftime("%Y-%m-%d")
+    end_date = datetime.now().strftime("%Y-%m-%d")
     logging.info(f"started for {restaurant} in save_to_db")
-    end_date = "2024-03-24"
+    # end_date = "2024-03-24"
     unwanted_columns = [
         "_lower",
         "_upper",
