@@ -22,10 +22,22 @@ def is_first_two_weeks_january_21(ds):
         end_date = pd.Timestamp("2022-01-30")
         return start_date <= date <= end_date
 def is_fellesferie(ds):
+        fellesferie_dates = {
+        2022: {"start": "2022-07-05", "end": "2022-08-05"},
+        2023: {"start": "2023-07-10", "end": "2023-07-28"},
+        2024: {"start": "2023-07-08", "end": "2023-07-26"},
+        # Add more years and their respective dates as needed
+    }
         date = pd.to_datetime(ds)
-        start_date = pd.Timestamp("2022-07-04")
-        end_date = pd.Timestamp("2022-08-07")
+        year = date.year  # Extract the year from the input date
+
+        if year not in fellesferie_dates:
+            return False  # or raise an error if you prefer
+
+        start_date = pd.Timestamp(fellesferie_dates[year]["start"])
+        end_date = pd.Timestamp(fellesferie_dates[year]["end"])
         return start_date <= date <= end_date
+
 def is_specific_month(ds):
         date = pd.to_datetime(ds)
         start_date = pd.to_datetime(
