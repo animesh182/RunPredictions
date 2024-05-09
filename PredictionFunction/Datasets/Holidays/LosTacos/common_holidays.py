@@ -11,6 +11,15 @@ first_may = pd.DataFrame(
         }
     )
 
+christmas = pd.DataFrame(
+        {
+            "holiday": "christmas",
+            "ds": pd.to_datetime(["2021-12-25", "2022-12-25","2023-12-25","2024-12-25"]),
+            "lower_window": 0,
+            "upper_window": 0,
+        }
+    )
+
 # NO 17th may in oslo_city
 # seventeenth_may = pd.DataFrame(
 #         {

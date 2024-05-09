@@ -215,8 +215,8 @@ def karl_johan(
     christmas_day = pd.DataFrame(
         {
             "holiday": "christmas eve",
-            "ds": pd.to_datetime(["2022-12-24"]),
-            "lower_window": -5,
+            "ds": pd.to_datetime(["2022-12-25","2021-12-25","2023-12-25","2024-12-25"]),
+            "lower_window": 0,
             "upper_window": 0,
         }
     )

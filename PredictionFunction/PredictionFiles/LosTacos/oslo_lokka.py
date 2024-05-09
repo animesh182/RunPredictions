@@ -22,16 +22,16 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import (
     heavy_rain_fall_weekday_future,
     heavy_rain_fall_weekend,
     heavy_rain_fall_weekend_future,
-    heavy_rain_winter_weekday,
-    heavy_rain_winter_weekday_future,
-    heavy_rain_winter_weekend,
-    heavy_rain_winter_weekend_future,
+    # heavy_rain_winter_weekday,
+    # heavy_rain_winter_weekday_future,
+    # heavy_rain_winter_weekend,
+    # heavy_rain_winter_weekend_future,
     heavy_rain_spring_weekday,
     heavy_rain_spring_weekday_future,
-    heavy_rain_spring_weekend,
-    heavy_rain_spring_weekend_future,
-    non_heavy_rain_fall_weekend,
-    non_heavy_rain_fall_weekend_future,
+    # heavy_rain_spring_weekend,
+    # heavy_rain_spring_weekend_future,
+    # non_heavy_rain_fall_weekend,
+    # non_heavy_rain_fall_weekend_future,
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.oslo_lokka_holidays import (
     christmas_day,
@@ -174,11 +174,11 @@ def oslo_lokka_jtorget_smestad_torggata(
     df = warm_dry_weather_spring(df)
     df = heavy_rain_fall_weekday(df)
     df = heavy_rain_fall_weekend(df)
-    df = heavy_rain_winter_weekday(df)
-    df = heavy_rain_winter_weekend(df)
+    # df = heavy_rain_winter_weekday(df)
+    # df = heavy_rain_winter_weekend(df)
     df = heavy_rain_spring_weekday(df)
-    df = heavy_rain_spring_weekend(df)
-    df = non_heavy_rain_fall_weekend(df)
+    # df = heavy_rain_spring_weekend(df)
+    # df = non_heavy_rain_fall_weekend(df)
 
     m = Prophet()
 
@@ -349,11 +349,11 @@ def oslo_lokka_jtorget_smestad_torggata(
     m.add_regressor("warm_and_dry")
     m.add_regressor("heavy_rain_fall_weekday")
     m.add_regressor("heavy_rain_fall_weekend")
-    m.add_regressor("heavy_rain_winter_weekday")
-    m.add_regressor("heavy_rain_winter_weekend")
+    # m.add_regressor("heavy_rain_winter_weekday")
+    # m.add_regressor("heavy_rain_winter_weekend")
     m.add_regressor("heavy_rain_spring_weekday")
-    m.add_regressor("heavy_rain_spring_weekend")
-    m.add_regressor("non_heavy_rain_fall_weekend")
+    # m.add_regressor("heavy_rain_spring_weekend")
+    # m.add_regressor("non_heavy_rain_fall_weekend")
 
     m.add_regressor("custom_regressor")
     m.add_regressor("opening_duration")
@@ -365,7 +365,7 @@ def oslo_lokka_jtorget_smestad_torggata(
 
     # m.add_regressor('covid_restriction')
     m.add_seasonality(
-        name="monthly", period=30.5, fourier_order=5, condition_name="specific_month"
+        name="specific_month", period=30.5, fourier_order=5, condition_name="specific_month"
     )
     m.add_seasonality(
         name="is_fellesferie",
@@ -529,11 +529,11 @@ def oslo_lokka_jtorget_smestad_torggata(
     future = warm_and_dry_future(future)
     future = heavy_rain_fall_weekday_future(future)
     future = heavy_rain_fall_weekend_future(future)
-    future = heavy_rain_winter_weekday_future(future)
-    future = heavy_rain_winter_weekend_future(future)
+    # future = heavy_rain_winter_weekday_future(future)
+    # future = heavy_rain_winter_weekend_future(future)
     future = heavy_rain_spring_weekday_future(future)
-    future = heavy_rain_spring_weekend_future(future)
-    future = non_heavy_rain_fall_weekend_future(future)
+    # future = heavy_rain_spring_weekend_future(future)
+    # future = non_heavy_rain_fall_weekend_future(future)
     future.fillna(0, inplace=True)
 
     return m, future, df, event_holidays

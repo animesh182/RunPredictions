@@ -19,8 +19,9 @@ from PredictionFunction.Datasets.Seasonalities.LosTacos.weekly_seasonality impor
     weekly_seasonalities,
 )
 from PredictionFunction.Datasets.Regressors.general_regressors import (
-    is_fellesferie_stavanger,
+    is_fellesferie,
     is_may,
+    is_specific_month,
     is_covid_restriction_christmas,
     is_fall_start,
     is_covid_loose_fall21,
@@ -254,7 +255,8 @@ def stavanger(
 
     ### Conditional seasonality - weekly
 
-    df["fellesferie"] = df["ds"].apply(is_fellesferie_stavanger)
+    df["fellesferie"] = df["ds"].apply(is_fellesferie)
+    df["month"] = df["ds"].apply(is_specific_month)
 
     df["is_may"] = df["ds"].apply(is_may)
 
@@ -425,8 +427,12 @@ def stavanger(
     # m.add_regressor('days_since_last')
 
     m.add_regressor("custom_regressor")
+
+    m.add_seasonality(
+        name="specific_month", period=30.5, fourier_order=2, condition_name="specific_month"
+    )
     # m.add_regressor('covid_restriction')
-    # m.add_seasonality(name='monthly', period=30.5, fourier_order=5, condition_name='specific_month')
+    m.add_seasonality(name='monthly', period=30.5, fourier_order=5)
     m.add_seasonality(
         name="covid_restriction_christmas",
         period=7,
@@ -436,6 +442,7 @@ def stavanger(
 
     # m.add_seasonality(name='weekly_fall_start', period=7, fourier_order=3,
     #                  condition_name='fall_start')
+    m.add_seasonality(name='fellesferie', period=30.5, fourier_order=5, condition_name='fellesferie')
 
     m.add_seasonality(
         name="covid_loose_fall21",
@@ -534,13 +541,12 @@ def stavanger(
 
     future["cluster_label"] = future["ds"].apply(get_cluster_label)
 
-    future["sunshine_amount"] = merged_data["sunshine_amount"]
-
     # add the last working day and the +/- 5 days
     # future = calculate_days(future, last_working_day)
 
     ## Add conditional seasonality
-    future["fellesferie"] = future["ds"].apply(is_fellesferie_stavanger)
+    future["fellesferie"] = future["ds"].apply(is_fellesferie)
+    future["month"] = future["ds"].apply(is_specific_month)
 
     # Add 'is_may' column to future DataFrame
     future["is_may"] = future["ds"].apply(is_may)
@@ -554,6 +560,7 @@ def stavanger(
     future["covid_loose_fall21"] = future["ds"].apply(is_covid_loose_fall21)
 
     future["christmas_shopping"] = future["ds"].apply(is_christmas_shopping)
+    future["specific_month"] = future["ds"].apply(is_specific_month)
 
     future["rain_sum"] = merged_data["rain_sum"]
     future["sunshine_amount"] = merged_data["sunshine_amount"]

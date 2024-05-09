@@ -448,7 +448,7 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
         condition_name="christmas_shopping",
     )
 
-    # m.add_seasonality(name='weekly_fellesferie', period=7, fourier_order=3, condition_name='fellesferie')
+    m.add_seasonality(name='fellesferie', period=30.5, fourier_order=5, condition_name='fellesferie')
 
     # m.add_seasonality(name='weekly_in_may', period=7, fourier_order=3, condition_name='is_may')
 

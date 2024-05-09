@@ -14,6 +14,7 @@ from PredictionFunction.Datasets.Regressors.general_regressors import (
     is_covid_restriction_christmas,
     is_fall_start,
     is_christmas_shopping,
+    is_fellesferie
 )
 from PredictionFunction.Datasets.Regressors.weather_regressors import (
     warm_dry_weather_spring,
@@ -211,6 +212,7 @@ def oslo_storo(
     # Add custom monthly seasonalities for a specific month
 
     df["specific_month"] = df["ds"].apply(is_specific_month)
+    df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
 
     # Define a function to check if the date is within the period of heavy COVID restrictions
 
@@ -259,6 +261,7 @@ def oslo_storo(
     df["fall_start"] = df["ds"].apply(is_fall_start)
 
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
+    df = calculate_days_30(df, fifteenth_working_days)
     df = add_opening_hours(df, "Oslo Storo", 11, 11)
 
     oslo_storo_venues = {
@@ -326,8 +329,8 @@ def oslo_storo(
         )
 
     # Add the payday columns as regressors
-    # m.add_regressor("days_since_last_30")
-    # m.add_regressor("days_until_next_30")
+    m.add_regressor("days_since_last_30")
+    m.add_regressor("days_until_next_30")
 
     m.add_regressor("warm_and_dry")
     m.add_regressor("heavy_rain_fall_weekday")
@@ -346,8 +349,9 @@ def oslo_storo(
             m.add_regressor(regressor_name)
 
     m.add_seasonality(
-        name="monthly", period=30.5, fourier_order=5, condition_name="specific_month"
+        name="specific_month", period=30.5, fourier_order=5, condition_name="specific_month"
     )
+    m.add_seasonality(name='monthly', period=30.5, fourier_order=5)
     m.add_seasonality(
         name="covid_restriction_christmas",
         period=7,
@@ -440,7 +444,7 @@ def oslo_storo(
         future = pd.concat([df_weekday, df_weekend])
 
     # add the last working day and the +/- 5 days
-    # future = calculate_days_30(future, last_working_day)
+    future = calculate_days_30(future, last_working_day)
 
     # future["sunshine_amount"] = merged_data["sunshine_amount"]
 
@@ -467,6 +471,7 @@ def oslo_storo(
     # Merge with the events data
 
     future["specific_month"] = future["ds"].apply(is_specific_month)
+    future["is_fellesferie"] = future["ds"].apply(is_fellesferie)
     # Calculate the custom regressor values for the future dates
     future["ds"] = pd.to_datetime(future["ds"])
     future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)

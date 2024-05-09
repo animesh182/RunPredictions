@@ -36,6 +36,14 @@ from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.oslo_city_holiday
     closed_days,
     norway_cup,
     black_friday,
+    december_open_2020_2021,
+    december_open,
+    december_2022,
+    december_2023,
+    sunday_2023,
+    # sunday_2024,
+    jan_closed,
+    unusual_low_sale
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
@@ -365,7 +373,7 @@ def oslo_city(
     holidays = pd.concat(
         (
             christmas_day,
-            firstweek_jan,
+            # firstweek_jan,
             first_may,
             easter_lowsaturday,
             easter_mondaydayoff,
@@ -379,6 +387,14 @@ def oslo_city(
             halloween_weekend,
             halloween_day,
             first_weekend_christmas_school_vacation,
+            december_open_2020_2021,
+            december_open,
+            december_2022,
+            december_2023,
+            sunday_2023,
+            # sunday_2024,
+            jan_closed,
+            unusual_low_sale
         )
     )
 
@@ -578,7 +594,9 @@ def oslo_city(
             holidays=holidays,
             yearly_seasonality=True,
             daily_seasonality=False,
-            changepoint_prior_scale=0.1,
+            changepoint_prior_scale=1,
+            holidays_prior_scale= 5,
+            seasonality_mode= "additive"
         )
 
     # add weather regressors

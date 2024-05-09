@@ -40,6 +40,7 @@ from PredictionFunction.Datasets.Regressors.general_regressors import (
     is_covid_restriction_christmas,
     is_fall_start,
     is_christmas_shopping,
+    is_fellesferie
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.dataset_holidays import (
     last_working_day,
@@ -256,6 +257,7 @@ def oslo_torggata(
     # Add custom monthly seasonalities for a specific month
 
     df["specific_month"] = df["ds"].apply(is_specific_month)
+    df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
 
     # Define a function to check if the date is within the period of heavy COVID restrictions
     # def is_covid_restriction_christmas(ds):
@@ -464,7 +466,13 @@ def oslo_torggata(
     # m.add_regressor('heavy_rain_winter_weekend')
 
     m.add_seasonality(
-        name="monthly", period=30.5, fourier_order=5, condition_name="specific_month"
+        name="specific_month", period=30.5, fourier_order=5, condition_name="specific_month"
+    )
+
+    m.add_seasonality(name='monthly', period=30.5, fourier_order=5)
+
+    m.add_seasonality(
+        name="is_fellesferie", period=30.5, fourier_order=5, condition_name="is_fellesferie"
     )
     # add daily seasonality when prediction type is hour
 
@@ -635,6 +643,7 @@ def oslo_torggata(
     future["fall_start"] = future["ds"].apply(is_fall_start)
     future["christmas_shopping"] = future["ds"].apply(is_christmas_shopping)
     future["specific_month"] = future["ds"].apply(is_specific_month)
+    future["is_fellesferie"] = future["ds"].apply(is_fellesferie)
     future = add_opening_hours(future, "Oslo Torggata", 13, 17)
     # Calculate the custom regressor values for the future dates
     future["ds"] = pd.to_datetime(future["ds"])

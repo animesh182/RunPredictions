@@ -38,6 +38,7 @@ from PredictionFunction.Datasets.Regressors.general_regressors import (
     is_covid_restriction_christmas,
     is_fall_start,
     is_christmas_shopping,
+    is_fellesferie
 )
 
 from PredictionFunction.Datasets.Regressors.weather_regressors import (
@@ -250,6 +251,7 @@ def oslo_smestad(
 
     df["fall_start"] = df["ds"].apply(is_fall_start)
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
+    df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
     df = add_opening_hours(df,"Oslo Smestad",7,7)
 
     oslo_smestad_venues = {
@@ -342,8 +344,14 @@ def oslo_smestad(
         if "event" in event_df.columns:
             m.add_regressor(regressor_name)
 
+
     m.add_seasonality(
-        name="monthly", period=30.5, fourier_order=5, condition_name="specific_month"
+        name="specific_month", period=30.5, fourier_order=5, condition_name="specific_month"
+    )
+    m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
+
+    m.add_seasonality(
+        name="is_fellesferie", period=30.5, fourier_order=5, condition_name="is_fellesferie"
     )
 
     m.add_seasonality(
@@ -406,7 +414,7 @@ def oslo_smestad(
     # future['not_fall_start'] = ~future['ds'].apply(is_fall_start)
 
     future["christmas_shopping"] = future["ds"].apply(is_christmas_shopping)
-    # future['not_christmas_shopping'] = ~future['ds'].apply(is_christmas_shopping)
+    future["is_fellesferie"] = future["ds"].apply(is_fellesferie)
 
     future["specific_month"] = future["ds"].apply(is_specific_month)
     # Calculate the custom regressor values for the future dates

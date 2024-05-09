@@ -15,7 +15,7 @@ from PredictionFunction.Datasets.Regressors.general_regressors import(
 from PredictionFunction.utils.utils import calculate_days_30, early_semester, calculate_days_15, custom_regressor
 
 from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.bergen_holidays import (
-    pre_christmas,
+    # pre_christmas,
     pre_christmas_covid21,
     weekendmiddec_21covid,
     new_year_romjul,
@@ -38,6 +38,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     new_years_day,
     pinse,
     himmelfart,
+    christmas
 )
 from PredictionFunction.Datasets.Regressors.weather_regressors import(
     warm_dry_weather_spring,
@@ -205,8 +206,9 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     m.add_country_holidays(country_name="NO")
 
     holidays = pd.concat(
-        (
-            pre_christmas,
+        (   
+            christmas,
+            # pre_christmas,
             new_year_romjul,
             pre_christmas_covid21,
             covid_christmas21_startjan22,
@@ -223,6 +225,7 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
             himmelfart,
             closed,
             unknown_outliers,
+
         )
     )
 
@@ -530,13 +533,13 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     future["early_semester_week"] = future["ds"].apply(
         lambda x: early_semester(x, params)
     )
-    future["first_two_weeks_january_21"] = future["ds"].apply(
-        is_first_two_weeks_january_21
-    )
-    # future['not_first_two_weeks_january_21'] = ~future['ds'].apply(is_first_two_weeks_january_21)
-    future["first_two_weeks_january_21"] = future["ds"].apply(
-        is_first_two_weeks_january_21
-    )
+    # future["first_two_weeks_january_21"] = future["ds"].apply(
+    #     is_first_two_weeks_january_21
+    # )
+    # # future['not_first_two_weeks_january_21'] = ~future['ds'].apply(is_first_two_weeks_january_21)
+    # future["first_two_weeks_january_21"] = future["ds"].apply(
+    #     is_first_two_weeks_january_21
+    # )
     future["fall_start"] = future["ds"].apply(is_fall_start)
     for event_df, event_column in regressors_to_add:
         if 'event' in event_df.columns:
