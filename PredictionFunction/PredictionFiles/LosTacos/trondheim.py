@@ -388,20 +388,20 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
     m.add_regressor("heavy_rain_winter_weekend")
     m.add_regressor("non_heavy_rain_fall_weekend")
 
-    # clusters = weekly_seasonalities(df)
+    clusters = weekly_seasonalities(df)
 
-    # for cluster_label, weeks in clusters.items():
-    #     # Here, you would define the custom seasonality parameters for each cluster
-    #     # You might want to define a custom seasonality function, or apply different parameters based on the cluster label
-    #     seasonality_params = {
-    #         "name": f"weekly_{cluster_label}",
-    #         "period": 7,
-    #         "fourier_order": 3,  # Adjust as needed
-    #         # Other parameters may go here as needed
-    #     }
+    for cluster_label, weeks in clusters.items():
+        # Here, you would define the custom seasonality parameters for each cluster
+        # You might want to define a custom seasonality function, or apply different parameters based on the cluster label
+        seasonality_params = {
+            "name": f"weekly_{cluster_label}",
+            "period": 7,
+            "fourier_order": 3,  # Adjust as needed
+            # Other parameters may go here as needed
+        }
 
-    #     # Add the custom seasonality to the model
-    #     m.add_seasonality(**seasonality_params)
+        # Add the custom seasonality to the model
+        m.add_seasonality(**seasonality_params)
     
     m.fit(df)
 
@@ -414,14 +414,14 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
         future = m.make_future_dataframe(periods=60, freq="D")
 
     # Apply the mapping function to the dates in the future DataFrame
-    # def get_cluster_label(date):
-    #     week_number = date.isocalendar().week
-    #     for cluster_label, weeks in clusters.items():
-    #         if week_number in weeks:
-    #             return cluster_label
-    #     return None  # Default if week number not found in clusters
+    def get_cluster_label(date):
+        week_number = date.isocalendar().week
+        for cluster_label, weeks in clusters.items():
+            if week_number in weeks:
+                return cluster_label
+        return None  # Default if week number not found in clusters
 
-    # future["cluster_label"] = future["ds"].apply(get_cluster_label)
+    future["cluster_label"] = future["ds"].apply(get_cluster_label)
     future.dropna(inplace=True)
 
     future["sunshine_amount"] = merged_data["sunshine_amount"]
