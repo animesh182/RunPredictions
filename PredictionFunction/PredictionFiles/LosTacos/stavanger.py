@@ -256,7 +256,7 @@ def stavanger(
     ### Conditional seasonality - weekly
 
     df["fellesferie"] = df["ds"].apply(is_fellesferie)
-    df["month"] = df["ds"].apply(is_specific_month)
+    df["specific_month"] = df["ds"].apply(is_specific_month)
 
     df["is_may"] = df["ds"].apply(is_may)
 
@@ -546,7 +546,6 @@ def stavanger(
 
     ## Add conditional seasonality
     future["fellesferie"] = future["ds"].apply(is_fellesferie)
-    future["month"] = future["ds"].apply(is_specific_month)
 
     # Add 'is_may' column to future DataFrame
     future["is_may"] = future["ds"].apply(is_may)

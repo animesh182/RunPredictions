@@ -20,8 +20,9 @@ def prepare_data(company, restaurant, start_date, end_date):
     if restaurant=="Trondheim":
         alcohol_reference = restaurant_list[restaurant_list["Restaurant"] == restaurant]["Alcohol Reference"].values[0]
         food_reference = restaurant_list[restaurant_list["Restaurant"] == restaurant]["Food Reference"].values[0]
-        restaurant = restaurant_list[restaurant_list["Restaurant"] == restaurant]["Restaurant"].values[0]
         company = restaurant_list[restaurant_list["Restaurant"] == restaurant]["Company"].values[0]
+        restaurant = restaurant_list[restaurant_list["Restaurant"] == restaurant]["Restaurant"].values[0]
+
         filtered_sales_data= (
             sales_without_effect(
                 company,
@@ -49,7 +50,10 @@ def prepare_data(company, restaurant, start_date, end_date):
 
    
     if city is not None:
-        filtered_weather_data = fetch_weather(city,start_date,end_date)
+        if city =='Trondheim':
+            filtered_weather_data = fetch_weather("Stavanger",start_date,end_date)
+        else:
+            filtered_weather_data = fetch_weather(city,start_date,end_date)
     else:
         filtered_weather_data=None
         print(f"No city found for the restaurant {restaurant}")

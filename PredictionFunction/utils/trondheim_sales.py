@@ -26,6 +26,9 @@ def sales_without_effect(
         "https://salespredictionstorage.blob.core.windows.net/csv/karl_johan_forecast.csv"
     )
 
+    final_sales_grouped = pd.read_csv(
+        "https://salespredictionstorage.blob.core.windows.net/csv/reference_trondheim_grouped.csv"
+    )
     # actual_trondheim_start_date = SalesData.objects.filter(
     #     company=company, restaurant="Trondheim"
     # ).aggregate(min_day=Min("gastronomic_day"))["min_day"]
@@ -123,9 +126,6 @@ def sales_without_effect(
     for day in range(7):
         scales[(day, 1)] = february_scales.get((day, 2), 1)
 
-    final_sales_grouped = pd.read_csv(
-        "https://salespredictionstorage.blob.core.windows.net/csv/reference_trondheim_grouped.csv"
-    )
     final_sales_grouped["gastronomic_day"]= pd.to_datetime(final_sales_grouped['gastronomic_day'])
         
     final_sales_grouped["day_of_week"] = final_sales_grouped[
@@ -138,6 +138,8 @@ def sales_without_effect(
     final_sales_grouped["scaled_total_net"] = (
         final_sales_grouped["total_net"] * final_sales_grouped["scaling_factor"]
     )
+
+    # final_sales_grouped.to_csv("final_grouped_sales_azure.csv")
 
 
     # ------------------------Get all the event Names for reference locations and their effects on the reference restaurant forecasts-------------------------------------------
@@ -228,7 +230,7 @@ def sales_without_effect(
         final_sales_grouped, matching_events_grouped, on="gastronomic_day", how="outer"
     )
     merged_sales["effect"].fillna(0, inplace=True)
-    merged_sales["altered_effect"] = merged_sales["scaled_total_net"].apply(
+    merged_sales["altered_effect"] = merged_sales["total_net"].apply(
         decimal.Decimal
     ) - merged_sales["effect"].apply(decimal.Decimal)
     merged_sales.rename(
@@ -248,7 +250,6 @@ def sales_without_effect(
     ).reset_index()
     final_merged.drop_duplicates("gastronomic_day", keep="last", inplace=True)
     final_merged.drop(columns=["old_total_net", "effect", "index"], inplace=True)
-    final_merged.fillna(0, inplace=True)
     filtered_sales = final_merged.copy()
     logging.info('filterd_df creation for trondheim finished')
     return filtered_sales

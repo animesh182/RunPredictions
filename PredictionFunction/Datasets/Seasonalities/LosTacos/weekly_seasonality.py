@@ -29,7 +29,7 @@ def weekly_seasonalities(df):
 
     for week_number in range(1, 54):  # ISO week numbers go from 1 to 53
         weekly_data = merged_data[merged_data["week_number"] == week_number]
-
+        weekly_data['y'] = weekly_data['y'].astype('float32')
         # Get the average for each day of the week across all years
         daily_averages = (
             weekly_data.groupby(weekly_data.index.weekday)["y"].mean().values

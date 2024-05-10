@@ -27,8 +27,7 @@ from datetime import timedelta
 async def main(mytimer: func.TimerRequest) -> None:
     utc_timestamp = datetime.utcnow().replace(tzinfo=timezone.utc).isoformat()
     start_date = "2021-09-01"
-    end_date = (datetime.now()-timedelta(days=1)).strftime("%Y-%m-%d")
-    # end_date = "2024-03-24"
+    # end_date = (datetime.now()-timedelta(days=1)).strftime("%Y-%m-%d")
     prediction_category = "day"
     # prediction category is either hour, type, alcohol or day
     company = "Los Tacos"
@@ -50,6 +49,7 @@ async def main(mytimer: func.TimerRequest) -> None:
         else:
             start_date = date(2021, 9, 1)
         end_date = (datetime.now()-timedelta(days=2)).strftime("%Y-%m-%d")
+        # end_date = date(2024,4,27)
 
         restaurant_func = location_specific_dictionary[restaurant]
         if prediction_category == "hour":
@@ -92,4 +92,4 @@ async def main(mytimer: func.TimerRequest) -> None:
         forecast["historical_sale"].fillna(0, inplace=True)
         forecast["historical_sale"] = forecast["historical_sale"].astype(int)
         logging.info(f"done")
-        save_to_db(forecast, company, restaurant, prediction_category, event_holidays)
+        save_to_db(forecast, company, restaurant, prediction_category, event_holidays,end_date)
