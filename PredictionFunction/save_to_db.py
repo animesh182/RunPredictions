@@ -9,7 +9,7 @@ from PredictionFunction.PredictionSaver.saveHolidayParams import save_holiday_pa
 from PredictionFunction.utils.fetch_events import fetch_events
 from PredictionFunction.utils.constants import opening_hours_dict
 import psycopg2
-from PredictionFunction.utils.params import params,prod_params
+from PredictionFunction.utils.params import params, prod_params
 from datetime import datetime
 from PredictionFunction.meta_tables import data
 import numpy as np
@@ -17,11 +17,13 @@ from PredictionFunction.utils.constants import holiday_parameter_type_categoriza
 from PredictionFunction.utils.trondheim_events import trondheim_events
 
 
-def save_to_db(forecast_df, company, restaurant, prediction_category, event_holidays,end_date):
+def save_to_db(
+    forecast_df, company, restaurant, prediction_category, event_holidays, end_date
+):
     # end_date = datetime.now().strftime("%Y-%m-%d")
     logging.info(f"started for {restaurant} in save_to_db")
     # end_date = "2024-04-27"
-    
+
     unwanted_columns = [
         "_lower",
         "_upper",
@@ -264,7 +266,7 @@ def save_to_db(forecast_df, company, restaurant, prediction_category, event_holi
 
         # save_daily_predictions(prediction_data,restaurant)
         # logging.info("saved daily predictions")
-        
+
         # Save the holiday parameters for predictions
         # sentrum_scene_events= fetch_events(restaurant,"Sentrum Scene")
         # oslo_spektrum_events= fetch_events(restaurant,"Oslo Spektrum")
@@ -327,18 +329,24 @@ def save_to_db(forecast_df, company, restaurant, prediction_category, event_holi
                             ),
                         )
                     conn.commit()
-        # filtered_df.to_csv('filtered_df.csv') 
-        else:  
-            if 'holiday' in event_holidays.columns:
-                event_holidays['event_names'] = event_holidays['holiday'].fillna(event_holidays['name'])
-                event_holidays['ds'] = pd.to_datetime(event_holidays['ds'])
-                event_holidays['date'] = pd.to_datetime(event_holidays['date'])
+        # filtered_df.to_csv('filtered_df.csv')
+        else:
+            if "holiday" in event_holidays.columns:
+                event_holidays["event_names"] = event_holidays["holiday"].fillna(
+                    event_holidays["name"]
+                )
+                event_holidays["ds"] = pd.to_datetime(event_holidays["ds"])
+                event_holidays["date"] = pd.to_datetime(event_holidays["date"])
                 # event_holidays.to_csv("events_before.csv")
-                event_holidays['event_date'] = event_holidays['date'].fillna(event_holidays['ds'].dt.date)
-                event_holidays['event_date'] = event_holidays['event_date'].dt.strftime('%Y-%m-%d').astype(str)
+                event_holidays["event_date"] = event_holidays["date"].fillna(
+                    event_holidays["ds"].dt.date
+                )
+                event_holidays["event_date"] = (
+                    event_holidays["event_date"].dt.strftime("%Y-%m-%d").astype(str)
+                )
             else:
-                event_holidays['event_names'] = event_holidays['name']
-                event_holidays['event_date'] = pd.to_datetime(event_holidays['date'])
+                event_holidays["event_names"] = event_holidays["name"]
+                event_holidays["event_date"] = pd.to_datetime(event_holidays["date"])
         with psycopg2.connect(**params) as conn:
             with conn.cursor() as cursor:
                 for index, row in filtered_df.iterrows():
@@ -372,7 +380,9 @@ def save_to_db(forecast_df, company, restaurant, prediction_category, event_holi
                                 else 0
                             )
                         except ValueError:
-                            print(f"Error converting value to float for column '{name}'")
+                            print(
+                                f"Error converting value to float for column '{name}'"
+                            )
                             effect_value = 0  # Assign a default valu
                         for concert in valid_concerts:
                             if concert in name:
@@ -383,9 +393,10 @@ def save_to_db(forecast_df, company, restaurant, prediction_category, event_holi
                                 if not date_matching_df.empty:
                                     concert_name = date_matching_df["name"].iloc[0]
                                     name = concert_name
-                        if ( effect_value > 2000
-                                and name in event_holidays["event_names"].values
-                            ):
+                        if (
+                            effect_value > 2000
+                            and name in event_holidays["event_names"].values
+                        ):
                             # print(f'upper {restaurant}: {name}')
 
                             holiday_param_insert = """ INSERT INTO public."Predictions_holidayparameters" (id,prediction_id, name, effect, type, date, restaurant, company, parent_restaurant,created_at)
@@ -405,10 +416,10 @@ def save_to_db(forecast_df, company, restaurant, prediction_category, event_holi
                             )
 
                         elif (
-                                effect_value != 0
-                                and name not in concert_dictionary
-                                and name not in event_holidays["event_names"].values
-                            ):
+                            effect_value != 0
+                            and name not in concert_dictionary
+                            and name not in event_holidays["event_names"].values
+                        ):
                             # print(f'lower {restaurant}: {name}')
                             try:
                                 type = holiday_parameter_type_categorization[name]
@@ -434,7 +445,6 @@ def save_to_db(forecast_df, company, restaurant, prediction_category, event_holi
                             )
         conn.commit()
         conn.close()
-
 
         # for index, row in melted_data.iterrows():
         #     for concert in valid_concerts:
@@ -574,19 +584,6 @@ def save_to_db(forecast_df, company, restaurant, prediction_category, event_holi
     #             restaurant=restaurant,
     #             date=date_obj.date(),
     #             take_out=total_prediction,
-    #         )
-    #         prediction_instance.save()
-
-    # Here, you can add logic for saving associated parameters if needed
-    # elif prediction_category == "product":
-    #     for index, row in filtered_df.iterrows():
-    #         date_obj = datetime.datetime.strptime(row["ds"], "%Y-%m-%d")
-    #         total_prediction = round(float(row["yhat"]))
-    #         prediction_instance = ProductMixPrediction(
-    #             company=company,
-    #             restaurant=restaurant,
-    #             date=date_obj.date(),
-    #             product_mix=total_prediction,
     #         )
     #         prediction_instance.save()
 

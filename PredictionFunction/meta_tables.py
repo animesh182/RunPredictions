@@ -44,19 +44,29 @@ from PredictionFunction.PredictionFiles.LosTacos.trondheim import (
 
 # This is a datatable showing which city each restaurant locations is in
 data = [
-       {"Restaurant": "Oslo Storo", "City": "Oslo", "Company": "Los Tacos"},
-        {"Restaurant": "Oslo City", "City": "Oslo", "Company": "Los Tacos"},
-         {"Restaurant": "Oslo Torggata", "City": "Oslo", "Company": "Los Tacos"},
-         {"Restaurant": "Karl Johan", "City": "Oslo", "Company": "Los Tacos"},
-       {"Restaurant": "Fredrikstad", "City": "Fredrikstad", "Company": "Los Tacos"},
-       {"Restaurant": "Oslo Lokka", "City": "Oslo", "Company": "Los Tacos"},
-        {"Restaurant": "Stavanger", "City": "Stavanger", "Company": "Los Tacos"},
-        {"Restaurant": "Bergen", "City": "Bergen", "Company": "Los Tacos"},
-       {"Restaurant": "Oslo Steen_Strom", "City": "Oslo", "Company": "Los Tacos"},
-        {"Restaurant": "Oslo Smestad", "City": "Oslo", "Company": "Los Tacos"},
-        {"Restaurant": "Sandnes", "City": "Stavanger", "Company": "Los Tacos"},
-        {"Restaurant": "Restaurant","City": "Stavanger","Company": "Fisketorget","Parent Restaurant": "Fisketorget Stavanger",},
-        {"Restaurant": "Fisketorget Utsalg","City": "Stavanger","Company": "Fisketorget","Parent Restaurant": "Fisketorget Stavanger",},
+    {"Restaurant": "Oslo Storo", "City": "Oslo", "Company": "Los Tacos"},
+    {"Restaurant": "Oslo City", "City": "Oslo", "Company": "Los Tacos"},
+    {"Restaurant": "Oslo Torggata", "City": "Oslo", "Company": "Los Tacos"},
+    {"Restaurant": "Karl Johan", "City": "Oslo", "Company": "Los Tacos"},
+    {"Restaurant": "Fredrikstad", "City": "Fredrikstad", "Company": "Los Tacos"},
+    {"Restaurant": "Oslo Lokka", "City": "Oslo", "Company": "Los Tacos"},
+    {"Restaurant": "Stavanger", "City": "Stavanger", "Company": "Los Tacos"},
+    {"Restaurant": "Bergen", "City": "Bergen", "Company": "Los Tacos"},
+    {"Restaurant": "Oslo Steen_Strom", "City": "Oslo", "Company": "Los Tacos"},
+    {"Restaurant": "Oslo Smestad", "City": "Oslo", "Company": "Los Tacos"},
+    {"Restaurant": "Sandnes", "City": "Stavanger", "Company": "Los Tacos"},
+    {
+        "Restaurant": "Restaurant",
+        "City": "Stavanger",
+        "Company": "Fisketorget",
+        "Parent Restaurant": "Fisketorget Stavanger",
+    },
+    {
+        "Restaurant": "Fisketorget Utsalg",
+        "City": "Stavanger",
+        "Company": "Fisketorget",
+        "Parent Restaurant": "Fisketorget Stavanger",
+    },
     {
         "Restaurant": "Trondheim",
         "City": "Trondheim",
@@ -65,7 +75,13 @@ data = [
         "Food Reference": "Stavanger",
         "Alcohol City": "Oslo",
         "Food City": "Stavanger",
-    }
+    },
+    {
+        "Restaurant": "Åsane Storsenter",
+        "City": "Bergen",
+        "Company": "Burgerheim",
+        "Parent Restaurant": "",
+    },
 ]
 location_specific_dictionary = {
     "Stavanger": stavanger_function,
