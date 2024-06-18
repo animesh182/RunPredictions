@@ -19,6 +19,7 @@ def sales_without_effect(
     food_reference_restaurant,
     restaurant
 ):
+    logging.info("started fetching sales for trondheim reference")
     sales_forecast_stavanger = pd.read_csv(
         "https://salespredictionstorage.blob.core.windows.net/csv/stavanger_forecast.csv"
     )
@@ -29,6 +30,7 @@ def sales_without_effect(
     final_sales_grouped = pd.read_csv(
         "https://salespredictionstorage.blob.core.windows.net/csv/reference_trondheim_grouped.csv"
     )
+    logging.info("started fetching sales for trondheim reference")
     # actual_trondheim_start_date = SalesData.objects.filter(
     #     company=company, restaurant="Trondheim"
     # ).aggregate(min_day=Min("gastronomic_day"))["min_day"]
@@ -52,8 +54,8 @@ def sales_without_effect(
             params=[company,restaurant,actual_trondheim_start_date, end_date],
         )
 
-        logging.info('actual_sales fetched ')
 
+    logging.info("actual sales fetched")
     actual_trondheim_sales["gastronomic_day"] = pd.to_datetime(
         actual_trondheim_sales["gastronomic_day"]
     )
@@ -62,7 +64,7 @@ def sales_without_effect(
     # get actual sales of food and alcohol in trondheim for a month---------------------------------------------------------------
     actual_sales_alcohol = actual_trondheim_sales[
         actual_trondheim_sales["article_supergroup"].isin(article_supergroup_values)
-        & (actual_trondheim_sales["gastronomic_day"].dt.month == 2)
+        & (actual_trondheim_sales["gastronomic_day"].dt.month == 3)
     ]
     average_sales_new_alcohol = (
         actual_sales_alcohol.groupby("gastronomic_day")["total_net"].sum().reset_index()
@@ -72,7 +74,7 @@ def sales_without_effect(
 
     actual_sales_food = actual_trondheim_sales[
         ~actual_trondheim_sales["article_supergroup"].isin(article_supergroup_values)
-        & (actual_trondheim_sales["gastronomic_day"].dt.month == 2)
+        & (actual_trondheim_sales["gastronomic_day"].dt.month == 3)
     ]
     average_sales_new_food = (
         actual_sales_food.groupby("gastronomic_day")["total_net"].sum().reset_index()
@@ -105,7 +107,7 @@ def sales_without_effect(
     for day in range(7):
         for month in range(1, 13):
             key = (day, month)
-            if month in [2, 3, 4]:
+            if month in [2, 3, 4, 5]:
                 if day == 5:  # If the day is Saturday
                     scales[key] = 1
                 else:
@@ -118,13 +120,14 @@ def sales_without_effect(
                         scales[key] = day_sales["total_net"].mean() / saturday_sales
                     else:
                         scales[key] = 1
-                if month == 2:
+                if month == 3:
                     february_scales[key] = scales[key]
             else:
-                scales[key] = february_scales.get((day, 2), 1)
+                scales[key] = february_scales.get((day, 3), 1)
 
     for day in range(7):
-        scales[(day, 1)] = february_scales.get((day, 2), 1)
+        scales[(day, 1)] = february_scales.get((day, 3), 1)
+        scales[(day, 2)] = february_scales.get((day, 3), 1)
 
     final_sales_grouped["gastronomic_day"]= pd.to_datetime(final_sales_grouped['gastronomic_day'])
         
@@ -138,6 +141,8 @@ def sales_without_effect(
     final_sales_grouped["scaled_total_net"] = (
         final_sales_grouped["total_net"] * final_sales_grouped["scaling_factor"]
     )
+    final_sales_grouped.loc[final_sales_grouped['day_of_week'] == 5, 'total_net'] *= 0.5
+    final_sales_grouped.loc[final_sales_grouped['day_of_week'] == 4, 'total_net'] *= 0.7
 
     # final_sales_grouped.to_csv("final_grouped_sales_azure.csv")
 

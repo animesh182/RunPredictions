@@ -76,12 +76,12 @@ data = [
         "Alcohol City": "Oslo",
         "Food City": "Stavanger",
     },
-    {
-        "Restaurant": "Åsane Storsenter",
-        "City": "Bergen",
-        "Company": "Burgerheim",
-        "Parent Restaurant": "",
-    },
+    # {
+    #     "Restaurant": "Åsane Storsenter",
+    #     "City": "Bergen",
+    #     "Company": "Burgerheim",
+    #     "Parent Restaurant": "",
+    # },
 ]
 location_specific_dictionary = {
     "Stavanger": stavanger_function,

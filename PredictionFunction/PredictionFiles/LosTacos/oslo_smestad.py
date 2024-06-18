@@ -256,13 +256,18 @@ def oslo_smestad(
 
     oslo_smestad_venues = {
         "Sentrum Scene",
-        "Fornebu",
-        "Oslo Storgata",
         "Rockefeller",
-        "Cosmopolite, Oslo",
+        "Fornebu",
+        "Dronning Sonja KunstStall",
+        "Langkaia",
         "Maihaugsalen",
-        "Nordic Black Theatre",
-        "Riksscenen Oslo",
+        "The Norwegian Theatre",
+        "Oslo Concert Hall",
+        "Oslo Central Station",
+        "Oslo Cathedral",
+        "Sommerrogata",
+        "St. Olavs",
+        "Tøyenparken",
         "University of Oslo",
     }
 

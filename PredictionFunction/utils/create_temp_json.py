@@ -1,6 +1,7 @@
 import os
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 import json
+import logging
 
 # Retrieve the connection string and container name from environment variables
 storage_account_link = os.environ.get("AzureWebJobsStorage", None)
@@ -10,21 +11,21 @@ import random
 # Initial JSON data
 initial_json = {
     "Los Tacos": {
-        "Oslo Storo": 0,
-        "Oslo City": 0,
-        "Oslo Torggata": 0,
-        "Karl Johan": 0,
-        "Fredrikstad": 0,
-        "Oslo Lokka": 0,
-        "Stavanger": 0,
-        "Bergen": 0,
-        "Oslo Steen_Strom": 0,
-        "Oslo Smestad": 0,
-        "Sandnes": 0,
+        # "Oslo Storo": 0,
+        # "Oslo City": 0,
+        # "Oslo Torggata": 0,
+        # "Karl Johan": 0,
+        # "Fredrikstad": 0,
+        # "Oslo Lokka": 0,
+        # "Stavanger": 0,
+        # "Bergen": 0,
+        # "Oslo Steen_Strom": 0,
+        # "Oslo Smestad": 0,
+        # "Sandnes": 0,
         "Trondheim": 0,
     },
-    "Fisketorget": {"Restaurant": 0, "Fisketorget Utsalg": 0},
-    "Burgerheim": {"Åsane Storsenter": 0},
+    # "Fisketorget": {"Restaurant": 0, "Fisketorget Utsalg": 0},
+    # "Burgerheim": {"Åsane Storsenter": 0},
 }
 
 
@@ -50,17 +51,17 @@ def fetch_or_initialize_json():
             # Attempt to read the blob content
             blob_data = blob_client.download_blob().readall()
             data = json.loads(blob_data)
-            print(f"Fetched existing JSON from blob: {blob_name}")
+            logging.info(f"Fetched existing JSON from blob: {blob_name}")
         except Exception as e:
             # If the blob does not exist, use the initial JSON data
             if "BlobNotFound" in str(e):
                 data = initial_json
-                print(f"Blob not found. Initializing with initial JSON data.")
+                logging.info(f"Blob not found. Initializing with initial JSON data.")
             else:
                 raise
 
     except Exception as e:
-        print(f"Error fetching or initializing JSON: {e}")
+        logging.info(f"Error fetching or initializing JSON: {e}")
         data = initial_json
 
     return data
@@ -73,7 +74,7 @@ def update_execution_count(data, company, restaurant):
         else:
             data[company][restaurant] = 1
     else:
-        print(f"Error: {company} does not exist in data.")
+        logging.info(f"Error: {company} does not exist in data.")
     return data
 
 
@@ -109,10 +110,10 @@ def save_json_file(data):
         # Upload the JSON file
         blob_client.upload_blob(data_json, overwrite=True)
 
-        print(f"File {blob_name} uploaded successfully.")
+        logging.info(f"File {blob_name} uploaded successfully.")
 
     except Exception as e:
-        print(f"Error: {e}")
+        logging.info(f"Error: {e}")
 
 
 # Fetch or initialize the JSON data

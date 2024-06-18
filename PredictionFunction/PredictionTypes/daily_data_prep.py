@@ -38,25 +38,24 @@ def prepare_data(company, restaurant, start_date, end_date):
     else:
         filtered_sales_data=fetch_salesdata(company,restaurant,start_date,end_date)
     sales_data_df = filtered_sales_data  
-    print("Length before dropping duplicates:", len(sales_data_df))
+    logging.info("Length before dropping duplicates:", len(sales_data_df))
     sales_data_df.drop_duplicates('date', inplace=True)
-    print("Length after dropping duplicates:", len(sales_data_df))  
+    logging.info("Length after dropping duplicates:", len(sales_data_df))  
     end_date= pd.to_datetime(end_date)
     weather_end_date = end_date + dt.timedelta(days=45)
 
     city_data = restaurant_list.loc[restaurant_list['Restaurant'] == restaurant, 'City']
     city = city_data.iloc[0] if not city_data.empty else None
     
-
+    logging.info(city)
    
-    if city is not None:
-        if city =='Trondheim':
-            filtered_weather_data = fetch_weather("Stavanger",start_date,end_date)
-        else:
-            filtered_weather_data = fetch_weather(city,start_date,end_date)
+    if city =='Trondheim':
+        filtered_weather_data = fetch_weather("Stavanger",start_date,end_date)
     else:
-        filtered_weather_data=None
-        print(f"No city found for the restaurant {restaurant}")
+        filtered_weather_data = fetch_weather(city,start_date,end_date)
+    # else:
+    #     # filtered_weather_data=None
+    #     print(f"No city found for the restaurant {restaurant}")
 
     
     

@@ -52,6 +52,7 @@ async def main(mytimer: func.TimerRequest) -> None:
     # end_date = date(2024,4,27)
 
     restaurant_func = location_specific_dictionary[restaurant]
+    logging.info(f"Running predictions for now {restaurant}")
     if prediction_category == "hour":
         merged_data, historical_data, future_data = prepare_hourly_data(
             company, restaurant, start_date, end_date
