@@ -11,20 +11,20 @@ import random
 # Initial JSON data
 initial_json = {
     "Los Tacos": {
-        # "Oslo Storo": 0,
-        # "Oslo City": 0,
-        # "Oslo Torggata": 0,
-        # "Karl Johan": 0,
-        # "Fredrikstad": 0,
-        # "Oslo Lokka": 0,
-        # "Stavanger": 0,
-        # "Bergen": 0,
-        # "Oslo Steen_Strom": 0,
-        # "Oslo Smestad": 0,
-        # "Sandnes": 0,
+        "Oslo Storo": 0,
+        "Oslo City": 0,
+        "Oslo Torggata": 0,
+        "Karl Johan": 0,
+        "Fredrikstad": 0,
+        "Oslo Lokka": 0,
+        "Stavanger": 0,
+        "Bergen": 0,
+        "Oslo Steen_Strom": 0,
+        "Oslo Smestad": 0,
+        "Sandnes": 0,
         "Trondheim": 0,
     },
-    # "Fisketorget": {"Restaurant": 0, "Fisketorget Utsalg": 0},
+    "Fisketorget": {"Restaurant": 0, "Fisketorget Utsalg": 0},
     # "Burgerheim": {"Åsane Storsenter": 0},
 }
 
