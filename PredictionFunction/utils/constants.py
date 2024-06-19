@@ -60,6 +60,7 @@ holiday_parameter_type_categorization = {
     "weekendmiddec_21covid": "special",
     "weekly_fall_start": "special",
     "weekly_fellesferie": "special",
+    "Gladmat":"event"
 }
 
 article_supergroup_values = [
@@ -76,3 +77,5 @@ article_supergroup_values = [
     "Wine",
     "Wine, Taco Tuesday",
 ]
+
+holiday_names_negative=['Gladmat']

@@ -355,7 +355,7 @@ def oslo_torggata(
             )  # Append venue_df along with venue name for regressor addition
         else:
             holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)
-
+    event_holidays= pd.concat(objs=[event_holidays, holidays], ignore_index=True)
     # Event regressors here
 
     # Sentrum scene concerts regressor

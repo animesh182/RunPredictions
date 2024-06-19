@@ -436,3 +436,20 @@ def heavy_rain_spring_weekend_future(future):
 
     return future
 
+## Warm and dry weather
+def warm_dry_weather_spring_tfs(df):
+    df['ds'] = pd.to_datetime(df['ds'])
+    df['day_of_week'] = df['ds'].dt.dayofweek
+    df['month'] = df['ds'].dt.month
+    df['rolling_avg_temp'] = df['sunshine_amount'].rolling(window=10, min_periods=1).mean()
+    warm_threshold = df['rolling_avg_temp'].quantile(0.75)  # Warm days based on rolling temperature
+    dry_threshold = 0
+    #Apply the conditions for warm and dry weather
+    df['warm_and_dry'] = (
+        (df['sunshine_amount'] >= warm_threshold) & 
+        (df['rain_sum'] <= dry_threshold) & 
+        (df['day_of_week'].isin([3,4,5])) &
+        (df['month'].isin([3, 4, 5, 6]))
+    ).astype(int)
+    return df
+

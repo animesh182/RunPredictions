@@ -13,7 +13,7 @@ from PredictionFunction.utils.params import params, prod_params
 from datetime import datetime
 from PredictionFunction.meta_tables import data
 import numpy as np
-from PredictionFunction.utils.constants import holiday_parameter_type_categorization
+from PredictionFunction.utils.constants import holiday_parameter_type_categorization,holiday_names_negative
 from PredictionFunction.utils.trondheim_events import trondheim_events
 
 
@@ -436,6 +436,27 @@ def save_to_db(
                                     name,
                                     effect_value,
                                     type,
+                                    date_obj,
+                                    restaurant,
+                                    company,
+                                    parent_restaurant,
+                                    datetime.now(),
+                                ),
+                            )
+                        elif (
+                            effect_value < -2000
+                            and name in holiday_names_negative
+                        ):
+                            # print(f'upper {restaurant}: {name}')
+
+                            holiday_param_insert = """ INSERT INTO public."Predictions_holidayparameters" (id,prediction_id, name, effect, type, date, restaurant, company, parent_restaurant,created_at)
+                            VALUES (gen_random_uuid(),%s, %s, %s,'event', %s, %s, %s, %s,%s)"""
+                            cursor.execute(
+                                holiday_param_insert,
+                                (
+                                    prediction_id,
+                                    name,
+                                    effect_value,
                                     date_obj,
                                     restaurant,
                                     company,

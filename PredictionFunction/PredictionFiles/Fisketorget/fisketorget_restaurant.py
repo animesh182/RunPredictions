@@ -19,12 +19,14 @@ from PredictionFunction.Datasets.Seasonalities.LosTacos.weekly_seasonality impor
     weekly_seasonalities,
 )
 from PredictionFunction.Datasets.Regressors.general_regressors import (
-    is_fellesferie_stavanger,
+    is_fellesferie,
     is_may,
     is_covid_restriction_christmas,
     is_fall_start,
     is_covid_loose_fall21,
     is_christmas_shopping,
+    is_outdoor_seating,
+    is_high_weekend_spring
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holidays import (
     christmas_day,
@@ -51,6 +53,14 @@ from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holiday
     utopia_friday,
     utopia_saturday,
     skeiva_natta,
+    valentines_day,
+    food_fun_fest,
+    fiskesprell,
+    stavanger_vinfest,
+    national_independence_day,
+    gladmat,
+    ons,
+    april_closed
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
@@ -84,6 +94,7 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import (
     # heavy_rain_spring_weekend_future,
     non_heavy_rain_fall_weekend,
     non_heavy_rain_fall_weekend_future,
+    warm_dry_weather_spring_tfs,
 )
 from PredictionFunction.utils.openinghours import add_opening_hours
 from PredictionFunction.utils.fetch_events import fetch_events
@@ -184,7 +195,7 @@ def fisketorget_restaurant(
             "air_temperature",
         ]
 
-    # df = warm_dry_weather_spring(df)
+    df = warm_dry_weather_spring_tfs(df)
     # df = heavy_rain_fall_weekday(df)
     df = heavy_rain_fall_weekend(df)
     df = heavy_rain_winter_weekday(df)
@@ -239,6 +250,14 @@ def fisketorget_restaurant(
             vinterferie_vestlandet_weekend_before,
             vinterferie_vestlandet_weekend,
             first_weekend_christmas_school_vacation,
+            valentines_day,
+            food_fun_fest,
+            fiskesprell,
+            stavanger_vinfest,
+            national_independence_day,
+            gladmat,
+            ons,
+            april_closed
         )
     )
 
@@ -246,7 +265,9 @@ def fisketorget_restaurant(
 
     ### Conditional seasonality - weekly
 
-    df["fellesferie"] = df["ds"].apply(is_fellesferie_stavanger)
+    df["fellesferie"] = df["ds"].apply(is_fellesferie)
+    df["high_weekend_spring"] = df["ds"].apply(is_high_weekend_spring)
+    df["outdoor_seating"] =df['ds'].apply(is_outdoor_seating)
 
     df["is_may"] = df["ds"].apply(is_may)
 
@@ -331,7 +352,7 @@ def fisketorget_restaurant(
             )  # Append venue_df along with venue name for regressor addition
         else:
             holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)
-
+    event_holidays= pd.concat(objs=[event_holidays, holidays], ignore_index=True)
     def calculate_days(df, last_working_day):
         # Convert 'ds' column to datetime if it's not already
         df["ds"] = pd.to_datetime(df["ds"])
@@ -430,7 +451,7 @@ def fisketorget_restaurant(
 
     # Add the conditional regressor to the model
     m.add_regressor("sunshine_amount", standardize=False)
-    # m.add_regressor("warm_and_dry")
+    m.add_regressor("warm_and_dry")
     # m.add_regressor("heavy_rain_fall_weekday")
     m.add_regressor("heavy_rain_fall_weekend")
     m.add_regressor("heavy_rain_winter_weekday")
@@ -440,6 +461,9 @@ def fisketorget_restaurant(
     m.add_regressor("non_heavy_rain_fall_weekend")
     m.add_regressor("opening_duration")
     m.add_regressor("sunshine_amount", standardize=False)
+    m.add_regressor("high_weekend_spring")
+    m.add_regressor("outdoor_seating")
+
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:
             m.add_regressor(regressor_name)
@@ -512,7 +536,9 @@ def fisketorget_restaurant(
     # future = calculate_days(future, last_working_day)
 
     ## Add conditional seasonality
-    future["fellesferie"] = future["ds"].apply(is_fellesferie_stavanger)
+    future["fellesferie"] = future["ds"].apply(is_fellesferie)
+    future["outdoor_seating"] = future["ds"].apply(is_outdoor_seating)
+    future["high_weekend_spring"] = future["ds"].apply(is_high_weekend_spring)
 
     # Add 'is_may' column to future DataFrame
     future["is_may"] = future["ds"].apply(is_may)
@@ -547,7 +573,7 @@ def fisketorget_restaurant(
             )
             future[event_column].fillna(0, inplace=True)
 
-    # future = warm_and_dry_future(future)
+    future = warm_dry_weather_spring_tfs(future)
     # future = heavy_rain_fall_weekday_future(future)
     future = heavy_rain_fall_weekend_future(future)
     future = heavy_rain_winter_weekday_future(future)

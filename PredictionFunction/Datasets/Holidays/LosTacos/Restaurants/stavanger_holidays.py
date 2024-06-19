@@ -268,3 +268,69 @@ skeiva_natta = pd.DataFrame(
             "upper_window": 0,
         }
     )
+
+valentines_day = pd.DataFrame(
+        {
+            "holiday": "valentines_day",
+            "ds": pd.to_datetime(["2022-02-14", "2023-02-14","2024-02-14","2025-02-14"]),
+            "lower_window": 0,
+            "upper_window": 0,
+        }
+    )
+food_fun_fest = pd.DataFrame(
+        {
+            "holiday": "Food fun festival",
+            "ds": pd.to_datetime(["2024-02-29"]),
+            "lower_window": -7,
+            "upper_window": 0,
+        }
+    )
+fiskesprell = pd.DataFrame(
+        {
+            "holiday": "Fiskesprell",
+            "ds": pd.to_datetime(["2024-03-05"]),
+            "lower_window": 0,
+            "upper_window": 0,
+        }
+    )
+stavanger_vinfest = pd.DataFrame(
+        {
+            "holiday": "Stavanger Vinfest",
+            "ds": pd.to_datetime(["2024-03-16"]),
+            "lower_window": -3,
+            "upper_window": 0,
+        }
+    )
+national_independence_day= pd.DataFrame(
+        {
+            "holiday": "Independence Day",
+            "ds": pd.to_datetime(["2024-05-17"]),
+            "lower_window": 0,
+            "upper_window": 0,
+        }
+    )
+gladmat = pd.DataFrame(
+        {
+            "holiday": "Gladmat",
+            "ds": pd.to_datetime(["2022-07-02","2023-07-01","2024-06-29"]),
+            "lower_window": -3,
+            "upper_window": 0,
+        }
+    )
+ons=pd.DataFrame(
+        {
+            "holiday": "ONS",
+            "ds": pd.to_datetime(["2024-08-29"]),
+            "lower_window": -2,
+            "upper_window": 0,
+        }
+    )
+
+april_closed = pd.DataFrame(
+        {
+            "holiday": "Closed April",
+            "ds": pd.to_datetime(["2023-04-27"]),
+            "lower_window": -20,
+            "upper_window": 0,
+        }
+    )

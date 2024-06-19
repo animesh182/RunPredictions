@@ -512,7 +512,7 @@ def oslo_city(
             )  # Append venue_df along with venue name for regressor addition
         else:
             holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)
-
+    event_holidays= pd.concat(objs=[event_holidays, holidays], ignore_index=True)
     # The training DataFrame (df) should also include 'days_since_last' and 'days_until_next' columns.
     df = calculate_days_30(df, fifteenth_working_days)
 

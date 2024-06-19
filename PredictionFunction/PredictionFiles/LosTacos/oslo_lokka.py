@@ -294,7 +294,7 @@ def oslo_lokka_jtorget_smestad_torggata(
             )  # Append venue_df along with venue name for regressor addition
         else:
             holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)
-
+    event_holidays= pd.concat(objs=[event_holidays, holidays], ignore_index=True)
     ## calculating the paydays and the days before and after. Used in regressions
 
     # The training DataFrame (df) should also include 'days_since_last' and 'days_until_next' columns.

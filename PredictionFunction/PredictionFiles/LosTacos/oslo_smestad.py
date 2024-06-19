@@ -293,6 +293,7 @@ def oslo_smestad(
             )  # Append venue_df along with venue name for regressor addition
         else:
             holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)
+    event_holidays= pd.concat(objs=[event_holidays, holidays], ignore_index=True)
     # df['not_christmas_shopping'] = ~df['ds'].apply(is_christmas_shopping)
 
     # create daily seasonality column setting a number for each day of the week, to be used later

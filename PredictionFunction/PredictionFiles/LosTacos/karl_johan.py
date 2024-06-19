@@ -328,7 +328,8 @@ def karl_johan(
             )  # Append venue_df along with venue name for regressor addition
         else:
             holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)
-
+    event_holidays= pd.concat(objs=[event_holidays, holidays], ignore_index=True)
+    
     df["high_weekend"] = df["ds"].apply(is_high_weekends)
     df["low_weekend"] = ~df["ds"].apply(is_high_weekends)
 

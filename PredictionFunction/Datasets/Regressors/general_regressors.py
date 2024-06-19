@@ -92,3 +92,43 @@ def is_may(ds):
         return ds.month == 5
 def is_saturday_rainy_windy(row):
         return 1 if(row['ds'].dayofweek == 5) and (row['rain_sum']>5) and (row['windspeed']>4.5) else 0
+
+
+def is_high_weekend_spring(ds):
+    date = pd.to_datetime(ds)
+    high_weekend_spring = {
+        2022: {"start": "2022-05-01", "end": "2022-06-30"},
+        2023: {"start": "2023-05-01", "end": "2023-06-30"},
+        2024: {"start": "2024-05-01", "end": "2024-06-30"},
+        # Add more years and their respective dates as needed
+    }
+    date = pd.to_datetime(ds)
+    year = date.year  # Extract the year from the input date
+
+    if year not in high_weekend_spring:
+        return False  
+
+    start_date = pd.Timestamp(high_weekend_spring[year]["start"])
+    end_date = pd.Timestamp(high_weekend_spring[year]["end"])
+    if start_date <= date <= end_date and date.weekday() in [4, 5]:
+        return True
+    else:
+        return False
+
+
+def is_outdoor_seating(ds):
+    outdoor_seating_dates = {
+        2022: {"start": "2022-04-22", "end": "2022-09-20"},
+        2023: {"start": "2023-05-15", "end": "2023-09-20"},
+        2024: {"start": "2024-05-15", "end": "2024-09-20"},
+        # Add more years and their respective dates as needed
+    }
+    date = pd.to_datetime(ds)
+    year = date.year  # Extract the year from the input date
+
+    if year not in outdoor_seating_dates:
+        return False  # or raise an error if you prefer
+
+    start_date = pd.Timestamp(outdoor_seating_dates[year]["start"])
+    end_date = pd.Timestamp(outdoor_seating_dates[year]["end"])
+    return start_date <= date <= end_date

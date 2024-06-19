@@ -9,27 +9,22 @@ import logging
 from PredictionFunction.Datasets.Regressors.general_regressors import( 
     is_fall_start,
     is_fellesferie,
-    is_first_two_weeks_january_21,
-    is_specific_month
+    is_specific_month,
+    is_high_weekend_spring,
     )
 from PredictionFunction.utils.utils import calculate_days_30, early_semester, calculate_days_15, custom_regressor
 
 from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.bergen_holidays import (
-    # pre_christmas,
     pre_christmas_covid21,
     weekendmiddec_21covid,
     new_year_romjul,
-    # firstweek_jan,
-    # new_years_day,
     fadder_week,
     seventeenth_may,
     easter,
-    # pinse,
-    # himmelfart,
     military_excercise,
     helg_før_fellesferie,
     closed,
-    unknown_outliers,
+    # unknown_outliers,
     covid_christmas21_startjan22,
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
@@ -41,22 +36,15 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     christmas
 )
 from PredictionFunction.Datasets.Regressors.weather_regressors import(
-    warm_dry_weather_spring,
-    warm_and_dry_future,
-    # heavy_rain_fall_weekday, does not have significant effect value : -481.92
-    # heavy_rain_fall_weekday_future,
-    # heavy_rain_fall_weekend, value : 774.36
-    # heavy_rain_fall_weekend_future,
-    # heavy_rain_winter_weekday, -905.903
-    # heavy_rain_winter_weekday_future,
+    # warm_dry_weather_spring,
+    # warm_and_dry_future,
     heavy_rain_winter_weekend,
     heavy_rain_winter_weekend_future,
-    # heavy_rain_spring_weekday, value -1107.74
-    # heavy_rain_spring_weekday_future,
     heavy_rain_spring_weekend,
     heavy_rain_spring_weekend_future,
     non_heavy_rain_fall_weekend,
     non_heavy_rain_fall_weekend_future,
+    warm_dry_weather_spring_tfs
 )
 from PredictionFunction.utils.openinghours import add_opening_hours
 from PredictionFunction.utils.fetch_events import fetch_events
@@ -96,7 +84,7 @@ def filter_hours(df):
     return pd.concat([df_weekday, df_weekend])
 
 
-def bergen(prediction_category,restaurant,merged_data,historical_data,future_data):
+def asane_storesenter(prediction_category,restaurant,merged_data,historical_data,future_data):
     # Group data in dataset by date to prepare it
     event_holidays=pd.DataFrame()
     sales_data_df = historical_data
@@ -190,7 +178,7 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
             "windspeed",
             "air_temperature",
         ]
-    df = warm_dry_weather_spring(df)
+    df = warm_dry_weather_spring_tfs(df)
     #df = heavy_rain_fall_weekday(df)
     #df = heavy_rain_fall_weekend(df)
     #df = heavy_rain_winter_weekday(df)
@@ -224,7 +212,7 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
             helg_før_fellesferie,
             himmelfart,
             closed,
-            unknown_outliers,
+            # unknown_outliers,
 
         )
     )
@@ -240,6 +228,9 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     df["fall_start"] = df["ds"].apply(is_fall_start)
     df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
     df["is_specific_month"] = df["ds"].apply(is_specific_month)
+    high_wekend_mask = (df['y'] >30000)
+    df.loc[high_wekend_mask, 'high_weekend_spring'] = df.loc[high_wekend_mask, 'ds'].apply(is_high_weekend_spring)
+    df.loc[~df['high_weekend_spring'].fillna(False), 'high_weekend_spring'] = False
 
     bergen_venues = {
         "Scruffy Murphy's", "USF Shipyard", "Aztec Shawnee Theatre", "Ulleval", 
@@ -332,6 +323,7 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
             yearly_seasonality=True,
             daily_seasonality=False,
             changepoint_prior_scale=0.1,
+            holidays_mode='additive'
         )
 
     # Add the payday columns as regressors
@@ -358,15 +350,12 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     df["students_early_semester"] = df["ds"].apply(lambda x: early_semester(x, params))
     m.add_regressor("students_early_semester")
     m.add_regressor("warm_and_dry")
-    #m.add_regressor("heavy_rain_fall_weekday")
-    #m.add_regressor("heavy_rain_fall_weekend")
-    #m.add_regressor("heavy_rain_winter_weekday")
     m.add_regressor("heavy_rain_winter_weekend")
-    #m.add_regressor("heavy_rain_spring_weekday")
     m.add_regressor("heavy_rain_spring_weekend")
     m.add_regressor("non_heavy_rain_fall_weekend")
     m.add_regressor("sunshine_amount", standardize=False)
     m.add_regressor("opening_duration")
+    m.add_regressor("high_weekend_spring")
 
     for event_df, regressor_name in regressors_to_add:
         if 'event' in event_df.columns:
@@ -533,6 +522,7 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     future["early_semester_week"] = future["ds"].apply(
         lambda x: early_semester(x, params)
     )
+    future["high_weekend_spring"] = future["ds"].apply(is_high_weekend_spring)
     # future["first_two_weeks_january_21"] = future["ds"].apply(
     #     is_first_two_weeks_january_21
     # )
@@ -565,7 +555,7 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
             inplace=True,
         )
     future = add_opening_hours(future, "Bergen", 12,17)
-    future = warm_and_dry_future(future)
+    future = warm_dry_weather_spring_tfs(future)
     #future = heavy_rain_fall_weekday_future(future)
     #future = heavy_rain_fall_weekend_future(future)
     #future = heavy_rain_winter_weekday_future(future)
@@ -578,4 +568,4 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
 
 
 def location_function(prediction_category,restaurant,merged_data,historical_data,future_data):
-    return bergen(prediction_category,restaurant,merged_data,historical_data,future_data)
+    return asane_storesenter(prediction_category,restaurant,merged_data,historical_data,future_data)

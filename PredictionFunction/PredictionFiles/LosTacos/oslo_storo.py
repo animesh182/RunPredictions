@@ -296,6 +296,7 @@ def oslo_storo(
         else:
             holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)
 
+    event_holidays= pd.concat(objs=[event_holidays, holidays], ignore_index=True)
     # create daily seasonality column setting a number for each day of the week, to be used later
     # Create a Boolean column for each weekday
     for weekday in range(7):

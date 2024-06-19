@@ -337,7 +337,7 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
             )  # Append venue_df along with venue name for regressor addition
         else:
             holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)
-
+    event_holidays= pd.concat(objs=[event_holidays, holidays], ignore_index=True)
     # function for calculating the days before and after the last workday
     def calculate_days(df, last_working_day):
         # Convert 'ds' column to datetime if it's not already

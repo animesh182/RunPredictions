@@ -449,7 +449,7 @@ def fredrikstad(
             )  # Append venue_df along with venue name for regressor addition
         else:
             holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)
-
+    event_holidays= pd.concat(objs=[event_holidays, holidays], ignore_index=True)
     # Define a function to check if the date is within the period of heavy COVID restrictions
 
     # Add new columns in your dataframe to indicate if a date is within or outside the restrictions period

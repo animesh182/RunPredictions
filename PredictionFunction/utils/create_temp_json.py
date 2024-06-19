@@ -25,7 +25,7 @@ initial_json = {
         "Trondheim": 0,
     },
     "Fisketorget": {"Restaurant": 0, "Fisketorget Utsalg": 0},
-    # "Burgerheim": {"Åsane Storsenter": 0},
+    "Burgerheim": {"Åsane Storsenter": 0},
 }
 
 

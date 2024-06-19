@@ -462,6 +462,7 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
     future.fillna(0, inplace=True)
+    event_holidays= pd.concat(objs=[event_holidays, holidays], ignore_index=True)
     return m, future, df,event_holidays
 
 def location_function(prediction_category,restaurant,merged_data,historical_data,future_data):

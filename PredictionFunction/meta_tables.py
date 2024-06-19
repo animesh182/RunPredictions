@@ -40,6 +40,9 @@ from PredictionFunction.PredictionFiles.Fisketorget.fisketorget_utsalg import (
 from PredictionFunction.PredictionFiles.LosTacos.trondheim import (
     location_function as trondheim_function,
 )
+from PredictionFunction.PredictionFiles.Burgerheim.asane_storesenter import(
+    location_function as asane_storesenter_function
+)
 
 
 # This is a datatable showing which city each restaurant locations is in
@@ -76,12 +79,12 @@ data = [
         "Alcohol City": "Oslo",
         "Food City": "Stavanger",
     },
-    # {
-    #     "Restaurant": "Åsane Storsenter",
-    #     "City": "Bergen",
-    #     "Company": "Burgerheim",
-    #     "Parent Restaurant": "",
-    # },
+    {
+        "Restaurant": "Åsane Storsenter",
+        "City": "Bergen",
+        "Company": "Burgerheim",
+        "Parent Restaurant": "",
+    },
 ]
 location_specific_dictionary = {
     "Stavanger": stavanger_function,
@@ -98,6 +101,7 @@ location_specific_dictionary = {
     "Restaurant": restaurant_function,
     "Fisketorget Utsalg": fisketorget_utsalg_function,
     "Trondheim": trondheim_function,
+    "Åsane Storsenter":asane_storesenter_function
 }
 # OBS! for Drammen and Fredrikstad i had trouble finding good weather data, so used Oslo
 weather_locations = {
