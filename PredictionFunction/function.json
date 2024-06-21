@@ -2,17 +2,10 @@
   "scriptFile": "run.py",
   "bindings": [
     {
-      "name": "mytimer1",
+      "name": "mytimer",
       "type": "timerTrigger",
       "direction": "in",
-      "schedule": "0,10,20,30,40,50 5-6 * * *",
-      "runOnStartup": false
-    },
-    {
-      "name": "mytimer2",
-      "type": "timerTrigger",
-      "direction": "in",
-      "schedule": "0,10 7 * * *",
+      "schedule": "0 */13 5-7 * * *",
       "runOnStartup": false
     }
   ]
