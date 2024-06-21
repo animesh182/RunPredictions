@@ -38,9 +38,7 @@ def prepare_data(company, restaurant, start_date, end_date):
     else:
         filtered_sales_data=fetch_salesdata(company,restaurant,start_date,end_date)
     sales_data_df = filtered_sales_data  
-    logging.info("Length before dropping duplicates:", len(sales_data_df))
     sales_data_df.drop_duplicates('date', inplace=True)
-    logging.info("Length after dropping duplicates:", len(sales_data_df))  
     end_date= pd.to_datetime(end_date)
     weather_end_date = end_date + dt.timedelta(days=45)
 
