@@ -4,7 +4,7 @@ import json
 import logging
 
 # Retrieve the connection string and container name from environment variables
-storage_account_link = os.environ.get("AzureWebJobsStorage", None)
+storage_account_link = os.environ.get("SecondaryStorage", None)
 storage_account_location = os.environ.get("storage_name", None)
 import random
 
