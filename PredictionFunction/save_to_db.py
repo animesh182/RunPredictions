@@ -102,7 +102,7 @@ def save_to_db(
         filtered_df["new_yhat"] = filtered_df["yhat"]
 
         for index, row in filtered_df.iterrows():
-            if (row["duration"] != normal_hour) and (row["duration"] != normal_hour_2):
+            if (row['duration'] not in normal_hour) and (row['duration'] not in normal_hour_2):
                 duration_scale = (
                     row["duration"] / row["common_duration"]
                 )  # Scaling based on common duration and normal hour
