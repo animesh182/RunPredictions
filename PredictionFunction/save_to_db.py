@@ -387,12 +387,21 @@ def save_to_db(
                         for concert in valid_concerts:
                             if concert in name:
                                 actual_concert = concert_dictionary[concert]
-                                date_matching_df = actual_concert[
-                                    actual_concert["date"] == date_key
-                                ]
-                                if not date_matching_df.empty:
-                                    concert_name = date_matching_df["name"].iloc[0]
-                                    name = concert_name
+                                if 'date' in actual_concert.columns:
+                                    date_matching_df = actual_concert[
+                                        actual_concert["date"] == date_key
+                                    ]
+                                    if not date_matching_df.empty:
+                                        concert_name = date_matching_df["name"].iloc[0]
+                                        name = concert_name
+                                else:
+                                # elif 'ds' in actual_concert.columns:
+                                    date_matching_df = actual_concert[
+                                        actual_concert["ds"] == date_key
+                                    ]
+                                    if not date_matching_df.empty:
+                                        concert_name = date_matching_df["holiday"].iloc[0]
+                                        name = concert_name
                         if (
                             effect_value > 2000
                             and name in event_holidays["event_names"].values
