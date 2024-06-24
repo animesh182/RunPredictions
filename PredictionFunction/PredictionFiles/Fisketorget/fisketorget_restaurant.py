@@ -329,7 +329,7 @@ def fisketorget_restaurant(
         "Stavanger Konserthus",
         "Stavanger Forum",
     }
-
+    venue_list = fisketorget_venues
     data = {"name": [], "effect": []}
     for venue in fisketorget_venues:
         regressors_to_add = []
@@ -594,7 +594,7 @@ def fisketorget_restaurant(
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
     future.fillna(0, inplace=True)
-    return m, future, df, event_holidays
+    return m, future, df, event_holidays, venue_list
 
 
 def location_function(

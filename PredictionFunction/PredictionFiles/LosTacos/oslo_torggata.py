@@ -332,6 +332,7 @@ def oslo_torggata(
         "Tøyenparken",
         "University of Oslo",
     }
+    venue_list = oslo_torggata_venues
 
     data = {"name": [], "effect": []}
     regressors_to_add = []
@@ -660,7 +661,7 @@ def oslo_torggata(
     future = future.drop_duplicates(subset="ds")
     future.fillna(0, inplace=True)
 
-    return m, future, df, event_holidays
+    return m, future, df, event_holidays, venue_list
 
 
 def location_function(

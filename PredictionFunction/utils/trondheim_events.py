@@ -1,6 +1,7 @@
 import pandas as pd
 import psycopg2
 from PredictionFunction.utils.fetch_events import fetch_events
+import logging
 
 
 def trondheim_events():
@@ -27,6 +28,7 @@ def trondheim_events():
 
     for venue in locations:
         venue_df = fetch_events("Trondheim", venue)
+        logging.info(venue)
         event_holidays = pd.concat(objs=[event_holidays, venue_df], ignore_index=True)
 
     event_holidays["event_names"] = event_holidays["holiday"].fillna(

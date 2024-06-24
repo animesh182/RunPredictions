@@ -314,7 +314,7 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
     # "University of Stavanger", "Vaisenhusgata", "Varhaughallen", "Western Plus Victoria Hotel",
     # "Zetlitz", "Åkra kirke", "Ølberg harbour"
     }
-
+    venue_list = sandnes_venues
     data = {"name": [], "effect": []}
     regressors_to_add = []
     for venue in sandnes_venues:
@@ -616,7 +616,7 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
     future.fillna(0, inplace=True)
 
     print(future.dtypes)
-    return m, future, df, event_holidays
+    return m, future, df, event_holidays,venue_list
 
 
 def location_function(

@@ -390,6 +390,8 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
 
     clusters = weekly_seasonalities(df)
 
+    venue_list = {}
+
     for cluster_label, weeks in clusters.items():
         # Here, you would define the custom seasonality parameters for each cluster
         # You might want to define a custom seasonality function, or apply different parameters based on the cluster label
@@ -434,7 +436,6 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
     future["covid_loose_fall21"] = future["ds"].apply(is_covid_loose_fall21)
     future["christmas_shopping"] = future["ds"].apply(is_christmas_shopping)
     future["christmas_shopping"] = future["ds"].apply(is_christmas_shopping)
-    future= add_opening_hours(future,"Trondheim",12,17)
     future["rain_sum"] = merged_data["rain_sum"]
     future["windspeed"] = merged_data["windspeed"]
     future["air_temperature"] = merged_data["air_temperature"]
@@ -463,7 +464,7 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
         future["ds"] = future["ds"].dt.date
     future.fillna(0, inplace=True)
     event_holidays= pd.concat(objs=[event_holidays, holidays], ignore_index=True)
-    return m, future, df,event_holidays
+    return m, future, df,event_holidays, venue_list
 
 def location_function(prediction_category,restaurant,merged_data,historical_data,future_data):
     return trondheim(prediction_category,restaurant,merged_data,historical_data,future_data)

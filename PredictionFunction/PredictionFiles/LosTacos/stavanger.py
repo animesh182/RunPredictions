@@ -336,7 +336,7 @@ def stavanger(
         "UIS Business School",
         "Fiskepiren",
     }
-
+    venue_list=stavanger_venues
     data = {"name": [], "effect": []}
     regressors_to_add = []
     for venue in stavanger_venues:
@@ -602,7 +602,7 @@ def stavanger(
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
     future.fillna(0, inplace=True)
-    return m, future, df, event_holidays
+    return m, future, df, event_holidays, venue_list
 
 
 def location_function(

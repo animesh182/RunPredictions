@@ -426,7 +426,7 @@ def fredrikstad(
     df = add_opening_hours(df, "Fredrikstad", 11, 16)
 
     fredrikstad_venues = {}
-
+    venue_list = fredrikstad_venues
     data = {"name": [], "effect": []}
     regressors_to_add = []
     for venue in fredrikstad_venues:
@@ -754,7 +754,7 @@ def fredrikstad(
 
     future.fillna(0, inplace=True)
 
-    return m, future, df, event_holidays
+    return m, future, df, event_holidays, venue_list
 
 
 def location_function(

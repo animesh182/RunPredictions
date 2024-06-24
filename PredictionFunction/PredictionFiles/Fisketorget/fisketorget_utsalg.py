@@ -192,7 +192,7 @@ def fisketorget_utsalg(
     # df = heavy_rain_spring_weekday(df)
     # df = heavy_rain_spring_weekend(df)
     df = non_heavy_rain_fall_weekend(df)
-    df = add_opening_hours(df, "Fisketorget Utsalg", 13, 13)
+    df = add_opening_hours(df, "Fisketorget Utsalg", 7, 6)
 
     m = Prophet()
 
@@ -308,6 +308,8 @@ def fisketorget_utsalg(
         "Stavanger Konserthus",
         "Stavanger Forum",
     }
+
+    venue_list=fisketorget_venues
 
     data = {"name": [], "effect": []}
     for venue in fisketorget_venues:
@@ -555,7 +557,7 @@ def fisketorget_utsalg(
     # future = heavy_rain_spring_weekday_future(future)
     # future = heavy_rain_spring_weekend_future(future)
     future = non_heavy_rain_fall_weekend_future(future)
-    future = add_opening_hours(future, "Fisketorget Utsalg", 13, 13)
+    future = add_opening_hours(future, "Fisketorget Utsalg", 7, 6)
     # Calculate the custom regressor values for the future dates
     future["ds"] = pd.to_datetime(future["ds"])
     future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)
@@ -568,7 +570,7 @@ def fisketorget_utsalg(
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
     future.fillna(0, inplace=True)
-    return m, future, df, event_holidays
+    return m, future, df, event_holidays, venue_list
 
 
 def location_function(

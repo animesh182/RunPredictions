@@ -70,7 +70,7 @@ async def main(mytimer: func.TimerRequest) -> None:
             company, restaurant, start_date, end_date
         )
     logging.info(f"Running predictions for now {restaurant}")
-    model, future_df, current_df, event_holidays = restaurant_func(
+    model, future_df, current_df, event_holidays, venues_list = restaurant_func(
         prediction_category, restaurant, merged_data, historical_data, future_data
     )
     logging.info(f"done")
@@ -88,7 +88,7 @@ async def main(mytimer: func.TimerRequest) -> None:
     forecast["historical_sale"] = forecast["historical_sale"].astype(int)
     logging.info(f"done")
     save_to_db(
-        forecast, company, restaurant, prediction_category, event_holidays, end_date
+        forecast, company, restaurant, prediction_category, event_holidays, end_date, venues_list
     )
     data = update_execution_count(data, company, restaurant)
 

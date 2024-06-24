@@ -240,7 +240,7 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
         "James Church","Nygårdsparken Pavilion","Ytre Arna Church","Grieghallen",
         "Teglverket, Kvarteret","Åsane idrettspark","Kulturhuset",
     }
-    
+    venue_list = bergen_venues
     regressors_to_add = []
     for venue in bergen_venues:
         venue_df = fetch_events("Bergen", venue)  # Assuming you have a function Events_dict()
@@ -564,7 +564,7 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
     future = heavy_rain_spring_weekend_future(future)
     future = non_heavy_rain_fall_weekend_future(future)
     future.fillna(0, inplace=True)
-    return m, future, df,event_holidays
+    return m, future, df,event_holidays, venue_list
 
 
 def location_function(prediction_category,restaurant,merged_data,historical_data,future_data):

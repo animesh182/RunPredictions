@@ -18,7 +18,7 @@ from PredictionFunction.utils.trondheim_events import trondheim_events
 
 
 def save_to_db(
-    forecast_df, company, restaurant, prediction_category, event_holidays, end_date
+    forecast_df, company, restaurant, prediction_category, event_holidays, end_date , venues_list
 ):
     # end_date = datetime.now().strftime("%Y-%m-%d")
     logging.info(f"started for {restaurant} in save_to_db")
@@ -165,7 +165,7 @@ def save_to_db(
         filtered_df = filtered_df[filtered_df["ds"] >= datetime.now()]
         concert_dictionary = {}
         valid_concerts = []
-
+        all_venues = venues_list
         if restaurant_name in [
             "Oslo Storo",
             "Oslo City",
@@ -174,82 +174,98 @@ def save_to_db(
             "Oslo Lokka",
             "Oslo Steen_Strom",
             "Oslo Smestad",
-        ]:
-            with psycopg2.connect(**prod_params) as conn:
-                with conn.cursor() as cursor:
-                    cursor.execute(
-                        """ select id from public."accounts_city" where name ='Oslo' """
-                    )
-                    city_uuid = cursor.fetchone()[0]
-                    cursor.execute(
-                        ' select name from public."Predictions_location" where cities_id = %s ',
-                        [city_uuid],
-                    )
-                    oslo_venues = cursor.fetchall()
-            for venue in oslo_venues:
-                dataframe_name = venue[0].lower().replace(" ", "_").replace(",", "")
-                dataframe = fetch_events("Oslo Torggata", venue)
-                concert_dictionary[dataframe_name] = dataframe
-                valid_concerts.append(dataframe_name)
-
+        ]:  
+            event_restaurant= 'Oslo Torggata'
         if restaurant_name in [
             "Stavanger",
             "Sandnes",
             "Restaurant",
             "Fisketorget Utsalg",
         ]:
-            with psycopg2.connect(**prod_params) as conn:
-                with conn.cursor() as cursor:
-                    cursor.execute(
-                        """ select id from public."accounts_city" where name ='Stavanger' """
-                    )
-                    city_uuid = cursor.fetchone()[0]
-                    cursor.execute(
-                        ' select name from public."Predictions_location" where cities_id = %s ',
-                        [city_uuid],
-                    )
-                    oslo_venues = cursor.fetchall()
-            for venue in oslo_venues:
-                dataframe_name = venue[0].lower().replace(" ", "_").replace(",", "")
-                dataframe = fetch_events("Stavanger", venue)
-                concert_dictionary[dataframe_name] = dataframe
-                valid_concerts.append(dataframe_name)
-
-        if restaurant_name in ["Bergen"]:
-            with psycopg2.connect(**prod_params) as conn:
-                with conn.cursor() as cursor:
-                    cursor.execute(
-                        """ select id from public."accounts_city" where name ='Bergen' """
-                    )
-                    city_uuid = cursor.fetchone()[0]
-                    cursor.execute(
-                        ' select name from public."Predictions_location" where cities_id = %s ',
-                        [city_uuid],
-                    )
-                    oslo_venues = cursor.fetchall()
-            for venue in oslo_venues:
-                dataframe_name = venue[0].lower().replace(" ", "_").replace(",", "")
-                dataframe = fetch_events("Bergen", venue)
-                concert_dictionary[dataframe_name] = dataframe
-                valid_concerts.append(dataframe_name)
-
+            event_restaurant= 'Stavanger'
+        if restaurant_name in ["Bergen","Åsane Storsenter"]:
+            event_restaurant= 'Bergen'
         if restaurant_name in ["Fredrikstad"]:
-            with psycopg2.connect(**prod_params) as conn:
-                with conn.cursor() as cursor:
-                    cursor.execute(
-                        """ select id from public."accounts_city" where name ='Fredrikstad' """
-                    )
-                    city_uuid = cursor.fetchone()[0]
-                    cursor.execute(
-                        ' select name from public."Predictions_location" where cities_id = %s ',
-                        [city_uuid],
-                    )
-                    oslo_venues = cursor.fetchall()
-            for venue in oslo_venues:
-                dataframe_name = venue[0].lower().replace(" ", "_").replace(",", "")
-                dataframe = fetch_events("Fredrikstad", venue)
-                concert_dictionary[dataframe_name] = dataframe
-                valid_concerts.append(dataframe_name)
+            event_restaurant= 'Fredrikstad'
+        # with psycopg2.connect(**prod_params) as conn:
+        #     with conn.cursor() as cursor:
+        #         cursor.execute(
+        #             """ select id from public."accounts_city" where name ='Oslo' """
+        #         )
+        #         city_uuid = cursor.fetchone()[0]
+        #         cursor.execute(
+        #             ' select name from public."Predictions_location" where cities_id = %s ',
+        #             [city_uuid],
+        #         )
+        #         oslo_venues = cursor.fetchall()
+        for venue in all_venues:
+            dataframe_name = venue[0].lower().replace(" ", "_").replace(",", "")
+            dataframe = fetch_events(event_restaurant, venue)
+            logging.info(venue)
+            concert_dictionary[dataframe_name] = dataframe
+            valid_concerts.append(dataframe_name)
+
+        # if restaurant_name in [
+        #     "Stavanger",
+        #     "Sandnes",
+        #     "Restaurant",
+        #     "Fisketorget Utsalg",
+        # ]:
+        #     with psycopg2.connect(**prod_params) as conn:
+        #         with conn.cursor() as cursor:
+        #             cursor.execute(
+        #                 """ select id from public."accounts_city" where name ='Stavanger' """
+        #             )
+        #             city_uuid = cursor.fetchone()[0]
+        #             cursor.execute(
+        #                 ' select name from public."Predictions_location" where cities_id = %s ',
+        #                 [city_uuid],
+        #             )
+        #             oslo_venues = cursor.fetchall()
+        #     for venue in oslo_venues:
+        #         dataframe_name = venue[0].lower().replace(" ", "_").replace(",", "")
+        #         dataframe = fetch_events("Stavanger", venue)
+        #         logging.info(venue)
+        #         concert_dictionary[dataframe_name] = dataframe
+        #         valid_concerts.append(dataframe_name)
+
+        # if restaurant_name in ["Bergen"]:
+        #     with psycopg2.connect(**prod_params) as conn:
+        #         with conn.cursor() as cursor:
+        #             cursor.execute(
+        #                 """ select id from public."accounts_city" where name ='Bergen' """
+        #             )
+        #             city_uuid = cursor.fetchone()[0]
+        #             cursor.execute(
+        #                 ' select name from public."Predictions_location" where cities_id = %s ',
+        #                 [city_uuid],
+        #             )
+        #             oslo_venues = cursor.fetchall()
+        #     for venue in oslo_venues:
+        #         dataframe_name = venue[0].lower().replace(" ", "_").replace(",", "")
+        #         dataframe = fetch_events("Bergen", venue)
+        #         logging.info(venue)
+        #         concert_dictionary[dataframe_name] = dataframe
+        #         valid_concerts.append(dataframe_name)
+
+        # if restaurant_name in ["Fredrikstad"]:
+        #     with psycopg2.connect(**prod_params) as conn:
+        #         with conn.cursor() as cursor:
+        #             cursor.execute(
+        #                 """ select id from public."accounts_city" where name ='Fredrikstad' """
+        #             )
+        #             city_uuid = cursor.fetchone()[0]
+        #             cursor.execute(
+        #                 ' select name from public."Predictions_location" where cities_id = %s ',
+        #                 [city_uuid],
+        #             )
+        #             oslo_venues = cursor.fetchall()
+        #     for venue in oslo_venues:
+        #         dataframe_name = venue[0].lower().replace(" ", "_").replace(",", "")
+        #         dataframe = fetch_events("Fredrikstad", venue)
+        #         logging.info(venue)
+        #         concert_dictionary[dataframe_name] = dataframe
+        #         valid_concerts.append(dataframe_name)
 
         # SAVE DAILY PREDICTIONS
         # prediction_data = filtered_df[['ds', 'yhat']]

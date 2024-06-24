@@ -489,6 +489,7 @@ def oslo_city(
         "Salt Langhuset",
         "Parkteatret Scene",
     }
+    venue_list = oslo_city_venues
 
     data = {"name": [], "effect": []}
     regressors_to_add = []
@@ -569,7 +570,7 @@ def oslo_city(
     df["rain_windy_weekend"] = df.apply(is_saturday_rainy_windy, axis=1)
     # df['rain_weekend'] =df['rain_weekend'].fillna(0)
     df["rain_windy_weekend"] = df["rain_windy_weekend"].fillna(0)
-    df = add_opening_hours(df, "Oslo City", 12, 12)
+    df = add_opening_hours(df, "Oslo City", 12, 10)
     # Add the custom regressor and seasonalities before fitting the model
     if prediction_category == "hour":
         m = Prophet(
@@ -817,9 +818,9 @@ def oslo_city(
     # future = non_heavy_rain_fall_weekend_future(future)
     future.fillna(0, inplace=True)
     future = future.drop_duplicates(subset="ds")
-    future = add_opening_hours(future, "Oslo City", 12, 12)
+    future = add_opening_hours(future, "Oslo City", 12, 10)
 
-    return m, future, df, event_holidays
+    return m, future, df, event_holidays, venue_list
 
 
 def location_function(

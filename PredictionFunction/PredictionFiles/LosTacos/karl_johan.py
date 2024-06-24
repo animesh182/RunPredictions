@@ -307,6 +307,7 @@ def karl_johan(
     }
 
     data = {"name": [], "effect": []}
+    venue_list = karl_johan_venues
     regressors_to_add = []
     for venue in karl_johan_venues:
         # for venue in karl_johan_venues:
@@ -553,7 +554,7 @@ def karl_johan(
     future.fillna(0, inplace=True)
     future = add_opening_hours(future, "Karl Johan", 12, 17)
 
-    return m, future, df, event_holidays
+    return m, future, df, event_holidays, venue_list
 
 
 def location_function(

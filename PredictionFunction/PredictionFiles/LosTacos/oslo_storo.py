@@ -272,7 +272,7 @@ def oslo_storo(
         "Salt Langhuset",
         "Parkteatret Scene",
     }
-
+    venue_list= oslo_storo_venues
     data = {"name": [], "effect": []}
     regressors_to_add = []
     for venue in oslo_storo_venues:
@@ -506,7 +506,7 @@ def oslo_storo(
     future.fillna(0, inplace=True)
     # event_holidays.to_csv("event_holidaysall.csv")
 
-    return m, future, df, event_holidays
+    return m, future, df, event_holidays, venue_list
 
 
 def location_function(

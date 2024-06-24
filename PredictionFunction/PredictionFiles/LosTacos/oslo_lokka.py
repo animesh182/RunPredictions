@@ -271,7 +271,7 @@ def oslo_lokka_jtorget_smestad_torggata(
         "Oslo Concert Hall",
         "Salt Langhuset",
     }
-
+    venue_list= oslo_lokka_venues
     data = {"name": [], "effect": []}
     regressors_to_add = []
     for venue in oslo_lokka_venues:
@@ -536,7 +536,7 @@ def oslo_lokka_jtorget_smestad_torggata(
     # future = non_heavy_rain_fall_weekend_future(future)
     future.fillna(0, inplace=True)
 
-    return m, future, df, event_holidays
+    return m, future, df, event_holidays, venue_list
 
 
 def location_function(

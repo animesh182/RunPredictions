@@ -270,7 +270,7 @@ def oslo_steenstrom(
         "Salt Langhuset",
         "Parkteatret Scene",
     }
-
+    venue_list = oslo_steen_strom_venues
     data = {"name": [], "effect": []}
     regressors_to_add = []
     for venue in oslo_steen_strom_venues:
@@ -540,7 +540,7 @@ def oslo_steenstrom(
     # future = non_heavy_rain_fall_weekend_future(future)
     future.fillna(0, inplace=True)
 
-    return m, future, df, event_holidays
+    return m, future, df, event_holidays,venue_list
 
 
 def location_function(

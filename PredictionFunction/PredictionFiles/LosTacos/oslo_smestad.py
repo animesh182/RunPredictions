@@ -270,7 +270,7 @@ def oslo_smestad(
         "Tøyenparken",
         "University of Oslo",
     }
-
+    venue_list = oslo_smestad_venues
     data = {"name": [], "effect": []}
     regressors_to_add = []
     for venue in oslo_smestad_venues:
@@ -454,7 +454,7 @@ def oslo_smestad(
     # future = non_heavy_rain_fall_weekend_future(future)
     future.fillna(0, inplace=True)
 
-    return m, future, df, event_holidays
+    return m, future, df, event_holidays,venue_list
 
 
 def location_function(
