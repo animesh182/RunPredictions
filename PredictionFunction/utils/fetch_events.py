@@ -88,14 +88,5 @@ def fetch_events(restaurant, location_name):
     return (
         pd.DataFrame(formatted_events)
         if len(events_dict) >= threshold
-        or any(
-            (
-                (event["end_date"] - event["start_date"]).days
-                if event.get("end_date") and event.get("start_date")
-                else 0
-            )
-            >= threshold
-            for event in events_dict
-        )
         else pd.DataFrame(formatted_holidays)
     )
