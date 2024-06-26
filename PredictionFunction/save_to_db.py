@@ -403,6 +403,7 @@ def save_to_db(
                         for concert in valid_concerts:
                             if concert in name:
                                 actual_concert = concert_dictionary[concert]
+                                logging.info(name)
                                 if 'date' in actual_concert.columns:
                                     date_matching_df = actual_concert[
                                         actual_concert["date"] == date_key
@@ -410,8 +411,7 @@ def save_to_db(
                                     if not date_matching_df.empty:
                                         concert_name = date_matching_df["name"].iloc[0]
                                         name = concert_name
-                                else:
-                                # elif 'ds' in actual_concert.columns:
+                                elif 'ds' in actual_concert.columns:
                                     date_matching_df = actual_concert[
                                         actual_concert["ds"] == date_key
                                     ]

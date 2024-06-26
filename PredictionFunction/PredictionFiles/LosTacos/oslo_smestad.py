@@ -256,20 +256,17 @@ def oslo_smestad(
 
     oslo_smestad_venues = {
         "Sentrum Scene",
-        "Rockefeller",
-        "Fornebu",
-        "Dronning Sonja KunstStall",
-        "Langkaia",
+          "Fornebu",
+          "Oslo Storgata",
+        "Rockefeller", 
+        "Cosmopolite, Oslo",
         "Maihaugsalen",
-        "The Norwegian Theatre",
-        "Oslo Concert Hall",
-        "Oslo Central Station",
-        "Oslo Cathedral",
-        "Sommerrogata",
-        "St. Olavs",
-        "Tøyenparken",
+        "Nordic Black Theatre",
+        "Riksscenen Oslo",
         "University of Oslo",
+        "Tons of Rock"
     }
+
     venue_list = oslo_smestad_venues
     data = {"name": [], "effect": []}
     regressors_to_add = []
