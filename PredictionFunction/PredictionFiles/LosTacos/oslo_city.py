@@ -55,6 +55,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
     himmelfart,
     lockdown,
     oslo_pride,
+    musikkfestival
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
@@ -183,6 +184,8 @@ def oslo_city(
     df = heavy_rain_fall_weekend(df)
     df = heavy_rain_winter_weekday(df)
     df = heavy_rain_spring_weekday(df)
+    df['sunday_regressor'] = df['ds'].apply(lambda x: 1 if (x.weekday() == 6 and x.month != 12 and x.year in [2022, 2023, 2024]) else 0)
+
     m = Prophet()
 
     ### Holidays and other repeating outliers
@@ -394,7 +397,9 @@ def oslo_city(
             sunday_2023,
             # sunday_2024,
             jan_closed,
-            unusual_low_sale
+            unusual_low_sale,
+            oslo_pride,
+            musikkfestival
         )
     )
 
@@ -611,6 +616,7 @@ def oslo_city(
     m.add_regressor("opening_duration")
     m.add_regressor("days_since_last_30")
     m.add_regressor("sunshine_amount", standardize=False)
+    m.add_regressor('sunday_regressor')
 
     # add event regressors
     for event_df, regressor_name in regressors_to_add:
@@ -790,6 +796,7 @@ def oslo_city(
     future.loc[~future_date_mask, "custom_regressor"] = 0
     future["specific_month"] = future["ds"].apply(is_specific_month)
     future["is_fellesferie"] = future["ds"].apply(is_fellesferie)
+    future['sunday_regressor'] = future['ds'].apply(lambda x: 1 if (x.weekday() == 6 and x.month != 12) else 0)
 
     # future = pd.merge(future,df[['ds','rain_weekend']],on='ds',how='left')
     # future["rain_weekend"].fillna(0, inplace=True)

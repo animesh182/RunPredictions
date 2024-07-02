@@ -31,6 +31,8 @@ from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.bergen_holidays i
     closed,
     unknown_outliers,
     covid_christmas21_startjan22,
+    july_closed,
+    bergen_pride
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     first_may,
@@ -225,6 +227,8 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
             himmelfart,
             closed,
             unknown_outliers,
+            july_closed,
+            bergen_pride
 
         )
     )
@@ -244,7 +248,7 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     bergen_venues = {
         "Scruffy Murphy's", "USF Shipyard", "Aztec Shawnee Theatre", "Ulleval", 
         "Gallery Geo", "Lydgalleriet","Madam Felle","Bergenhus Festning", 
-        "Pokémon TCG","St. Mary's Church","Varden Amfi","Håkonshallen",
+        "Outland Bergen","St. Mary's Church","Varden Amfi","Håkonshallen",
         "Festplassen","Åsane kulturhus","Bergen County Plaza","Litteraturhuset",
         "James Church","Nygårdsparken Pavilion","Ytre Arna Church","Grieghallen",
         "Teglverket, Kvarteret","Åsane idrettspark","Kulturhuset",

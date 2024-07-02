@@ -61,7 +61,9 @@ holiday_parameter_type_categorization = {
     "weekendmiddec_21covid": "special",
     "weekly_fall_start": "special",
     "weekly_fellesferie": "special",
-    "Gladmat":"event"
+    "Gladmat":"event",
+    "Last day of school":"event",
+    "First day of school":"event"
 }
 
 article_supergroup_values = [

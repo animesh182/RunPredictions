@@ -162,6 +162,33 @@ closed = pd.DataFrame(
         }
     )
 
+july_closed = pd.DataFrame({
+            "holiday": "july_closed_2022",
+            "ds": pd.to_datetime(
+                ["2022-07-31"]
+            ),
+            "lower_window": -31,
+            "upper_window": 0,
+            "effect":-10000,
+            "prior_scale": 1
+        }
+    )
+
+bergen_pride = pd.DataFrame(
+        {
+            "holiday": "Bergen Pride",
+            "ds": pd.to_datetime(
+                [
+                    "2023-06-10",
+                    "2024-06-08"
+
+                ]
+            ),
+            "lower_window": 0,
+            "upper_window": 0,
+        }
+    )
+
 unknown_outliers = pd.DataFrame(
         {
             "holiday": "unknown_outliers",
@@ -193,6 +220,25 @@ covid_christmas21_startjan22 = pd.DataFrame(
                 ]
             ),
             "lower_window": 0,
+            "upper_window": 0,
+        }
+    )
+
+
+last_day_of_school = pd.DataFrame(
+        {
+            "holiday": "Last day of school",
+            "ds": pd.to_datetime(["2023-06-21","2024-06-28","2025-06-30"]),
+            "lower_window": 0,
+            "upper_window": 1,
+        }
+    )
+
+first_day_of_school = pd.DataFrame(
+        {
+            "holiday": "First day of school",
+            "ds": pd.to_datetime(["2022-08-08","2023-08-01","2024-08-15","2025-08-01"]),
+            "lower_window": -1,
             "upper_window": 0,
         }
     )

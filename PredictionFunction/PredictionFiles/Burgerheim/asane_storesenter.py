@@ -26,6 +26,9 @@ from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.bergen_holidays i
     closed,
     # unknown_outliers,
     covid_christmas21_startjan22,
+    last_day_of_school,
+    first_day_of_school,
+    bergen_pride
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     first_may,
@@ -49,39 +52,39 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import(
 from PredictionFunction.utils.openinghours import add_opening_hours
 from PredictionFunction.utils.fetch_events import fetch_events
 
-def filter_hours(df):
-    # Filter the DataFrame based on the day and time
-    weekday_mask = df["ds"].dt.weekday < 4  # Monday to Friday
-    weekend_mask = df["ds"].dt.weekday >= 4  # Saturday and Sunday
+# def filter_hours(df):
+#     # Filter the DataFrame based on the day and time
+#     weekday_mask = df["ds"].dt.weekday < 4  # Monday to Friday
+#     weekend_mask = df["ds"].dt.weekday >= 4  # Saturday and Sunday
 
-    df_weekday = df[weekday_mask]
-    df_weekend = df[weekend_mask]
+#     df_weekday = df[weekday_mask]
+#     df_weekend = df[weekend_mask]
 
-    # Set the hours dynamically based on the day of the week
-    df_weekday = df_weekday[
-        (
-            df_weekday["ds"].dt.hour
-            >= int(restaurant_hours["Bergen"]["weekday"]["starting"])
-        )
-        & (
-            df_weekday["ds"].dt.hour
-            <= int(restaurant_hours["Bergen"]["weekday"]["ending"])
-        )
-    ]
+#     # Set the hours dynamically based on the day of the week
+#     df_weekday = df_weekday[
+#         (
+#             df_weekday["ds"].dt.hour
+#             >= int(restaurant_hours["Bergen"]["weekday"]["starting"])
+#         )
+#         & (
+#             df_weekday["ds"].dt.hour
+#             <= int(restaurant_hours["Bergen"]["weekday"]["ending"])
+#         )
+#     ]
 
-    df_weekend = df_weekend[
-        (
-            df_weekend["ds"].dt.hour
-            >= int(restaurant_hours["Bergen"]["weekend"]["starting"])
-        )
-        | (
-            df_weekend["ds"].dt.hour
-            <= int(restaurant_hours["Bergen"]["weekend"]["ending"])
-        )
-    ]
+#     df_weekend = df_weekend[
+#         (
+#             df_weekend["ds"].dt.hour
+#             >= int(restaurant_hours["Bergen"]["weekend"]["starting"])
+#         )
+#         | (
+#             df_weekend["ds"].dt.hour
+#             <= int(restaurant_hours["Bergen"]["weekend"]["ending"])
+#         )
+#     ]
 
-    # Concatenate the weekday and weekend DataFrames
-    return pd.concat([df_weekday, df_weekend])
+#     # Concatenate the weekday and weekend DataFrames
+#     return pd.concat([df_weekday, df_weekend])
 
 
 def asane_storesenter(prediction_category,restaurant,merged_data,historical_data,future_data):
@@ -213,7 +216,9 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
             himmelfart,
             closed,
             # unknown_outliers,
-
+            last_day_of_school,
+            first_day_of_school,
+            bergen_pride
         )
     )
 
@@ -467,44 +472,44 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
     else:
         future = m.make_future_dataframe(periods=60, freq="D")
 
-    if prediction_category == "hour":
-        # print(future)
-        # future['ds'] = pd.to_datetime(future['ds'].astype(str) + ' ' + future['hour'].astype(str) + ':00:00')
-        # Filter the DataFrame based on the day and time
-        weekday_mask = future["ds"].dt.weekday < 4  # Monday to Friday
-        weekend_mask = future["ds"].dt.weekday >= 4  # Saturday and Sunday
+    # if prediction_category == "hour":
+    #     # print(future)
+    #     # future['ds'] = pd.to_datetime(future['ds'].astype(str) + ' ' + future['hour'].astype(str) + ':00:00')
+    #     # Filter the DataFrame based on the day and time
+    #     weekday_mask = future["ds"].dt.weekday < 4  # Monday to Friday
+    #     weekend_mask = future["ds"].dt.weekday >= 4  # Saturday and Sunday
 
-        df_weekday = future[weekday_mask]
-        df_weekend = future[weekend_mask]
-        # print(df_weekday)
-        # print(df_weekend)
-        # Set the hours dynamically based on the day of the week
-        df_weekday = df_weekday[
-            (
-                df_weekday["ds"].dt.hour
-                >= int(restaurant_hours["Bergen"]["weekday"]["starting"])
-            )
-            & (
-                df_weekday["ds"].dt.hour
-                <= int(restaurant_hours["Bergen"]["weekday"]["ending"])
-            )
-        ]
+    #     df_weekday = future[weekday_mask]
+    #     df_weekend = future[weekend_mask]
+    #     # print(df_weekday)
+    #     # print(df_weekend)
+    #     # Set the hours dynamically based on the day of the week
+    #     df_weekday = df_weekday[
+    #         (
+    #             df_weekday["ds"].dt.hour
+    #             >= int(restaurant_hours["Bergen"]["weekday"]["starting"])
+    #         )
+    #         & (
+    #             df_weekday["ds"].dt.hour
+    #             <= int(restaurant_hours["Bergen"]["weekday"]["ending"])
+    #         )
+    #     ]
 
-        df_weekend = df_weekend[
-            (
-                df_weekend["ds"].dt.hour
-                >= int(restaurant_hours["Bergen"]["weekend"]["starting"])
-            )
-            | (
-                df_weekend["ds"].dt.hour
-                <= int(restaurant_hours["Bergen"]["weekend"]["ending"])
-            )
-        ]
+    #     df_weekend = df_weekend[
+    #         (
+    #             df_weekend["ds"].dt.hour
+    #             >= int(restaurant_hours["Bergen"]["weekend"]["starting"])
+    #         )
+    #         | (
+    #             df_weekend["ds"].dt.hour
+    #             <= int(restaurant_hours["Bergen"]["weekend"]["ending"])
+    #         )
+    #     ]
 
-        # Concatenate the weekday and weekend DataFrames
-        future = pd.concat([df_weekday, df_weekend])
+    #     # Concatenate the weekday and weekend DataFrames
+    #     future = pd.concat([df_weekday, df_weekend])
 
-    # add the last working day and the +/- 5 days
+    # # add the last working day and the +/- 5 days
     #future = calculate_days_30(future, last_working_day)
     
     

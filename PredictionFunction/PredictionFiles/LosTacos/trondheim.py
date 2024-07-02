@@ -60,6 +60,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
 )
 
 from PredictionFunction.Datasets.Regressors.weather_regressors import(
+    warm_dry_weather_spring_fss,
     # warm_dry_weather_spring,
     # warm_and_dry_future,
     # heavy_rain_fall_weekday,
@@ -183,6 +184,7 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
     # df = heavy_rain_spring_weekday(df)
     # df = heavy_rain_spring_weekend(df)
     df = non_heavy_rain_fall_weekend(df)
+    df = warm_dry_weather_spring_fss(df)
     m = Prophet()
 
     ### Holidays and other repeating outliers
@@ -382,6 +384,7 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
     )
 
     m.add_regressor("sunshine_amount", standardize=False)
+    m.add_regressor("warm_and_dry")
     m.add_regressor("opening_duration")
     m.add_regressor("heavy_rain_fall_weekend")
     m.add_regressor("heavy_rain_winter_weekday")
@@ -451,6 +454,7 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
     # future = heavy_rain_spring_weekend_future(future)
     future = non_heavy_rain_fall_weekend_future(future)
     future = add_opening_hours(future,"Trondheim",12,17)
+    future = warm_dry_weather_spring_fss(future)
     # Calculate the custom regressor values for the future dates
     future["ds"] = pd.to_datetime(future["ds"])
     future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)
