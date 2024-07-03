@@ -493,6 +493,7 @@ def oslo_city(
         "Oslo Concert Hall",
         "Salt Langhuset",
         "Parkteatret Scene",
+        "Tons of Rock"
     }
     venue_list = oslo_city_venues
 
@@ -615,7 +616,7 @@ def oslo_city(
     m.add_regressor("rain_windy_weekend")
     m.add_regressor("opening_duration")
     m.add_regressor("days_since_last_30")
-    m.add_regressor("sunshine_amount", standardize=False)
+    m.add_regressor("sunshine_amount")
     m.add_regressor('sunday_regressor')
 
     # add event regressors

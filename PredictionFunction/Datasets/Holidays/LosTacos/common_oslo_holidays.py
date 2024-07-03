@@ -104,7 +104,7 @@ lockdown = pd.DataFrame(
 oslo_pride = pd.DataFrame(
         {
             "holiday": "oslo_pride",
-            "ds": pd.to_datetime(["2023-07-01"]),
+            "ds": pd.to_datetime(["2023-07-01","2024-06-29"]),
             "lower_window": -7,
             "upper_window": 3,
         }
@@ -117,4 +117,29 @@ musikkfestival = pd.DataFrame(
             "lower_window": 0,
             "upper_window": 1,
         }
-    )  
+    ) 
+
+easter = pd.DataFrame(
+        {
+            "holiday": "easter",
+            "ds": pd.to_datetime(
+                [
+                    "2022-04-14",
+                    "2022-04-15",
+                    "2022-04-16",
+                    "2022-04-17",
+                    "2023-04-06",
+                    "2023-04-07",
+                    "2023-04-08",
+                    "2023-04-09",
+                    "2024-03-24",
+                    "2024-03-28",
+                    "2024-03-29",
+                    "2024-03-31",
+                    "2024-04-01",
+                ]
+            ),
+            "lower_window": 0,
+            "upper_window": 0,
+        }
+    ) 

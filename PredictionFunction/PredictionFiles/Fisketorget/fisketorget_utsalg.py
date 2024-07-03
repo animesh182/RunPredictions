@@ -72,6 +72,7 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import (
     # warm_and_dry_future,
     # heavy_rain_fall_weekday,
     # heavy_rain_fall_weekday_future,
+    warm_dry_weather_spring_tfs,
     heavy_rain_fall_weekend,
     heavy_rain_fall_weekend_future,
     heavy_rain_winter_weekday,
@@ -186,6 +187,7 @@ def fisketorget_utsalg(
 
     # df = warm_dry_weather_spring(df)
     # df = heavy_rain_fall_weekday(df)
+    df = warm_dry_weather_spring_tfs(df)
     df = heavy_rain_fall_weekend(df)
     df = heavy_rain_winter_weekday(df)
     df = heavy_rain_winter_weekend(df)
@@ -202,7 +204,12 @@ def fisketorget_utsalg(
     ONS = pd.DataFrame(
         {
             "holiday": "ONS",
-            "ds": pd.to_datetime(["2022-08-31"]),
+            "ds": pd.to_datetime(["2022-08-31",
+                                  "2024-08-26",
+                                  "2024-08-27",
+                                  "2024-08-28",
+                                  "2024-08-29",
+                                  ]),
             "lower_window": 0,
             "upper_window": 0,
         }
@@ -213,24 +220,21 @@ def fisketorget_utsalg(
             christmas_day,
             firstweek_jan,
             new_year_eve,
-            fadder_week,
-            landstreff_russ,
+            # fadder_week,
+            # landstreff_russ,
             first_may,
             eight_may,
             easter,
-            easter_mondaydayoff,
             seventeenth_may,
             pinse,
             fjoge,
-            stor_konsert_ukedag,
             himmelfart,
             ONS,
             outliers,
             closed_days,
-            cruise_ship_arrivals_holiday,
-            maijazz_lørdag,
-            utopia_friday,
-            utopia_saturday,
+            # cruise_ship_arrivals_holiday,
+            # utopia_friday,
+            # utopia_saturday,
             skeiva_natta,
             military_excercise,
             hostferie_sor_ostlandet_weekdend,
@@ -428,11 +432,11 @@ def fisketorget_utsalg(
 
     # m.add_seasonality(name='weekly_in_may', period=7, fourier_order=3, condition_name='is_may')
 
-    # m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
+    m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
 
     # Add the conditional regressor to the model
     m.add_regressor("sunshine_amount", standardize=False)
-    # m.add_regressor("warm_and_dry")
+    m.add_regressor("warm_and_dry")
     # m.add_regressor("heavy_rain_fall_weekday")
     m.add_regressor("heavy_rain_fall_weekend")
     m.add_regressor("heavy_rain_winter_weekday")
@@ -441,7 +445,6 @@ def fisketorget_utsalg(
     # m.add_regressor("heavy_rain_spring_weekend")
     m.add_regressor("non_heavy_rain_fall_weekend")
     m.add_regressor("opening_duration")
-    m.add_regressor("sunshine_amount", standardize=False)
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:
             m.add_regressor(regressor_name)
@@ -549,6 +552,7 @@ def fisketorget_utsalg(
             )
             future[event_column].fillna(0, inplace=True)
 
+    future = warm_dry_weather_spring_tfs(future)
     # future = warm_and_dry_future(future)
     # future = heavy_rain_fall_weekday_future(future)
     future = heavy_rain_fall_weekend_future(future)

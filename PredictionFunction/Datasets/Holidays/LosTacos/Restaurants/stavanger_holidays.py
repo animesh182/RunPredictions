@@ -100,15 +100,18 @@ easter = pd.DataFrame(
                     "2022-04-15",
                     "2022-04-16",
                     "2022-04-17",
-                    "2023-04-01",
+                    "2022-04-18",
                     "2023-04-02",
-                    "2023-04-03",
-                    "2023-04-04",
-                    "2023-04-05",
                     "2023-04-06",
                     "2023-04-07",
-                    "2023-04-08",
                     "2023-04-09",
+                    "2023-04-10",
+                    "2024-03-24",
+                    "2024-03-28",
+                    "2024-03-29",
+                    "2024-03-30",
+                    "2024-03-31",
+                    "2024-04-01",
                 ]
             ),
             "lower_window": 0,
@@ -170,6 +173,15 @@ fjoge = pd.DataFrame(
                     "2023-07-12",
                     "2023-07-19",
                     "2023-07-26",
+                    "2023-07-27",
+                    "2023-07-28",
+                    "2023-07-29",
+                    "2023-07-29",
+                    "2023-07-29",
+                    "2024-07-24",
+                    "2024-07-25",
+                    "2024-07-26",
+                    "2024-07-27",
                 ]
             ),
             "lower_window": 0,
@@ -177,23 +189,6 @@ fjoge = pd.DataFrame(
         }
     )
 
-stor_konsert_ukedag = pd.DataFrame(
-        {
-            "holiday": "stor_konsert_ukedag",
-            "ds": pd.to_datetime(["2022-06-14", "2022-06-15"]),
-            "lower_window": 0,
-            "upper_window": 0,
-        }
-    )
-
-maijazz_lørdag = pd.DataFrame(
-        {
-            "holiday": "Maijazz lørdag",
-            "ds": pd.to_datetime(["2022-05-14", "2023-05-13", "2024-05-15"]),
-            "lower_window": 0,
-            "upper_window": 0,
-        }
-    )
 military_excercise = pd.DataFrame(
         {
             "holiday": "Militærøvelse",
@@ -220,7 +215,16 @@ closed_days = pd.DataFrame(
         {
             "holiday": "closed_days",
             "ds": pd.to_datetime(
-                ["2021-12-23", "2021-12-24", "2021-12-25", "2021-12-26"]
+                ["2021-12-23", "2021-12-24", "2021-12-25", "2021-12-26",
+                 "2023-12-24",
+                    "2023-12-25",
+                    "2023-12-31",
+                    "2024-12-24",
+                    "2024-12-25",
+                    "2024-12-31",
+                    "2025-12-24",
+                    "2025-12-25",
+                    "2025-12-31",]
             ),
             "lower_window": 0,
             "upper_window": 0,
@@ -244,22 +248,22 @@ pay_day = pd.DataFrame(
             "upper_window": 4,
         }
     )
-utopia_friday = pd.DataFrame(
-        {
-            "holiday": "Utopia",
-            "ds": pd.to_datetime(["2022-08-26", "2023-08-25"]),
-            "lower_window": 0,
-            "upper_window": 0,
-        }
-    )
-utopia_saturday = pd.DataFrame(
-        {
-            "holiday": "Utopia",
-            "ds": pd.to_datetime(["2022-08-27", "2023-08-26"]),
-            "lower_window": 0,
-            "upper_window": 0,
-        }
-    )
+# utopia_friday = pd.DataFrame(
+#         {
+#             "holiday": "Utopia",
+#             "ds": pd.to_datetime(["2022-08-26", "2023-08-25"]),
+#             "lower_window": 0,
+#             "upper_window": 0,
+#         }
+#     )
+# utopia_saturday = pd.DataFrame(
+#         {
+#             "holiday": "Utopia",
+#             "ds": pd.to_datetime(["2022-08-27", "2023-08-26"]),
+#             "lower_window": 0,
+#             "upper_window": 0,
+#         }
+#     )
 skeiva_natta = pd.DataFrame(
         {
             "holiday": "Skeiva Nattå",
@@ -331,6 +335,24 @@ april_closed = pd.DataFrame(
             "holiday": "Closed April",
             "ds": pd.to_datetime(["2023-04-27"]),
             "lower_window": -20,
+            "upper_window": 0,
+        }
+    )
+
+june_july = pd.DataFrame(
+        {
+            "holiday": "june_july",
+            "ds": pd.to_datetime(["2022-07-02", "2023-07-01"]),
+            "lower_window": -3,
+            "upper_window": 0,
+        }
+    )
+
+stavanger_pride = pd.DataFrame(
+        {
+            "holiday": "Stavanger_pride",
+            "ds": pd.to_datetime(["2022-09-03","2023-09-02", "2024-09-07"]),
+            "lower_window": -1,
             "upper_window": 0,
         }
     )

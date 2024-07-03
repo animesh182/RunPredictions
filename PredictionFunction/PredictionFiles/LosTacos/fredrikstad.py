@@ -54,6 +54,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.fredrikstad_holid
     idyll,
     closed_days,
     black_friday,
+    feb_closed
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
@@ -375,6 +376,7 @@ def fredrikstad(
             halloween_day,
             hostferie_sor_ostlandet_weekdend,
             hostferie_sor_ostlandet_weekdays,
+            feb_closed
         )
     )
 
@@ -566,10 +568,11 @@ def fredrikstad(
     m.add_regressor("heavy_rain_spring_weekday")
     m.add_regressor("heavy_rain_spring_weekend")
     # m.add_regressor("non_heavy_rain_fall_weekend")
-
     m.add_regressor("custom_regressor")
     # m.add_regressor('covid_restriction')
     m.add_regressor("closed_jan")
+    m.add_regressor("opening_duration")
+    m.add_regressor("sunshine_amount")
 
     m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
     m.add_seasonality(
@@ -604,12 +607,11 @@ def fredrikstad(
         fourier_order=3,
         condition_name="christmas_shopping",
     )
+    m.add_seasonality(name='monthly', period=30.5, fourier_order=5)
     # m.add_seasonality(name='not_christmas_shopping', period=7, fourier_order=3,
     #                  condition_name='not_christmas_shopping')
 
     # Add the conditional regressor to the model
-    m.add_regressor("opening_duration")
-    m.add_regressor("sunshine_amount", standardize=False)
 
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:

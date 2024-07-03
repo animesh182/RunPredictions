@@ -65,6 +65,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
     himmelfart,
     lockdown,
     oslo_pride,
+    musikkfestival
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
@@ -192,7 +193,6 @@ def oslo_storo(
             firstweek_jan,
             first_may,
             easter,
-            easter_mondaydayoff,
             seventeenth_may,
             pinse,
             himmelfart,
@@ -206,6 +206,7 @@ def oslo_storo(
             halloween_weekend,
             hostferie_sor_ostlandet_weekdend,
             first_weekend_christmas_school_vacation,
+            musikkfestival
         )
     )
 
@@ -271,6 +272,7 @@ def oslo_storo(
         "Nordic Black Theatre",
         "Salt Langhuset",
         "Parkteatret Scene",
+        "Tons of Rock"
     }
     venue_list= oslo_storo_venues
     data = {"name": [], "effect": []}
@@ -341,7 +343,7 @@ def oslo_storo(
     m.add_regressor("heavy_rain_spring_weekday")
     m.add_regressor("heavy_rain_spring_weekend")
     # m.add_regressor("non_heavy_rain_fall_weekend")
-    m.add_regressor("sunshine_amount", standardize=False)
+    m.add_regressor("sunshine_amount")
     m.add_regressor("opening_duration")
     m.add_regressor("custom_regressor")
 
@@ -358,6 +360,10 @@ def oslo_storo(
         period=7,
         fourier_order=1000,
         condition_name="covid_restriction_christmas",
+    )
+
+    m.add_seasonality(
+        name="is_fellesferie", period=30.5, fourier_order=5, condition_name="is_fellesferie"
     )
 
     m.add_seasonality(

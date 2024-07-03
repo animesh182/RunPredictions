@@ -183,3 +183,12 @@ black_friday = pd.DataFrame(
             "upper_window": 0,
         }
     )      
+
+feb_closed=  pd.DataFrame(
+        {
+            "holiday": "Closed february 2024",
+            "ds": pd.to_datetime(["2024-02-29"]),
+            "lower_window": -30,
+            "upper_window": 0,
+        }
+    )   

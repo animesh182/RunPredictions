@@ -111,7 +111,7 @@ new_years_day = pd.DataFrame(
 pinse = pd.DataFrame(
         {
             "holiday": "Pinse",
-            "ds": pd.to_datetime(["2022-06-06", "2023-05-29"]),
+            "ds": pd.to_datetime(["2022-06-06", "2023-05-29","2024-05-20"]),
             "lower_window": -4,
             "upper_window": 0,
         }
@@ -120,7 +120,7 @@ pinse = pd.DataFrame(
 himmelfart = pd.DataFrame(
         {
             "holiday": "Himmelfart",
-            "ds": pd.to_datetime(["2022-05-26"]),
+            "ds": pd.to_datetime(["2022-05-26","2023-05-18","2024-05-09"]),
             "lower_window": -1,
             "upper_window": 0,
         }
@@ -144,15 +144,15 @@ halloween_day = pd.DataFrame(
 hostferie_sor_ostlandet_weekdays = pd.DataFrame(
     {
         "holiday": "Høstferie weekdays",
-        "ds": pd.to_datetime(["2023-10-05", "2022-10-06", "2021-10-07"]),
-        "lower_window": -1,
+        "ds": pd.to_datetime(["2024-10-4","2023-10-05", "2022-10-07"]),
+        "lower_window": -4,
         "upper_window": 0,
     }
 ) 
 hostferie_sor_ostlandet_weekdend = pd.DataFrame(
     {
         "holiday": "Høstferie weekend",
-        "ds": pd.to_datetime(["2023-10-07", "2022-10-08", "2021-10-09"]),
+        "ds": pd.to_datetime(["2024-10-06","2023-10-08", "2022-10-09"]),
         "lower_window": -1,
         "upper_window": 0,
     }

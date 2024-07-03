@@ -60,7 +60,8 @@ from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holiday
     national_independence_day,
     gladmat,
     ons,
-    april_closed
+    april_closed,
+    june_july
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
@@ -224,8 +225,8 @@ def fisketorget_restaurant(
             christmas_day,
             firstweek_jan,
             new_year_eve,
-            fadder_week,
-            landstreff_russ,
+            # fadder_week,
+            # landstreff_russ,
             first_may,
             eight_may,
             easter,
@@ -233,15 +234,15 @@ def fisketorget_restaurant(
             seventeenth_may,
             pinse,
             fjoge,
-            stor_konsert_ukedag,
+            # stor_konsert_ukedag,
             himmelfart,
             ONS,
             outliers,
             closed_days,
             cruise_ship_arrivals_holiday,
-            maijazz_lørdag,
-            utopia_friday,
-            utopia_saturday,
+            # maijazz_lørdag,
+            # utopia_friday,
+            # utopia_saturday,
             skeiva_natta,
             military_excercise,
             hostferie_sor_ostlandet_weekdend,
@@ -257,7 +258,8 @@ def fisketorget_restaurant(
             national_independence_day,
             gladmat,
             ons,
-            april_closed
+            april_closed,
+            june_july
         )
     )
 
@@ -447,7 +449,7 @@ def fisketorget_restaurant(
 
     # m.add_seasonality(name='weekly_in_may', period=7, fourier_order=3, condition_name='is_may')
 
-    # m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
+    m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
 
     # Add the conditional regressor to the model
     m.add_regressor("sunshine_amount", standardize=False)
@@ -460,7 +462,6 @@ def fisketorget_restaurant(
     # m.add_regressor("heavy_rain_spring_weekend")
     m.add_regressor("non_heavy_rain_fall_weekend")
     m.add_regressor("opening_duration")
-    m.add_regressor("sunshine_amount", standardize=False)
     m.add_regressor("high_weekend_spring")
     m.add_regressor("outdoor_seating")
 

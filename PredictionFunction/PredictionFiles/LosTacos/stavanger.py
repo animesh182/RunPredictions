@@ -39,18 +39,12 @@ from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holiday
     easter,
     easter_mondaydayoff,
     landstreff_russ,
-    # pinse,
-    # himmelfart,
     fjoge,
-    stor_konsert_ukedag,
-    maijazz_lørdag,
     military_excercise,
     outliers,
     closed_days,
     cruise_ship_arrivals_holiday,
     pay_day,
-    utopia_friday,
-    utopia_saturday,
     skeiva_natta,
 )
 
@@ -69,7 +63,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
 )
 
 from PredictionFunction.Datasets.Regressors.weather_regressors import (
-    # warm_dry_weather_spring,
+    warm_dry_weather_spring_fss,
     # warm_and_dry_future,
     # heavy_rain_fall_weekday,
     # heavy_rain_fall_weekday_future,
@@ -185,7 +179,7 @@ def stavanger(
             "air_temperature",
         ]
 
-    # df = warm_dry_weather_spring(df)
+    df = warm_dry_weather_spring_fss(df)
     # df = heavy_rain_fall_weekday(df)
     df = heavy_rain_fall_weekend(df)
     df = heavy_rain_winter_weekday(df)
@@ -227,19 +221,13 @@ def stavanger(
             first_may,
             eight_may,
             easter,
-            easter_mondaydayoff,
             seventeenth_may,
             pinse,
             fjoge,
-            stor_konsert_ukedag,
             himmelfart,
             ONS,
             outliers,
             closed_days,
-            cruise_ship_arrivals_holiday,
-            maijazz_lørdag,
-            utopia_friday,
-            utopia_saturday,
             skeiva_natta,
             military_excercise,
             hostferie_sor_ostlandet_weekdend,
@@ -310,32 +298,10 @@ def stavanger(
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
 
     stavanger_venues = {
-        "Nedre Strandgate",
-        "Martinique",
-        "Nærbø",
-        "Ræge Kirke",
-        "Løkkeveien",
-        "University of Stavanger",
-        "Clarion Hotel Energy",
-        "Nordic Black Theatre",
-        "Oslo Concert Hall",
-        "Salt Langhuset",
-        "Vaisenhusgata",
-        "Campus Bjergsted",
-        "Fargegaten - Øvre Holmegate",
-        "Folken, Løkkeveien",
-        "Gamle Stavanger",
-        "Tou Scene",
-        "Bryne",
-        "Ølberg harbour",
-        "City Centre",
-        "Sangerlosjen",
-        "Zetlitz",
-        "Kinokino",
-        "Kongsgata",
-        "UIS Business School",
-        "Fiskepiren",
+        "Fiskepiren","Folken, Løkkeveien","Zetlitz","Cementen, Stavanger", 
+        "DNB Arena","Stavanger Konserthus","Stavanger Forum",
     }
+    
     venue_list=stavanger_venues
     data = {"name": [], "effect": []}
     regressors_to_add = []
@@ -426,7 +392,6 @@ def stavanger(
 
     # m.add_regressor('days_since_last')
 
-    m.add_regressor("custom_regressor")
 
     m.add_seasonality(
         name="specific_month", period=30.5, fourier_order=2, condition_name="specific_month"
@@ -465,8 +430,9 @@ def stavanger(
     # m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
 
     # Add the conditional regressor to the model
-    m.add_regressor("sunshine_amount", standardize=False)
-    # m.add_regressor("warm_and_dry")
+    m.add_regressor("custom_regressor")
+    m.add_regressor("sunshine_amount")
+    m.add_regressor("warm_and_dry")
     # m.add_regressor("heavy_rain_fall_weekday")
     m.add_regressor("heavy_rain_fall_weekend")
     m.add_regressor("heavy_rain_winter_weekday")
@@ -583,6 +549,7 @@ def stavanger(
 
     # future = warm_and_dry_future(future)
     # future = heavy_rain_fall_weekday_future(future)
+    future = warm_dry_weather_spring_fss(future)
     future = heavy_rain_fall_weekend_future(future)
     future = heavy_rain_winter_weekday_future(future)
     future = heavy_rain_winter_weekend_future(future)

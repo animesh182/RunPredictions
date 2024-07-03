@@ -216,19 +216,13 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
             first_may,
             eight_may,
             easter,
-            easter_mondaydayoff,
             seventeenth_may,
             pinse,
             fjoge,
-            stor_konsert_ukedag,
             himmelfart,
             ONS,
             outliers,
             closed_days,
-            cruise_ship_arrivals_holiday,
-            maijazz_lørdag,
-            utopia_friday,
-            utopia_saturday,
             skeiva_natta,
             halloween_weekend,
             halloween_day,
@@ -263,14 +257,14 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
     df["ds"] = pd.to_datetime(df["ds"])
 
     # Define the start and end dates for the specific date interval
-    # start_date = "2022-08-22"
-    # end_date = "2022-09-11"
-    # # make start_date and end:date datetime
-    # start_date = pd.to_datetime(start_date)
-    # end_date = pd.to_datetime(end_date)
+    start_date = "2022-08-22"
+    end_date = "2022-09-11"
+    # make start_date and end:date datetime
+    start_date = pd.to_datetime(start_date)
+    end_date = pd.to_datetime(end_date)
 
     # # Create a mask for the specific date interval
-    # date_mask = (df["ds"] >= start_date) & (df["ds"] <= end_date)
+    date_mask = (df["ds"] >= start_date) & (df["ds"] <= end_date)
 
     # # Calculate the week number for the start and end dates
     # start_week = pd.to_datetime(start_date).week
@@ -282,12 +276,12 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
     # Define a function to calculate the custom regressor value based on the week number
 
     # # Calculate the custom regressor values for the specific date interval
-    # df.loc[date_mask, "custom_regressor"] = df.loc[date_mask, "week_number"].apply(
-    #     custom_regressor
-    # )
+    df.loc[date_mask, "custom_regressor"] = df.loc[date_mask, "week_number"].apply(
+        custom_regressor
+    )
 
     # # Fill the custom regressor with zeros for the rows outside the specific date interval
-    # df.loc[~date_mask, "custom_regressor"] = 0
+    df.loc[~date_mask, "custom_regressor"] = 0
 
     # Different weekly seasonality for 2 weeks in august related to starting fall semester/work
 
@@ -409,7 +403,7 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
 
     # m.add_regressor('days_since_last')
 
-    # m.add_regressor("custom_regressor")
+    m.add_regressor("custom_regressor")
     # m.add_regressor('covid_restriction')
 
     m.add_regressor("warm_and_dry")
@@ -421,7 +415,7 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
     m.add_regressor("heavy_rain_spring_weekend")
     m.add_regressor("non_heavy_rain_fall_weekend")
     m.add_regressor("opening_duration")
-    m.add_regressor("sunshine_amount", standardize=False)
+    m.add_regressor("sunshine_amount")
 
     # m.add_seasonality(name='monthly', period=30.5, fourier_order=5, condition_name='specific_month')
     m.add_seasonality(
@@ -455,7 +449,7 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
     m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
 
     # Add the conditional regressor to the model
-    m.add_regressor("sunshine_amount", standardize=False)
+
 
     # for event_df, regressor_name in regressors_to_add:
     #     if 'event' in event_df.columns:
@@ -576,12 +570,12 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
 
     # Calculate the custom regressor values for the future dates
     future["ds"] = pd.to_datetime(future["ds"])
-    # future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)
+    future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)
     future["week_number"] = future["ds"].dt.isocalendar().week
-    # future.loc[future_date_mask, "custom_regressor"] = future.loc[
-    #     future_date_mask, "week_number"
-    # ].apply(custom_regressor)
-    # future.loc[~future_date_mask, "custom_regressor"] = 0
+    future.loc[future_date_mask, "custom_regressor"] = future.loc[
+        future_date_mask, "week_number"
+    ].apply(custom_regressor)
+    future.loc[~future_date_mask, "custom_regressor"] = 0
 
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date

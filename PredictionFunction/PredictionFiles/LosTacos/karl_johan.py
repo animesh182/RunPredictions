@@ -14,6 +14,7 @@ from PredictionFunction.Datasets.Regressors.general_regressors import (
     is_campaign_active,
     is_high_weekends,
     is_fellesferie,
+    is_high_weekend_spring
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.dataset_holidays import (
     last_working_day,
@@ -27,7 +28,7 @@ from PredictionFunction.Datasets.Concerts.concerts import (
 )
 from PredictionFunction.utils.fetch_events import fetch_events
 from PredictionFunction.Datasets.Regressors.weather_regressors import (
-    # warm_dry_weather_spring,
+    warm_dry_weather_spring,
     # warm_and_dry_future,
     heavy_rain_fall_weekday,
     heavy_rain_fall_weekend,
@@ -81,7 +82,9 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
     himmelfart,
     lockdown,
     oslo_pride,
+    musikkfestival
 )
+
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     halloween_day,
     halloween_weekend,
@@ -204,6 +207,7 @@ def karl_johan(
     df = heavy_rain_spring_weekday(df)
     df = heavy_rain_fall_weekend(df)
     df = heavy_rain_fall_weekday(df)
+    df = warm_dry_weather_spring(df)
     df = calculate_days_15(df, fifteenth_working_days)
     df = add_opening_hours(df, "Karl Johan", 12, 17)
 
@@ -244,6 +248,8 @@ def karl_johan(
             halloween_day,
             hostferie_sor_ostlandet_weekdend,
             first_weekend_christmas_school_vacation,
+            oslo_pride,
+            musikkfestival
         )
     )
     # Didnt use, because the effect was too small or looked incorrect: piknik_i_parken,inferno
@@ -291,6 +297,7 @@ def karl_johan(
     df["fall_start"] = df["ds"].apply(is_fall_start)
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
     df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
+    df["high_weekend_spring"] = df["ds"].apply(is_high_weekend_spring)
 
     karl_johan_venues = {
         "Oslo Spektrum",
@@ -304,6 +311,7 @@ def karl_johan(
         "Nordic Black Theatre",
         "Oslo Concert Hall",
         "Salt Langhuset",
+        "Tons of Rock"
     }
 
     data = {"name": [], "effect": []}
@@ -382,12 +390,14 @@ def karl_johan(
     # Add the payday columns as regressors
     m.add_regressor("days_since_last_30")
     m.add_regressor("days_until_next_30")
-    m.add_regressor("sunshine_amount", standardize=False)
+    m.add_regressor("sunshine_amount")
     m.add_regressor("opening_duration")
     m.add_regressor("custom_regressor")
     m.add_regressor("closed_jan")
+    m.add_regressor('warm_and_dry')
+    m.add_regressor("high_weekend_spring",mode='multiplicative')
 
-    m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
+    # m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
 
     m.add_seasonality(
         name="covid_restriction_christmas",
@@ -523,6 +533,7 @@ def karl_johan(
     future = heavy_rain_spring_weekday_future(future)
     future = heavy_rain_fall_weekend_future(future)
     future = heavy_rain_fall_weekday_future(future)
+    future = warm_dry_weather_spring(future)
     # add the last working day and the +/- 5 days
     future = calculate_days_30(future, last_working_day)
     future["high_weekend"] = future["ds"].apply(is_high_weekends)
@@ -538,6 +549,7 @@ def karl_johan(
     future["christmas_shopping"] = future["ds"].apply(is_christmas_shopping)
 
     future["specific_month"] = future["ds"].apply(is_specific_month)
+    future["high_weekend_spring"] = future["ds"].apply(is_high_weekend_spring)
     # Calculate the custom regressor values for the future dates
     future["ds"] = pd.to_datetime(future["ds"])
     future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)

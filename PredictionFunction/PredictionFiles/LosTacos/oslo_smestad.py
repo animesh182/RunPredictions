@@ -32,6 +32,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
     himmelfart,
     lockdown,
     oslo_pride,
+    musikkfestival
 )
 from PredictionFunction.Datasets.Regressors.general_regressors import (
     is_specific_month,
@@ -191,12 +192,13 @@ def oslo_smestad(
             himmelfart,
             lockdown,
             closed,
-            tons_of_rock,
+            # tons_of_rock,
             oslo_pride,
             halloween_weekend,
             halloween_day,
             hostferie_sor_ostlandet_weekdays,
             hostferie_sor_ostlandet_weekdend,
+            musikkfestival
         )
     )
 
@@ -256,11 +258,10 @@ def oslo_smestad(
 
     oslo_smestad_venues = {
         "Sentrum Scene",
-          "Fornebu",
-          "Oslo Storgata",
+        "Fornebu",
+        "Oslo Storgata",
         "Rockefeller", 
         "Cosmopolite, Oslo",
-        "Maihaugsalen",
         "Nordic Black Theatre",
         "Riksscenen Oslo",
         "University of Oslo",
@@ -341,7 +342,7 @@ def oslo_smestad(
     # m.add_regressor("heavy_rain_spring_weekend")
     # m.add_regressor("non_heavy_rain_fall_weekend")
     m.add_regressor("opening_duration")
-    m.add_regressor("sunshine_amount", standardize=False)
+    m.add_regressor("sunshine_amount")
 
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:

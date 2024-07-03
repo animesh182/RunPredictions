@@ -238,12 +238,11 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
     df.loc[~df['high_weekend_spring'].fillna(False), 'high_weekend_spring'] = False
 
     bergen_venues = {
-        "Scruffy Murphy's", "USF Shipyard", "Aztec Shawnee Theatre", "Ulleval", 
-        "Gallery Geo", "Lydgalleriet","Madam Felle","Bergenhus Festning", 
-        "Pokémon TCG","St. Mary's Church","Varden Amfi","Håkonshallen",
-        "Festplassen","Åsane kulturhus","Bergen County Plaza","Litteraturhuset",
-        "James Church","Nygårdsparken Pavilion","Ytre Arna Church","Grieghallen",
-        "Teglverket, Kvarteret","Åsane idrettspark","Kulturhuset",
+        "Åsane church",
+        "Åsane kulturhus",
+        "Åsane idrettspark",
+        "ÅSANE ARENA AS",
+        "Vestlandshallen"
     }
     venue_list = bergen_venues
     regressors_to_add = []
@@ -358,7 +357,8 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
     m.add_regressor("heavy_rain_winter_weekend")
     m.add_regressor("heavy_rain_spring_weekend")
     m.add_regressor("non_heavy_rain_fall_weekend")
-    m.add_regressor("sunshine_amount", standardize=False)
+    m.add_regressor("sunshine_amount")
+    m.add_regressor("rain_sum")
     m.add_regressor("opening_duration")
     m.add_regressor("high_weekend_spring")
 
@@ -390,12 +390,6 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
     # df["fellesferie"] = df["ds"].apply(is_fellesferie)
     # df['not_fellesferie'] = ~df['ds'].apply(is_fellesferie)
 
-    m.add_seasonality(
-        name="weekly_fellesferie",
-        period=7,
-        fourier_order=3,
-        condition_name="is_fellesferie",
-    )
     # m.add_seasonality(name='weekly_not_fellesferie', period=7, fourier_order=3, condition_name='not_fellesferie')
 
     m.add_seasonality(
@@ -404,7 +398,7 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
 
 
     m.add_seasonality(
-        name="is_fellesferie", period=30.5, fourier_order=5, condition_name="is_fellesferie"
+        name="fellesferie", period=30.5, fourier_order=5, condition_name="is_fellesferie"
     )
     m.add_seasonality(
         name="is_specific_month", period=30.5, fourier_order=5, condition_name="is_specific_month"

@@ -57,6 +57,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
     himmelfart,
     lockdown,
     oslo_pride,
+    musikkfestival
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
@@ -191,8 +192,6 @@ def oslo_lokka_jtorget_smestad_torggata(
             firstweek_jan,
             first_may,
             easter,
-            easter_lowsaturday,
-            easter_mondaydayoff,
             seventeenth_may,
             pinse,
             himmelfart,
@@ -203,6 +202,8 @@ def oslo_lokka_jtorget_smestad_torggata(
             halloween_day,
             hostferie_sor_ostlandet_weekdend,
             first_weekend_christmas_school_vacation,
+            oslo_pride,
+            musikkfestival
         )
     )
 
@@ -270,6 +271,8 @@ def oslo_lokka_jtorget_smestad_torggata(
         "Nordic Black Theatre",
         "Oslo Concert Hall",
         "Salt Langhuset",
+        "Sofienbergparken",
+        "Tons of Rock"
     }
     venue_list= oslo_lokka_venues
     data = {"name": [], "effect": []}
@@ -346,6 +349,7 @@ def oslo_lokka_jtorget_smestad_torggata(
     # m.add_regressor("rain_deviation")
     # m.add_regressor("wind_deviation")
 
+    m.add_regressor("custom_regressor")
     m.add_regressor("warm_and_dry")
     m.add_regressor("heavy_rain_fall_weekday")
     m.add_regressor("heavy_rain_fall_weekend")
@@ -355,9 +359,8 @@ def oslo_lokka_jtorget_smestad_torggata(
     # m.add_regressor("heavy_rain_spring_weekend")
     # m.add_regressor("non_heavy_rain_fall_weekend")
 
-    m.add_regressor("custom_regressor")
     m.add_regressor("opening_duration")
-    m.add_regressor("sunshine_amount", standardize=False)
+    m.add_regressor("sunshine_amount")
 
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:
@@ -367,6 +370,9 @@ def oslo_lokka_jtorget_smestad_torggata(
     m.add_seasonality(
         name="specific_month", period=30.5, fourier_order=5, condition_name="specific_month"
     )
+
+    m.add_seasonality(name='monthly', period=30.5, fourier_order=5)
+    
     m.add_seasonality(
         name="is_fellesferie",
         period=30.5,

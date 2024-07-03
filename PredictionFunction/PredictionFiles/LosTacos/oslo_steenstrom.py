@@ -59,6 +59,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
     himmelfart,
     lockdown,
     oslo_pride,
+    musikkfestival
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
@@ -191,13 +192,14 @@ def oslo_steenstrom(
             himmelfart,
             lockdown,
             closed_days,
-            tons_of_rock,
+            # tons_of_rock,
             oslo_pride,
             black_friday,
             halloween_day,
             halloween_weekend,
             hostferie_sor_ostlandet_weekdend,
             first_weekend_christmas_school_vacation,
+            musikkfestival
         )
     )
 
@@ -269,6 +271,7 @@ def oslo_steenstrom(
         "Oslo Concert Hall",
         "Salt Langhuset",
         "Parkteatret Scene",
+        "Tons of Rock"
     }
     venue_list = oslo_steen_strom_venues
     data = {"name": [], "effect": []}
@@ -357,13 +360,13 @@ def oslo_steenstrom(
     m.add_regressor("heavy_rain_spring_weekend")
     # m.add_regressor("non_heavy_rain_fall_weekend")
     m.add_regressor("opening_duration")
-    m.add_regressor("sunshine_amount", standardize=False)
+    m.add_regressor("sunshine_amount")
+    m.add_regressor("closed_jan")
 
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:
             m.add_regressor(regressor_name)
 
-    m.add_regressor("closed_jan")
     m.add_seasonality(
         name="specific_month",
         period=30.5,

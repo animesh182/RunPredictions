@@ -246,13 +246,9 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     df["is_specific_month"] = df["ds"].apply(is_specific_month)
 
     bergen_venues = {
-        "Scruffy Murphy's", "USF Shipyard", "Aztec Shawnee Theatre", "Ulleval", 
-        "Gallery Geo", "Lydgalleriet","Madam Felle","Bergenhus Festning", 
-        "Outland Bergen","St. Mary's Church","Varden Amfi","Håkonshallen",
-        "Festplassen","Åsane kulturhus","Bergen County Plaza","Litteraturhuset",
-        "James Church","Nygårdsparken Pavilion","Ytre Arna Church","Grieghallen",
-        "Teglverket, Kvarteret","Åsane idrettspark","Kulturhuset",
+        "Det Akademiske Kvarter","Ole Bull Scene, Bergen","USF Verftet","Forum Scene","Lille Ole Bull","Norges Handelshøyskoles","Bergenhus Festning","Bergen","Grieghallen","Ricks Theatre"
     }
+    
     venue_list = bergen_venues
     regressors_to_add = []
     for venue in bergen_venues:
@@ -400,12 +396,6 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     # df["fellesferie"] = df["ds"].apply(is_fellesferie)
     # df['not_fellesferie'] = ~df['ds'].apply(is_fellesferie)
 
-    m.add_seasonality(
-        name="weekly_fellesferie",
-        period=7,
-        fourier_order=3,
-        condition_name="is_fellesferie",
-    )
     # m.add_seasonality(name='weekly_not_fellesferie', period=7, fourier_order=3, condition_name='not_fellesferie')
 
     m.add_seasonality(

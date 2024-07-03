@@ -9,6 +9,7 @@ from PredictionFunction.utils.utils import (
     calculate_days_15,
 )
 from PredictionFunction.Datasets.Regressors.weather_regressors import (
+    warm_dry_weather_spring,
     heavy_rain_fall_weekday,
     heavy_rain_fall_weekend,
     heavy_rain_spring_weekday,
@@ -74,6 +75,8 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
     himmelfart,
     lockdown,
     oslo_pride,
+    musikkfestival,
+    easter
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
@@ -189,6 +192,7 @@ def oslo_torggata(
     df = heavy_rain_fall_weekday(df)
     # df = heavy_rain_winter_weekend(df)
     df = heavy_rain_winter_weekday(df)
+    df = warm_dry_weather_spring(df)
     # df = warm_dry_weekend_spring(df)
     # df = warm_dry_weekday_spring(df)
     # df = warm_dry_weekend_fall(df)
@@ -205,8 +209,7 @@ def oslo_torggata(
             christmas_day,
             firstweek_jan,
             first_may,
-            easter_weekend,
-            easter_mondaydayoff,
+            easter,
             seventeenth_may,
             pinse,
             himmelfart,
@@ -217,6 +220,9 @@ def oslo_torggata(
             oktoberfest_youngstorget,
             halloween_weekend,
             halloween_day,
+            new_years_day,
+            oslo_pride,
+            musikkfestival
         )
     )
 
@@ -317,20 +323,12 @@ def oslo_torggata(
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
 
     oslo_torggata_venues = {
-        "Sentrum Scene",
-        "Rockefeller",
-        "Fornebu",
-        "Dronning Sonja KunstStall",
-        "Langkaia",
-        "Maihaugsalen",
-        "The Norwegian Theatre",
-        "Oslo Concert Hall",
-        "Oslo Central Station",
-        "Oslo Cathedral",
-        "Sommerrogata",
-        "St. Olavs",
-        "Tøyenparken",
-        "University of Oslo",
+        "Parkteatret Scene", "Latter, Oslo",
+        "Oslo Konserthus", "Sentrum Scene",
+        "Oslo Spektrum", "Vulkan Arena",
+        "Rockefeller", "John Dee (Ved Rockefeller), Oslo",
+        "Holmenkollen, Skiskyting", "Oslo City",
+        "Ulleval","Tons of Rock"
     }
     venue_list = oslo_torggata_venues
 
@@ -431,9 +429,7 @@ def oslo_torggata(
             changepoint_prior_scale=0.1,
         )
 
-    # Add the payday columns as regressors
-    m.add_regressor("days_since_last_30")
-    m.add_regressor("days_until_next_30")
+
 
     ### Add events and concert regressors here
 
@@ -446,7 +442,9 @@ def oslo_torggata(
 
     m.add_regressor("custom_regressor")
     # m.add_regressor('covid_restriction')
-
+    # Add the payday columns as regressors
+    m.add_regressor("days_since_last_30")
+    m.add_regressor("days_until_next_30")
     # Weather regressors
     # Add the 'warm_and_dry' and 'cold_and_wet' as additional regressors
     m.add_regressor("heavy_rain_fall_weekday")
@@ -454,11 +452,13 @@ def oslo_torggata(
     m.add_regressor("heavy_rain_spring_weekday")
     m.add_regressor("heavy_rain_spring_weekend")
     m.add_regressor("heavy_rain_winter_weekday")
+    m.add_regressor("warm_and_dry")
     # m.add_regressor('warm_dry_weekend_spring')
     # m.add_regressor('warm_dry_weekday_spring')
     # m.add_regressor('warm_dry_weekend_fall')
     m.add_regressor("opening_duration")
-    m.add_regressor("sunshine_amount", standardize=False)
+    m.add_regressor("sunshine_amount")
+    m.add_regressor("rain_sum")
 
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:
@@ -612,6 +612,7 @@ def oslo_torggata(
     future = heavy_rain_fall_weekday_future(future)
     # future = heavy_rain_winter_weekend_future(future)
     future = heavy_rain_winter_weekday_future(future)
+    future = warm_dry_weather_spring(future)
     # future = warm_dry_weekday_spring_future(future)
     # future = warm_dry_weekend_spring_future(future)
     # future = warm_dry_weekend_fall_future(future)
