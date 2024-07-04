@@ -55,7 +55,8 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
     himmelfart,
     lockdown,
     oslo_pride,
-    musikkfestival
+    musikkfestival,
+    easter
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
@@ -378,8 +379,7 @@ def oslo_city(
             christmas_day,
             # firstweek_jan,
             first_may,
-            easter_lowsaturday,
-            easter_mondaydayoff,
+            easter,
             pinse,
             day_before_red_day,
             himmelfart,

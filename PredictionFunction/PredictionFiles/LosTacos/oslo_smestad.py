@@ -185,8 +185,8 @@ def oslo_smestad(
             firstweek_jan,
             first_may,
             easter,
-            easter_lowsaturday,
-            easter_mondaydayoff,
+            # easter_lowsaturday,
+            # easter_mondaydayoff,
             seventeenth_may,
             pinse,
             himmelfart,
@@ -198,7 +198,8 @@ def oslo_smestad(
             halloween_day,
             hostferie_sor_ostlandet_weekdays,
             hostferie_sor_ostlandet_weekdend,
-            musikkfestival
+            musikkfestival,
+            new_years_day
         )
     )
 

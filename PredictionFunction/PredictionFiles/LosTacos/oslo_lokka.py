@@ -40,8 +40,8 @@ from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.oslo_lokka_holida
     # first_may,
     seventeenth_may,
     easter,
-    easter_lowsaturday,
-    easter_mondaydayoff,
+    # easter_lowsaturday,
+    # easter_mondaydayoff,
     # pinse,
     # himmelfart,
     closed,
@@ -52,7 +52,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
     firstweek_jan,
     new_years_day,
     first_may,
-    easter_mondaydayoff,
+    # easter_mondaydayoff,
     pinse,
     himmelfart,
     lockdown,
@@ -203,7 +203,8 @@ def oslo_lokka_jtorget_smestad_torggata(
             hostferie_sor_ostlandet_weekdend,
             first_weekend_christmas_school_vacation,
             oslo_pride,
-            musikkfestival
+            musikkfestival,
+            new_years_day
         )
     )
 

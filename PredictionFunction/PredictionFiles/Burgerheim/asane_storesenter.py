@@ -200,7 +200,8 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
         (   
             christmas,
             # pre_christmas,
-            new_year_romjul,
+            new_years_day,
+            # new_year_romjul,
             pre_christmas_covid21,
             covid_christmas21_startjan22,
             weekendmiddec_21covid,

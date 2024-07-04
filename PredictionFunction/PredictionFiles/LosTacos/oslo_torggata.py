@@ -222,7 +222,8 @@ def oslo_torggata(
             halloween_day,
             new_years_day,
             oslo_pride,
-            musikkfestival
+            musikkfestival,
+            new_years_day
         )
     )
 

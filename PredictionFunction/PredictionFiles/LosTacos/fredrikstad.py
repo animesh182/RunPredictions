@@ -50,7 +50,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.fredrikstad_holid
     easter,
     # pinse,
     # himmelfart,
-    stor_konsert_ukedag,
+    # stor_konsert_ukedag,
     idyll,
     closed_days,
     black_friday,

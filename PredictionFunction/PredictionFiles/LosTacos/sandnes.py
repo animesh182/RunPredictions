@@ -226,7 +226,8 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
             skeiva_natta,
             halloween_weekend,
             halloween_day,
-            closed_march
+            closed_march,
+            new_years_day
         )
     )
 

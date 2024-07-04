@@ -206,7 +206,8 @@ def oslo_storo(
             halloween_weekend,
             hostferie_sor_ostlandet_weekdend,
             first_weekend_christmas_school_vacation,
-            musikkfestival
+            musikkfestival,
+            new_years_day
         )
     )
 

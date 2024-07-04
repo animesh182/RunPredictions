@@ -15,7 +15,7 @@ christmas = pd.DataFrame(
         {
             "holiday": "christmas",
             "ds": pd.to_datetime(["2021-12-25", "2022-12-25","2023-12-25","2024-12-25"]),
-            "lower_window": 0,
+            "lower_window": -1,
             "upper_window": 0,
         }
     )
@@ -103,7 +103,7 @@ new_years_day = pd.DataFrame(
         {
             "holiday": "new_years_day",
             "ds": pd.to_datetime(["2022-01-01", "2023-01-01"]),
-            "lower_window": 0,
+            "lower_window": -1,
             "upper_window": 0,
         }
     )

@@ -185,8 +185,6 @@ def oslo_steenstrom(
             firstweek_jan,
             first_may,
             easter,
-            easter_lowsaturday,
-            easter_mondaydayoff,
             seventeenth_may,
             pinse,
             himmelfart,
@@ -199,7 +197,8 @@ def oslo_steenstrom(
             halloween_weekend,
             hostferie_sor_ostlandet_weekdend,
             first_weekend_christmas_school_vacation,
-            musikkfestival
+            musikkfestival,
+            new_years_day
         )
     )
 

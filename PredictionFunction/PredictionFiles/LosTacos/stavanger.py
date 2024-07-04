@@ -215,7 +215,7 @@ def stavanger(
         (
             christmas_day,
             firstweek_jan,
-            new_year_eve,
+            # new_year_eve,
             fadder_week,
             landstreff_russ,
             first_may,
@@ -236,6 +236,7 @@ def stavanger(
             vinterferie_vestlandet_weekend_before,
             vinterferie_vestlandet_weekend,
             first_weekend_christmas_school_vacation,
+            new_years_day
         )
     )
 
