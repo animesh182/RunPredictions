@@ -198,7 +198,8 @@ def oslo_steenstrom(
             hostferie_sor_ostlandet_weekdend,
             first_weekend_christmas_school_vacation,
             musikkfestival,
-            new_years_day
+            new_years_day,
+            tons_of_rock
         )
     )
 

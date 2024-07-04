@@ -20,7 +20,7 @@ from PredictionFunction.Datasets.Regressors.general_regressors import (
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holidays import (
     christmas_day,
-    new_year_eve,
+    # new_year_eve,
     # firstweek_jan,
     # new_years_day,
     fadder_week,
@@ -33,15 +33,15 @@ from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holiday
     # pinse,
     # himmelfart,
     fjoge,
-    stor_konsert_ukedag,
-    maijazz_lørdag,
+    # stor_konsert_ukedag,
+    # maijazz_lørdag,
     military_excercise,
     outliers,
     closed_days,
     cruise_ship_arrivals_holiday,
     pay_day,
-    utopia_friday,
-    utopia_saturday,
+    # utopia_friday,
+    # utopia_saturday,
     skeiva_natta,
 )
 

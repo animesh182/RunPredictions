@@ -367,7 +367,7 @@ def fredrikstad(
             easter,
             seventeenth_may,
             pinse,
-            stor_konsert_ukedag,
+            # stor_konsert_ukedag,
             himmelfart,
             closed_days,
             idyll,

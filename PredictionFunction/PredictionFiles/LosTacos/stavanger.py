@@ -29,7 +29,7 @@ from PredictionFunction.Datasets.Regressors.general_regressors import (
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holidays import (
     christmas_day,
-    new_year_eve,
+    # new_year_eve,
     # firstweek_jan,
     # new_years_day,
     fadder_week,
@@ -37,14 +37,14 @@ from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holiday
     eight_may,
     seventeenth_may,
     easter,
-    easter_mondaydayoff,
+    # easter_mondaydayoff,
     landstreff_russ,
     fjoge,
     military_excercise,
     outliers,
     closed_days,
-    cruise_ship_arrivals_holiday,
-    pay_day,
+    # cruise_ship_arrivals_holiday,
+    # pay_day,
     skeiva_natta,
 )
 

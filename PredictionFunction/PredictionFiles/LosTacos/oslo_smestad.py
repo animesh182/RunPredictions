@@ -199,7 +199,8 @@ def oslo_smestad(
             hostferie_sor_ostlandet_weekdays,
             hostferie_sor_ostlandet_weekdend,
             musikkfestival,
-            new_years_day
+            new_years_day,
+            tons_of_rock
         )
     )
 
