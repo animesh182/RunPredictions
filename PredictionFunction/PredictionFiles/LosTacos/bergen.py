@@ -18,20 +18,17 @@ from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.bergen_holidays i
     # pre_christmas,
     pre_christmas_covid21,
     weekendmiddec_21covid,
-    new_year_romjul,
     # firstweek_jan,
     # new_years_day,
     fadder_week,
-    seventeenth_may,
-    easter,
     # pinse,
     # himmelfart,
     military_excercise,
     helg_før_fellesferie,
     closed,
+    july_closed,
     unknown_outliers,
     covid_christmas21_startjan22,
-    july_closed,
     bergen_pride
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
@@ -40,7 +37,10 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     new_years_day,
     pinse,
     himmelfart,
-    christmas
+    christmas,
+    new_year_romjul,
+    seventeenth_may,
+    easter,
 )
 from PredictionFunction.Datasets.Regressors.weather_regressors import(
     warm_dry_weather_spring,
@@ -60,42 +60,13 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import(
     non_heavy_rain_fall_weekend,
     non_heavy_rain_fall_weekend_future,
 )
+from PredictionFunction.Datasets.Regressors.event_weather_regressors import (
+    is_event_with_bad_weather,
+    is_event_with_good_weather,
+    is_event_with_normal_weather
+)
 from PredictionFunction.utils.openinghours import add_opening_hours
 from PredictionFunction.utils.fetch_events import fetch_events
-
-def filter_hours(df):
-    # Filter the DataFrame based on the day and time
-    weekday_mask = df["ds"].dt.weekday < 4  # Monday to Friday
-    weekend_mask = df["ds"].dt.weekday >= 4  # Saturday and Sunday
-
-    df_weekday = df[weekday_mask]
-    df_weekend = df[weekend_mask]
-
-    # Set the hours dynamically based on the day of the week
-    df_weekday = df_weekday[
-        (
-            df_weekday["ds"].dt.hour
-            >= int(restaurant_hours["Bergen"]["weekday"]["starting"])
-        )
-        & (
-            df_weekday["ds"].dt.hour
-            <= int(restaurant_hours["Bergen"]["weekday"]["ending"])
-        )
-    ]
-
-    df_weekend = df_weekend[
-        (
-            df_weekend["ds"].dt.hour
-            >= int(restaurant_hours["Bergen"]["weekend"]["starting"])
-        )
-        | (
-            df_weekend["ds"].dt.hour
-            <= int(restaurant_hours["Bergen"]["weekend"]["ending"])
-        )
-    ]
-
-    # Concatenate the weekday and weekend DataFrames
-    return pd.concat([df_weekday, df_weekend])
 
 
 def bergen(prediction_category,restaurant,merged_data,historical_data,future_data):
@@ -229,7 +200,6 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
             unknown_outliers,
             july_closed,
             bergen_pride
-
         )
     )
 
@@ -246,7 +216,7 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     df["is_specific_month"] = df["ds"].apply(is_specific_month)
 
     bergen_venues = {
-        "Det Akademiske Kvarter","Ole Bull Scene, Bergen","USF Verftet","Forum Scene","Lille Ole Bull","Norges Handelshøyskoles","Bergenhus Festning","Bergen","Grieghallen","Ricks Theatre"
+        "Det Akademiske Kvarter","Ole Bull Scene, Bergen","USF Verftet","Forum Scene","Lille Ole Bull","Norges Handelshøyskoles","Bergenhus Festning","Bergen","Grieghallen","Ricks Theatre",
     }
     
     venue_list = bergen_venues
@@ -265,6 +235,9 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
             dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
             venue_df[dataframe_name] = 1
             df = pd.merge(df, venue_df, how="left", on="ds", suffixes=('', '_venue'))
+            df = is_event_with_good_weather(df,dataframe_name)
+            df = is_event_with_bad_weather(df,dataframe_name)
+            df = is_event_with_normal_weather(df,dataframe_name)
             df[dataframe_name].fillna(0, inplace=True)
             regressors_to_add.append((venue_df, dataframe_name))  # Append venue_df along with venue name for regressor addition
         else:
@@ -370,7 +343,11 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
 
     for event_df, regressor_name in regressors_to_add:
         if 'event' in event_df.columns:
-            m.add_regressor(regressor_name)
+            # m.add_regressor(regressor_name)
+            m.add_regressor(regressor_name + '_good_weather')
+            m.add_regressor(regressor_name + '_bad_weather')
+            m.add_regressor(regressor_name + '_normal_weather')
+
 
     # setting the dates for early semester students goinf out trend/cutting covid restrictions at the same time - 2021
     # start_date_early_semester_21 = pd.to_datetime('2021-09-26')
@@ -534,6 +511,12 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     # future["first_two_weeks_january_21"] = future["ds"].apply(
     #     is_first_two_weeks_january_21
     # )
+    # Add relevant weather columns to the future df
+    future["rain_sum"] = merged_data["rain_sum"]
+    future["sunshine_amount"] = merged_data["sunshine_amount"]
+    future["windspeed"] = merged_data["windspeed"]
+    future["air_temperature"] = merged_data["air_temperature"]
+    
     future["fall_start"] = future["ds"].apply(is_fall_start)
     for event_df, event_column in regressors_to_add:
         if 'event' in event_df.columns:
@@ -545,15 +528,13 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
                 on="ds",
             )
             future[event_column].fillna(0, inplace=True)
+            future = is_event_with_good_weather(future,event_column)
+            future = is_event_with_bad_weather(future,event_column)
+            future = is_event_with_normal_weather(future,event_column)
 
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
 
-    # Add relevant weather columns to the future df
-    future["rain_sum"] = merged_data["rain_sum"]
-    future["sunshine_amount"] = merged_data["sunshine_amount"]
-    future["windspeed"] = merged_data["windspeed"]
-    future["air_temperature"] = merged_data["air_temperature"]
     future.fillna(
             {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
             inplace=True,

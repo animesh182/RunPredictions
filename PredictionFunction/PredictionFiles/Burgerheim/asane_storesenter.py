@@ -13,21 +13,23 @@ from PredictionFunction.Datasets.Regressors.general_regressors import(
     is_high_weekend_spring,
     )
 from PredictionFunction.utils.utils import calculate_days_30, early_semester, calculate_days_15, custom_regressor
+from PredictionFunction.Datasets.Regressors.event_weather_regressors import (
+    is_event_with_good_weather,
+    is_event_with_bad_weather,
+    is_event_with_normal_weather,
+)
 
-from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.bergen_holidays import (
+from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.holidays_asane import (
     pre_christmas_covid21,
     weekendmiddec_21covid,
-    new_year_romjul,
     fadder_week,
-    seventeenth_may,
-    easter,
     military_excercise,
     helg_før_fellesferie,
     closed,
     # unknown_outliers,
     covid_christmas21_startjan22,
-    last_day_of_school,
     first_day_of_school,
+    last_day_of_school,
     bergen_pride
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
@@ -36,7 +38,10 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     new_years_day,
     pinse,
     himmelfart,
-    christmas
+    christmas,
+    new_year_romjul,
+    seventeenth_may,
+    easter,
 )
 from PredictionFunction.Datasets.Regressors.weather_regressors import(
     # warm_dry_weather_spring,
@@ -199,9 +204,7 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
     holidays = pd.concat(
         (   
             christmas,
-            # pre_christmas,
-            new_years_day,
-            # new_year_romjul,
+            new_year_romjul,
             pre_christmas_covid21,
             covid_christmas21_startjan22,
             weekendmiddec_21covid,
@@ -217,8 +220,8 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
             himmelfart,
             closed,
             # unknown_outliers,
-            last_day_of_school,
             first_day_of_school,
+            last_day_of_school,
             bergen_pride
         )
     )
@@ -243,7 +246,8 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
         "Åsane kulturhus",
         "Åsane idrettspark",
         "ÅSANE ARENA AS",
-        "Vestlandshallen"
+        "Vestlandshallen",
+        "Bergen"
     }
     venue_list = bergen_venues
     regressors_to_add = []
@@ -261,6 +265,9 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
             dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
             venue_df[dataframe_name] = 1
             df = pd.merge(df, venue_df, how="left", on="ds", suffixes=('', '_venue'))
+            df = is_event_with_good_weather(df,dataframe_name)
+            df = is_event_with_bad_weather(df,dataframe_name)
+            df = is_event_with_normal_weather(df,dataframe_name)
             df[dataframe_name].fillna(0, inplace=True)
             regressors_to_add.append((venue_df, dataframe_name))  # Append venue_df along with venue name for regressor addition
         else:
@@ -365,7 +372,10 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
 
     for event_df, regressor_name in regressors_to_add:
         if 'event' in event_df.columns:
-            m.add_regressor(regressor_name)
+            # m.add_regressor(regressor_name)
+            m.add_regressor(regressor_name + '_good_weather')
+            m.add_regressor(regressor_name + '_bad_weather')
+            m.add_regressor(regressor_name + '_normal_weather')
 
     # setting the dates for early semester students goinf out trend/cutting covid restrictions at the same time - 2021
     # start_date_early_semester_21 = pd.to_datetime('2021-09-26')
@@ -531,6 +541,12 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
     #     is_first_two_weeks_january_21
     # )
     future["fall_start"] = future["ds"].apply(is_fall_start)
+    # Add relevant weather columns to the future df
+    future["rain_sum"] = merged_data["rain_sum"]
+    future["sunshine_amount"] = merged_data["sunshine_amount"]
+    future["windspeed"] = merged_data["windspeed"]
+    future["air_temperature"] = merged_data["air_temperature"]
+    
     for event_df, event_column in regressors_to_add:
         if 'event' in event_df.columns:
             event_df= event_df.drop_duplicates('ds')
@@ -541,15 +557,12 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
                 on="ds",
             )
             future[event_column].fillna(0, inplace=True)
+            future = is_event_with_good_weather(future,event_column)
+            future = is_event_with_bad_weather(future,event_column)
+            future = is_event_with_normal_weather(future,event_column)
 
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
-
-    # Add relevant weather columns to the future df
-    future["rain_sum"] = merged_data["rain_sum"]
-    future["sunshine_amount"] = merged_data["sunshine_amount"]
-    future["windspeed"] = merged_data["windspeed"]
-    future["air_temperature"] = merged_data["air_temperature"]
     future.fillna(
             {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
             inplace=True,

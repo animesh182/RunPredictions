@@ -32,6 +32,11 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import (
     # warm_dry_weekday_fall,
     # warm_dry_weekday_fall_future,
 )
+from PredictionFunction.Datasets.Regressors.event_weather_regressors import (
+    is_event_with_bad_weather,
+    is_event_with_good_weather,
+    is_event_with_normal_weather
+)
 
 from PredictionFunction.Datasets.OpeningHours.lostacos_opening_hours import (
     restaurant_opening_hours,
@@ -51,37 +56,25 @@ from PredictionFunction.Datasets.Holidays.LosTacos.dataset_holidays import (
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.oslo_torggata_holidays import (
-    christmas_day,
-    # firstweek_jan,
-    # new_years_day,
-    # first_may,
-    seventeenth_may,
-    easter_weekend,
-    easter_mondaydayoff,
-    # pinse,
-    # himmelfart,
-    bondens_matfest_youngstorget,
-    twentysecond_july_youngstorget,
-    oktoberfest_youngstorget,
     closed_days,
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
     firstweek_jan,
-    new_years_day,
-    first_may,
-    easter_mondaydayoff,
-    pinse,
-    himmelfart,
     lockdown,
     oslo_pride,
     musikkfestival,
-    easter
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
-    halloween_day,
-    halloween_weekend,
+    christmas_day,
+    new_years_day,
+    new_year_romjul,
+    first_may,
+    seventeenth_may,
+    easter,
+    pinse,
+    himmelfart,
 )
 from PredictionFunction.utils.fetch_events import fetch_events
 from PredictionFunction.utils.openinghours import add_opening_hours
@@ -215,15 +208,10 @@ def oslo_torggata(
             himmelfart,
             lockdown,
             closed_days,
-            bondens_matfest_youngstorget,
-            twentysecond_july_youngstorget,
-            oktoberfest_youngstorget,
-            halloween_weekend,
-            halloween_day,
-            new_years_day,
-            oslo_pride,
             musikkfestival,
-            new_years_day
+            oslo_pride,
+            new_years_day,
+            new_year_romjul
         )
     )
 
@@ -349,6 +337,9 @@ def oslo_torggata(
             dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
             venue_df[dataframe_name] = 1
             df = pd.merge(df, venue_df, how="left", on="ds", suffixes=("", "_venue"))
+            df = is_event_with_good_weather(df,dataframe_name)
+            df = is_event_with_bad_weather(df,dataframe_name)
+            df = is_event_with_normal_weather(df,dataframe_name)
             df[dataframe_name].fillna(0, inplace=True)
             regressors_to_add.append(
                 (venue_df, dataframe_name)
@@ -463,7 +454,10 @@ def oslo_torggata(
 
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:
-            m.add_regressor(regressor_name)
+            # m.add_regressor(regressor_name)
+            m.add_regressor(regressor_name + '_good_weather')
+            m.add_regressor(regressor_name + '_bad_weather')
+            m.add_regressor(regressor_name + '_normal_weather')
 
     # m.add_regressor('heavy_rain_winter_weekend')
 
@@ -591,6 +585,7 @@ def oslo_torggata(
     future["sunshine_amount"] = merged_data["sunshine_amount"]
     future["windspeed"] = merged_data["windspeed"]
     future["air_temperature"] = merged_data["air_temperature"]
+
     future.fillna(
         {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
         inplace=True,
@@ -605,6 +600,9 @@ def oslo_torggata(
                 on="ds",
             )
             future[event_column].fillna(0, inplace=True)
+            future = is_event_with_good_weather(future,event_column)
+            future = is_event_with_bad_weather(future,event_column)
+            future = is_event_with_normal_weather(future,event_column)
 
     # Apply the future functions for weather regressions here
     future = heavy_rain_spring_weekend_future(future)

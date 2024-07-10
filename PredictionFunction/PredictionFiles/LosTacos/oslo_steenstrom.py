@@ -10,19 +10,12 @@ from PredictionFunction.utils.utils import (
     custom_regressor,
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.oslo_steenstrom_holidays import (
-    christmas_day,
-    # firstweek_jan,
-    # new_years_day,
-    # first_may,
-    seventeenth_may,
-    easter,
-    easter_lowsaturday,
-    easter_mondaydayoff,
-    # pinse,
-    # himmelfart,
     closed_days,
-    tons_of_rock,
+    # tons_of_rock,
     black_friday,
+    # sunday_except_december,
+    # holiday_december,
+    # sunday_december
 )
 from PredictionFunction.Datasets.Regressors.general_regressors import (
     is_specific_month,
@@ -50,23 +43,31 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import (
     # non_heavy_rain_fall_weekend,
     # non_heavy_rain_fall_weekend_future,
 )
+from PredictionFunction.Datasets.Regressors.event_weather_regressors import (
+    is_event_with_bad_weather,
+    is_event_with_good_weather,
+    is_event_with_normal_weather
+)
+
 from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
     firstweek_jan,
-    new_years_day,
-    first_may,
-    easter_mondaydayoff,
-    pinse,
-    himmelfart,
     lockdown,
     oslo_pride,
     musikkfestival
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
-    halloween_day,
-    halloween_weekend,
     hostferie_sor_ostlandet_weekdend,
     first_weekend_christmas_school_vacation,
+    christmas_day,
+    seventeenth_may,
+    easter,
+    new_years_day,
+    first_may,
+    pinse,
+    himmelfart,
+    christmas_day,
+    new_year_romjul
 )
 from PredictionFunction.utils.fetch_events import fetch_events
 from PredictionFunction.utils.openinghours import add_opening_hours
@@ -190,16 +191,13 @@ def oslo_steenstrom(
             himmelfart,
             lockdown,
             closed_days,
-            # tons_of_rock,
             oslo_pride,
             black_friday,
-            halloween_day,
-            halloween_weekend,
             hostferie_sor_ostlandet_weekdend,
             first_weekend_christmas_school_vacation,
             musikkfestival,
             new_years_day,
-            tons_of_rock
+            new_year_romjul
         )
     )
 
@@ -290,6 +288,9 @@ def oslo_steenstrom(
             dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
             venue_df[dataframe_name] = 1
             df = pd.merge(df, venue_df, how="left", on="ds", suffixes=("", "_venue"))
+            df = is_event_with_good_weather(df,dataframe_name)
+            df = is_event_with_bad_weather(df,dataframe_name)
+            df = is_event_with_normal_weather(df,dataframe_name)
             df[dataframe_name].fillna(0, inplace=True)
             regressors_to_add.append(
                 (venue_df, dataframe_name)
@@ -365,7 +366,10 @@ def oslo_steenstrom(
 
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:
-            m.add_regressor(regressor_name)
+            # m.add_regressor(regressor_name)
+            m.add_regressor(regressor_name + '_good_weather')
+            m.add_regressor(regressor_name + '_bad_weather')
+            m.add_regressor(regressor_name + '_normal_weather')
 
     m.add_seasonality(
         name="specific_month",
@@ -506,6 +510,11 @@ def oslo_steenstrom(
     future["closed"] = future["ds"].apply(
         lambda x: 1 if x in closed_dates or x.dayofweek == 6 else 0
     )
+    # Add relevant weather columns to the future df
+    future["rain_sum"] = merged_data["rain_sum"]
+    future["sunshine_amount"] = merged_data["sunshine_amount"]
+    future["windspeed"] = merged_data["windspeed"]
+    future["air_temperature"] = merged_data["air_temperature"]
 
     for event_df, event_column in regressors_to_add:
         if "event" in event_df.columns:
@@ -517,15 +526,13 @@ def oslo_steenstrom(
                 on="ds",
             )
             future[event_column].fillna(0, inplace=True)
+            future = is_event_with_good_weather(future,event_column)
+            future = is_event_with_bad_weather(future,event_column)
+            future = is_event_with_normal_weather(future,event_column)
 
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
 
-    # Add relevant weather columns to the future df
-    future["rain_sum"] = merged_data["rain_sum"]
-    future["sunshine_amount"] = merged_data["sunshine_amount"]
-    future["windspeed"] = merged_data["windspeed"]
-    future["air_temperature"] = merged_data["air_temperature"]
     future.fillna(
         {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
         inplace=True,

@@ -1,23 +1,5 @@
 import pandas as pd
 
-
-# firstweek_jan = pd.DataFrame(
-#         {
-#             "holiday": "firstweek_jan",
-#             "ds": pd.to_datetime(["2022-01-10", "2023-01-08", "2024-01-07"]),
-#             "lower_window": -7,
-#             "upper_window": 0,
-#         }
-#     )
-christmas_day = pd.DataFrame(
-        {
-            "holiday": "christmas eve",
-            "ds": pd.to_datetime(["2022-12-24"]),
-            "lower_window": -5,
-            "upper_window": 0,
-        }
-    )
-
 jan_closed = pd.DataFrame({
             "holiday": "jan_closed_2022",
             "ds": pd.to_datetime(
@@ -101,24 +83,6 @@ sunday_2024 = pd.DataFrame({
             "effect":-10000,
             "prior_scale": 1
 })
-
-# new_years_day = pd.DataFrame(
-#         {
-#             "holiday": "new_years_day",
-#             "ds": pd.to_datetime(["2022-01-01", "2023-01-01"]),
-#             "lower_window": 0,
-#             "upper_window": 0,
-#         }
-#     )
-
-# first_may = pd.DataFrame(
-#         {
-#             "holiday": "first_may",
-#             "ds": pd.to_datetime(["2021-05-01", "2022-05-01", "2023-05-01"]),
-#             "lower_window": -1,
-#             "upper_window": 0,
-#         }
-#     )
 
 easter = pd.DataFrame(
         {

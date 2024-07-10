@@ -19,44 +19,27 @@ from PredictionFunction.Datasets.Regressors.general_regressors import (
     is_christmas_shopping,
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holidays import (
-    christmas_day,
-    # new_year_eve,
-    # firstweek_jan,
-    # new_years_day,
     fadder_week,
-    # first_may,
-    eight_may,
-    seventeenth_may,
-    easter,
-    easter_mondaydayoff,
-    landstreff_russ,
-    # pinse,
-    # himmelfart,
     fjoge,
-    # stor_konsert_ukedag,
-    # maijazz_lørdag,
     military_excercise,
     outliers,
     closed_days,
-    cruise_ship_arrivals_holiday,
-    pay_day,
-    # utopia_friday,
-    # utopia_saturday,
-    skeiva_natta,
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     first_may,
     firstweek_jan,
-    new_years_day,
     pinse,
     himmelfart,
-    halloween_weekend,
-    halloween_day,
     hostferie_sor_ostlandet_weekdend,
     vinterferie_vestlandet_weekend,
     vinterferie_vestlandet_weekend_before,
     first_weekend_christmas_school_vacation,
+    seventeenth_may,
+    easter,
+    christmas_day,
+    new_year_romjul,
+    new_years_day
 )
 
 from PredictionFunction.Datasets.Regressors.weather_regressors import(
@@ -78,6 +61,11 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import(
     non_heavy_rain_fall_weekend,
     non_heavy_rain_fall_weekend_future,
 
+)
+from PredictionFunction.Datasets.Regressors.event_weather_regressors import (
+    is_event_with_bad_weather,
+    is_event_with_good_weather,
+    is_event_with_normal_weather
 )
 from PredictionFunction.utils.openinghours import add_opening_hours
 from PredictionFunction.utils.fetch_events import fetch_events
@@ -221,35 +209,23 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
         (
             christmas_day,
             firstweek_jan,
-            # new_year_eve,
-            new_years_day,
             fadder_week,
-            landstreff_russ,
             first_may,
-            eight_may,
             easter,
-            easter_mondaydayoff,
             seventeenth_may,
             pinse,
             fjoge,
-            # stor_konsert_ukedag,
             himmelfart,
-            ONS,
             outliers,
             closed_days,
-            cruise_ship_arrivals_holiday,
-            # maijazz_lørdag,
-            # utopia_friday,
-            # utopia_saturday,
-            skeiva_natta,
             military_excercise,
             hostferie_sor_ostlandet_weekdend,
-            halloween_day,
-            halloween_weekend,
             vinterferie_vestlandet_weekend_before,
             vinterferie_vestlandet_weekend,
             first_weekend_christmas_school_vacation,
             seventh_feb,
+            new_year_romjul,
+            new_years_day
         )
     )
 

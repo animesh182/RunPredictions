@@ -18,6 +18,7 @@ weekendmiddec_21covid = pd.DataFrame(
         }
     )
 
+
 fadder_week = pd.DataFrame(
         {
             "holiday": "Fadder week",
@@ -26,6 +27,34 @@ fadder_week = pd.DataFrame(
             "upper_window": 0,
         }
     )   
+
+# only when the holiday is on a weekday. If it is in the weekend there is no effect
+# first_may = pd.DataFrame(
+#         {
+#             "holiday": "First of may",
+#             "ds": pd.to_datetime(["2021-05-01", "2023-05-01"]),
+#             "lower_window": -1,
+#             "upper_window": 0,
+#         }
+#     )
+
+# pinse = pd.DataFrame(
+#         {
+#             "holiday": "Pinse",
+#             "ds": pd.to_datetime(["2022-06-06", "2023-05-29"]),
+#             "lower_window": -4,
+#             "upper_window": 0,
+#         }
+#     )
+
+# himmelfart = pd.DataFrame(
+#         {
+#             "holiday": "Himmelfart",
+#             "ds": pd.to_datetime(["2022-05-26"]),
+#             "lower_window": -1,
+#             "upper_window": 0,
+#         }
+#     )
 
 military_excercise = pd.DataFrame(
         {
@@ -136,6 +165,25 @@ bergen_pride = pd.DataFrame(
                 ]
             ),
             "lower_window": 0,
+            "upper_window": 0,
+        }
+    )
+
+
+last_day_of_school = pd.DataFrame(
+        {
+            "holiday": "Last day of school",
+            "ds": pd.to_datetime(["2023-06-21","2024-06-28","2025-06-30"]),
+            "lower_window": 0,
+            "upper_window": 1,
+        }
+    )
+
+first_day_of_school = pd.DataFrame(
+        {
+            "holiday": "First day of school",
+            "ds": pd.to_datetime(["2022-08-08","2023-08-01","2024-08-15","2025-08-01"]),
+            "lower_window": -1,
             "upper_window": 0,
         }
     )

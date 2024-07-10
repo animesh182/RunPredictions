@@ -28,23 +28,11 @@ from PredictionFunction.Datasets.Regressors.general_regressors import (
     is_christmas_shopping,
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holidays import (
-    christmas_day,
-    # new_year_eve,
-    # firstweek_jan,
-    # new_years_day,
     fadder_week,
-    # first_may,
-    eight_may,
-    seventeenth_may,
-    easter,
-    # easter_mondaydayoff,
-    landstreff_russ,
     fjoge,
     military_excercise,
     outliers,
     closed_days,
-    # cruise_ship_arrivals_holiday,
-    # pay_day,
     skeiva_natta,
 )
 
@@ -52,14 +40,17 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     first_may,
     firstweek_jan,
     new_years_day,
+    new_year_romjul,
     pinse,
     himmelfart,
-    halloween_weekend,
-    halloween_day,
     hostferie_sor_ostlandet_weekdend,
     vinterferie_vestlandet_weekend,
     vinterferie_vestlandet_weekend_before,
     first_weekend_christmas_school_vacation,
+    first_may,
+    seventeenth_may,
+    easter,
+    christmas_day,
 )
 
 from PredictionFunction.Datasets.Regressors.weather_regressors import (
@@ -79,6 +70,11 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import (
     # heavy_rain_spring_weekend_future,
     non_heavy_rain_fall_weekend,
     non_heavy_rain_fall_weekend_future,
+)
+from PredictionFunction.Datasets.Regressors.event_weather_regressors import (
+    is_event_with_bad_weather,
+    is_event_with_good_weather,
+    is_event_with_normal_weather
 )
 from PredictionFunction.utils.openinghours import add_opening_hours
 from PredictionFunction.utils.fetch_events import fetch_events
@@ -215,11 +211,8 @@ def stavanger(
         (
             christmas_day,
             firstweek_jan,
-            # new_year_eve,
             fadder_week,
-            landstreff_russ,
             first_may,
-            eight_may,
             easter,
             seventeenth_may,
             pinse,
@@ -231,16 +224,13 @@ def stavanger(
             skeiva_natta,
             military_excercise,
             hostferie_sor_ostlandet_weekdend,
-            halloween_day,
-            halloween_weekend,
             vinterferie_vestlandet_weekend_before,
             vinterferie_vestlandet_weekend,
             first_weekend_christmas_school_vacation,
-            new_years_day
+            new_years_day,
+            new_year_romjul,
         )
     )
-
-    print("done with holidays")
 
     ### Conditional seasonality - weekly
 
@@ -320,6 +310,9 @@ def stavanger(
             dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
             venue_df[dataframe_name] = 1
             df = pd.merge(df, venue_df, how="left", on="ds", suffixes=("", "_venue"))
+            df = is_event_with_good_weather(df,dataframe_name)
+            df = is_event_with_bad_weather(df,dataframe_name)
+            df = is_event_with_normal_weather(df,dataframe_name)            
             df[dataframe_name].fillna(0, inplace=True)
             regressors_to_add.append(
                 (venue_df, dataframe_name)
@@ -444,7 +437,10 @@ def stavanger(
     m.add_regressor("opening_duration")
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:
-            m.add_regressor(regressor_name)
+            # m.add_regressor(regressor_name)
+            m.add_regressor(regressor_name + '_good_weather')
+            m.add_regressor(regressor_name + '_bad_weather')
+            m.add_regressor(regressor_name + '_normal_weather')            
 
     print("done with seasonalities")
     if prediction_category == "hour":
@@ -547,6 +543,9 @@ def stavanger(
                 on="ds",
             )
             future[event_column].fillna(0, inplace=True)
+            future = is_event_with_good_weather(future,event_column)
+            future = is_event_with_bad_weather(future,event_column)
+            future = is_event_with_normal_weather(future,event_column)            
 
     # future = warm_and_dry_future(future)
     # future = heavy_rain_fall_weekday_future(future)

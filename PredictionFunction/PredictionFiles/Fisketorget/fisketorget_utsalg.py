@@ -27,30 +27,28 @@ from PredictionFunction.Datasets.Regressors.general_regressors import (
     is_christmas_shopping,
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holidays import (
-    christmas_day,
-    new_year_eve,
     # firstweek_jan,
     # new_years_day,
-    # fadder_week,
+    fadder_week,
     # first_may,
-    eight_may,
-    seventeenth_may,
-    easter,
-    # easter_mondaydayoff,
-    # landstreff_russ,
     # pinse,
     # himmelfart,
     fjoge,
-    # stor_konsert_ukedag,
-    # maijazz_lørdag,
+    stor_konsert_ukedag,
+    maijazz_lørdag,
     military_excercise,
     outliers,
     closed_days,
-    # cruise_ship_arrivals_holiday,
-    # pay_day,
-    # utopia_friday,
-    # utopia_saturday,
+    cruise_ship_arrivals_holiday,
+    pay_day,
+    utopia_friday,
+    utopia_saturday,
     skeiva_natta,
+    food_fun_fest,
+    fiskesprell,
+    stavanger_vinfest,
+    gladmat,
+    april_closed
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
@@ -59,12 +57,14 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     new_years_day,
     pinse,
     himmelfart,
-    halloween_weekend,
-    halloween_day,
     hostferie_sor_ostlandet_weekdend,
     vinterferie_vestlandet_weekend,
     vinterferie_vestlandet_weekend_before,
     first_weekend_christmas_school_vacation,
+    christmas_day,
+    seventeenth_may,
+    easter,
+    new_year_romjul
 )
 
 from PredictionFunction.Datasets.Regressors.weather_regressors import (
@@ -88,6 +88,11 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import (
 )
 from PredictionFunction.utils.openinghours import add_opening_hours
 from PredictionFunction.utils.fetch_events import fetch_events
+from PredictionFunction.Datasets.Regressors.event_weather_regressors import (
+    is_event_with_bad_weather,
+    is_event_with_good_weather,
+    is_event_with_normal_weather
+)
 
 
 def fisketorget_utsalg(
@@ -219,11 +224,9 @@ def fisketorget_utsalg(
         (
             christmas_day,
             firstweek_jan,
-            new_year_eve,
             # fadder_week,
             # landstreff_russ,
             first_may,
-            eight_may,
             easter,
             seventeenth_may,
             pinse,
@@ -233,16 +236,20 @@ def fisketorget_utsalg(
             outliers,
             closed_days,
             # cruise_ship_arrivals_holiday,
-            # utopia_friday,
-            # utopia_saturday,
             skeiva_natta,
             military_excercise,
             hostferie_sor_ostlandet_weekdend,
-            halloween_day,
-            halloween_weekend,
             vinterferie_vestlandet_weekend_before,
             vinterferie_vestlandet_weekend,
             first_weekend_christmas_school_vacation,
+            # dec_2021,
+            food_fun_fest,
+            fiskesprell,
+            stavanger_vinfest,
+            gladmat,
+            april_closed,
+            new_years_day,
+            new_year_romjul
         )
     )
 
@@ -304,14 +311,9 @@ def fisketorget_utsalg(
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
 
     fisketorget_venues = {
-        "Fiskepiren",
-        "Folken, Løkkeveien",
-        "Zetlitz",
-        "Cementen, Stavanger",
-        "DNB Arena",
-        "Stavanger Konserthus",
-        "Stavanger Forum",
-    }
+        "Fiskepiren","Folken, Løkkeveien","Zetlitz","Cementen, Stavanger", 
+        "DNB Arena","Stavanger Konserthus","Stavanger Forum","Stavanger","Stavanger Sentrum"
+    }  
 
     venue_list=fisketorget_venues
 
@@ -331,6 +333,9 @@ def fisketorget_utsalg(
             dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
             venue_df[dataframe_name] = 1
             df = pd.merge(df, venue_df, how="left", on="ds", suffixes=("", "_venue"))
+            df = is_event_with_good_weather(df,dataframe_name)
+            df = is_event_with_bad_weather(df,dataframe_name)
+            df = is_event_with_normal_weather(df,dataframe_name)
             df[dataframe_name].fillna(0, inplace=True)
             regressors_to_add.append(
                 (venue_df, dataframe_name)
@@ -391,14 +396,9 @@ def fisketorget_utsalg(
     else:
         m = Prophet(
             holidays=holidays,
-            yearly_seasonality=5,
+            yearly_seasonality=True,
             daily_seasonality=False,
-            n_changepoints=12,
-            changepoint_range=0.95,
-            changepoint_prior_scale=1.3,
-            seasonality_prior_scale=2,
-            holidays_prior_scale=5,
-            seasonality_mode="additive",
+            changepoint_prior_scale=0.1,
         )
 
     m.add_regressor("custom_regressor")
@@ -447,7 +447,10 @@ def fisketorget_utsalg(
     m.add_regressor("opening_duration")
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:
-            m.add_regressor(regressor_name)
+            # m.add_regressor(regressor_name)
+            m.add_regressor(regressor_name + '_good_weather')
+            m.add_regressor(regressor_name + '_bad_weather')
+            m.add_regressor(regressor_name + '_normal_weather')
 
     print("done with seasonalities")
     if prediction_category == "hour":
@@ -551,6 +554,9 @@ def fisketorget_utsalg(
                 on="ds",
             )
             future[event_column].fillna(0, inplace=True)
+            future = is_event_with_good_weather(future,event_column)
+            future = is_event_with_bad_weather(future,event_column)
+            future = is_event_with_normal_weather(future,event_column)
 
     future = warm_dry_weather_spring_tfs(future)
     # future = warm_and_dry_future(future)

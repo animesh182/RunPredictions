@@ -40,17 +40,13 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import (
     # non_heavy_rain_fall_weekend,
     # non_heavy_rain_fall_weekend_future,
 )
+from PredictionFunction.Datasets.Regressors.event_weather_regressors import (
+    is_event_with_bad_weather,
+    is_event_with_good_weather,
+    is_event_with_normal_weather
+)
 from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.fredrikstad_holidays import (
-    christmas_day,
-    new_year_eve,
-    # firstweek_jan,
-    # new_years_day,
     fadder_week,
-    seventeenth_may,
-    easter,
-    # pinse,
-    # himmelfart,
-    # stor_konsert_ukedag,
     idyll,
     closed_days,
     black_friday,
@@ -63,10 +59,12 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     new_years_day,
     pinse,
     himmelfart,
-    halloween_day,
-    halloween_weekend,
     hostferie_sor_ostlandet_weekdays,
     hostferie_sor_ostlandet_weekdend,
+    christmas_day,
+    seventeenth_may,
+    easter,
+    new_year_romjul
 )
 from PredictionFunction.utils.openinghours import add_opening_hours
 from PredictionFunction.utils.fetch_events import fetch_events
@@ -359,7 +357,7 @@ def fredrikstad(
     holidays = pd.concat(
         (
             christmas_day,
-            new_year_eve,
+            new_year_romjul,
             new_years_day,
             firstweek_jan,
             fadder_week,
@@ -367,13 +365,10 @@ def fredrikstad(
             easter,
             seventeenth_may,
             pinse,
-            # stor_konsert_ukedag,
             himmelfart,
             closed_days,
             idyll,
             black_friday,
-            halloween_weekend,
-            halloween_day,
             hostferie_sor_ostlandet_weekdend,
             hostferie_sor_ostlandet_weekdays,
             feb_closed
@@ -426,8 +421,15 @@ def fredrikstad(
     df["is_specific_month"] = df["ds"].apply(is_specific_month)
     df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
     df = add_opening_hours(df, "Fredrikstad", 11, 16)
-
-    fredrikstad_venues = {}
+    fredrikstad_venues = {  
+                            "Tollbodplassen"
+                            "Fredrikstad domkirke"
+                            "City scene"
+                            "Fredrikstad Stadion"
+                            "Alibi Fredrikstad"
+                            "Kulturkirken Gamle Fredrikstad"
+                            "City Scene Fredrikstad"
+                            }
     venue_list = fredrikstad_venues
     data = {"name": [], "effect": []}
     regressors_to_add = []
@@ -445,6 +447,9 @@ def fredrikstad(
             dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
             venue_df[dataframe_name] = 1
             df = pd.merge(df, venue_df, how="left", on="ds", suffixes=("", "_venue"))
+            df = is_event_with_good_weather(df,dataframe_name)
+            df = is_event_with_bad_weather(df,dataframe_name)
+            df = is_event_with_normal_weather(df,dataframe_name)
             df[dataframe_name].fillna(0, inplace=True)
             regressors_to_add.append(
                 (venue_df, dataframe_name)
@@ -615,7 +620,10 @@ def fredrikstad(
 
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:
-            m.add_regressor(regressor_name)
+            # m.add_regressor(regressor_name)
+            m.add_regressor(regressor_name + '_good_weather')
+            m.add_regressor(regressor_name + '_bad_weather')
+            m.add_regressor(regressor_name + '_normal_weather')
 
     if prediction_category == "hour":
         df["ds"] = pd.to_datetime(
@@ -724,6 +732,11 @@ def fredrikstad(
     future["closed_jan"] = future["ds"].apply(is_closed)
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
+    # Add relevant weather columns to the future df
+    future["rain_sum"] = merged_data["rain_sum"]
+    future["sunshine_amount"] = merged_data["sunshine_amount"]
+    future["windspeed"] = merged_data["windspeed"]
+    future["air_temperature"] = merged_data["air_temperature"]
 
     for event_df, event_column in regressors_to_add:
         if "event" in event_df.columns:
@@ -735,11 +748,9 @@ def fredrikstad(
                 on="ds",
             )
             future[event_column].fillna(0, inplace=True)
-    # Add relevant weather columns to the future df
-    future["rain_sum"] = merged_data["rain_sum"]
-    future["sunshine_amount"] = merged_data["sunshine_amount"]
-    future["windspeed"] = merged_data["windspeed"]
-    future["air_temperature"] = merged_data["air_temperature"]
+            future = is_event_with_good_weather(future,event_column)
+            future = is_event_with_bad_weather(future,event_column)
+            future = is_event_with_normal_weather(future,event_column)
     future.fillna(
         {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
         inplace=True,

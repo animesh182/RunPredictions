@@ -42,42 +42,29 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import (
     non_heavy_rain_fall_weekend,
     non_heavy_rain_fall_weekend_future,
 )
+from PredictionFunction.Datasets.Regressors.event_weather_regressors import (
+    is_event_with_bad_weather,
+    is_event_with_good_weather,
+    is_event_with_normal_weather
+)
 import logging
 
 from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.sandnes_holidays import (
-    christmas_day,
-    new_year_eve,
-    #  firstweek_jan,
-    #  new_years_day,
-     fadder_week,
-    #  first_may, 
-     eight_may,
-     seventeenth_may,
-     easter, 
-    #  easter_mondaydayoff,
-     landstreff_russ,
-    #  pinse, 
-    #  himmelfart, 
-     fjoge, 
-    #  stor_konsert_ukedag, 
-    #  maijazz_lørdag, 
-     outliers, 
-     closed_days, 
-    #  cruise_ship_arrivals_holiday, 
-    #  pay_day, 
-    #  utopia_friday,
-    #  utopia_saturday, 
-     skeiva_natta,
-     closed_march
+    outliers,
+    closed_days,
+    closed_march
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     first_may,
     firstweek_jan,
-    new_years_day,
     pinse,
     himmelfart,
-    halloween_day,
-    halloween_weekend,
+    christmas_day,
+    new_years_day,
+    first_may,
+    seventeenth_may,
+    easter,
+    new_year_romjul
 )
 from PredictionFunction.utils.fetch_events import fetch_events
 from PredictionFunction.utils.openinghours import add_opening_hours
@@ -210,24 +197,16 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
         (
             christmas_day,
             firstweek_jan,
-            new_year_eve,
-            fadder_week,
-            landstreff_russ,
+            new_years_day,
+            new_year_romjul,
             first_may,
-            eight_may,
             easter,
             seventeenth_may,
             pinse,
-            fjoge,
             himmelfart,
-            ONS,
             outliers,
             closed_days,
-            skeiva_natta,
-            halloween_weekend,
-            halloween_day,
             closed_march,
-            new_years_day
         )
     )
 
@@ -326,6 +305,9 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
             dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
             venue_df[dataframe_name] = 1
             df = pd.merge(df, venue_df, how="left", on="ds", suffixes=("", "_venue"))
+            df = is_event_with_good_weather(df,dataframe_name)
+            df = is_event_with_bad_weather(df,dataframe_name)
+            df = is_event_with_normal_weather(df,dataframe_name)
             df[dataframe_name].fillna(0, inplace=True)
             regressors_to_add.append(
                 (venue_df, dataframe_name)
@@ -418,6 +400,14 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
     m.add_regressor("opening_duration")
     m.add_regressor("sunshine_amount")
 
+
+    for event_df, regressor_name in regressors_to_add:
+        if 'event' in event_df.columns:
+            # m.add_regressor(regressor_name)
+            m.add_regressor(regressor_name + '_good_weather')
+            m.add_regressor(regressor_name + '_bad_weather')
+            m.add_regressor(regressor_name + '_normal_weather')
+
     # m.add_seasonality(name='monthly', period=30.5, fourier_order=5, condition_name='specific_month')
     m.add_seasonality(
         name="covid_restriction_christmas",
@@ -449,12 +439,6 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
 
     m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
 
-    # Add the conditional regressor to the model
-
-
-    # for event_df, regressor_name in regressors_to_add:
-    #     if 'event' in event_df.columns:
-    #         m.add_regressor(regressor_name)
 
     print("done with seasonalities")
     if prediction_category == "hour":
@@ -547,9 +531,6 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
 
     future["cluster_label"] = future["ds"].apply(get_cluster_label)
 
-    future["sunshine_amount"] = merged_data["sunshine_amount"]
-    future.dropna(inplace=True)
-
     # add the last working day and the +/- 5 days
     # future = calculate_days(future, last_working_day)
 
@@ -589,16 +570,19 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
         {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
         inplace=True,
     )
-    # for event_df, event_column in regressors_to_add:
-    #     if 'event' in event_df.columns:
-    #         event_df= event_df.drop_duplicates('ds')
-    #         future = pd.merge(
-    #             future,
-    #             event_df[["ds", event_column]],
-    #             how="left",
-    #             on="ds",
-    #         )
-    #         future[event_column].fillna(0, inplace=True)
+    for event_df, event_column in regressors_to_add:
+        if 'event' in event_df.columns:
+            event_df= event_df.drop_duplicates('ds')
+            future = pd.merge(
+                future,
+                event_df[["ds", event_column]],
+                how="left",
+                on="ds",
+            )
+            future[event_column].fillna(0, inplace=True)
+            future = is_event_with_good_weather(future,event_column)
+            future = is_event_with_bad_weather(future,event_column)
+            future = is_event_with_normal_weather(future,event_column)
     future = warm_and_dry_future(future)
     future = heavy_rain_fall_weekday_future(future)
     future = heavy_rain_fall_weekend_future(future)

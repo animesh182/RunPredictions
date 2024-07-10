@@ -34,45 +34,38 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import (
     # non_heavy_rain_fall_weekend,
     # non_heavy_rain_fall_weekend_future,
 )
+from PredictionFunction.Datasets.Regressors.event_weather_regressors import (
+    is_event_with_bad_weather,
+    is_event_with_good_weather,
+    is_event_with_normal_weather
+)
 from PredictionFunction.utils.utils import (
     calculate_days_30,
     custom_regressor,
     calculate_days_15,
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.oslo_storo_holidays import (
-    christmas_day,
-    # firstweek_jan,
-    # new_years_day,
-    # first_may,
-    seventeenth_may,
-    easter,
-    easter_lowsaturday,
-    easter_mondaydayoff,
-    # pinse,
-    # himmelfart,
-    fadderuke,
-    day_before_red_day,
     closed_days,
-    karriere_dag,
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
     firstweek_jan,
-    new_years_day,
-    first_may,
-    easter_mondaydayoff,
-    pinse,
-    himmelfart,
     lockdown,
     oslo_pride,
     musikkfestival
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
-    halloween_day,
-    halloween_weekend,
     hostferie_sor_ostlandet_weekdend,
     first_weekend_christmas_school_vacation,
+    christmas_day,
+    new_years_day,
+    new_year_romjul,
+    first_may,
+    seventeenth_may,
+    easter,
+    pinse,
+    himmelfart,
 )
 from PredictionFunction.utils.fetch_sales_data import fetch_salesdata
 from PredictionFunction.utils.fetch_events import fetch_events
@@ -196,18 +189,14 @@ def oslo_storo(
             seventeenth_may,
             pinse,
             himmelfart,
-            day_before_red_day,
             lockdown,
             closed_days,
-            fadderuke,
             oslo_pride,
-            karriere_dag,
-            halloween_day,
-            halloween_weekend,
             hostferie_sor_ostlandet_weekdend,
             first_weekend_christmas_school_vacation,
             musikkfestival,
-            new_years_day
+            new_years_day,
+            new_year_romjul,
         )
     )
 
@@ -292,6 +281,9 @@ def oslo_storo(
             dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
             venue_df[dataframe_name] = 1
             df = pd.merge(df, venue_df, how="left", on="ds", suffixes=("", "_venue"))
+            df = is_event_with_good_weather(df,dataframe_name)
+            df = is_event_with_bad_weather(df,dataframe_name)
+            df = is_event_with_normal_weather(df,dataframe_name)
             df[dataframe_name].fillna(0, inplace=True)
             regressors_to_add.append(
                 (venue_df, dataframe_name)
@@ -350,7 +342,10 @@ def oslo_storo(
 
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:
-            m.add_regressor(regressor_name)
+            # m.add_regressor(regressor_name)
+            m.add_regressor(regressor_name + '_good_weather')
+            m.add_regressor(regressor_name + '_bad_weather')
+            m.add_regressor(regressor_name + '_normal_weather')
 
     m.add_seasonality(
         name="specific_month", period=30.5, fourier_order=5, condition_name="specific_month"
@@ -463,6 +458,11 @@ def oslo_storo(
     future["fall_start"] = future["ds"].apply(is_fall_start)
 
     future["christmas_shopping"] = future["ds"].apply(is_christmas_shopping)
+    # Add relevant weather columns to the future df
+    future["rain_sum"] = merged_data["rain_sum"]
+    future["sunshine_amount"] = merged_data["sunshine_amount"]
+    future["windspeed"] = merged_data["windspeed"]
+    future["air_temperature"] = merged_data["air_temperature"]
 
     for event_df, event_column in regressors_to_add:
         if "event" in event_df.columns:
@@ -474,6 +474,9 @@ def oslo_storo(
                 on="ds",
             )
             future[event_column].fillna(0, inplace=True)
+            future = is_event_with_good_weather(future,event_column)
+            future = is_event_with_bad_weather(future,event_column)
+            future = is_event_with_normal_weather(future,event_column)
 
     # Add Future df for Oslo Spektrum large concerts
     # Merge with the events data
@@ -492,11 +495,7 @@ def oslo_storo(
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
 
-    # Add relevant weather columns to the future df
-    future["rain_sum"] = merged_data["rain_sum"]
-    future["sunshine_amount"] = merged_data["sunshine_amount"]
-    future["windspeed"] = merged_data["windspeed"]
-    future["air_temperature"] = merged_data["air_temperature"]
+
     future.fillna(
         {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
         inplace=True,

@@ -51,45 +51,37 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import (
     # warm_dry_weekend_spring_future,
     # warm_dry_weekend_fall_future,
 )
+from PredictionFunction.Datasets.Regressors.event_weather_regressors import (
+    is_event_with_bad_weather,
+    is_event_with_good_weather,
+    is_event_with_normal_weather
+)
 from PredictionFunction.Datasets.Holidays.LosTacos.dataset_holidays import (
     last_working_day,
     fifteenth_working_days,
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.karl_johan_holidays import (
-    by_larm,
-    oya,
-    tons_of_rock,
-    findings,
-    # firstweek_jan,
-    # new_years_day,
-    # first_may,
-    seventeenth_may,
-    easter,
-    easter_lowsaturday,
-    easter_mondaydayoff,
-    # pinse,
-    # himmelfart,
-    norway_cup,
     closed_days,
     black_friday,
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
     firstweek_jan,
-    new_years_day,
-    first_may,
-    easter_mondaydayoff,
-    pinse,
-    himmelfart,
     lockdown,
     oslo_pride,
-    musikkfestival
+    musikkfestival,
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
-    halloween_day,
-    halloween_weekend,
     hostferie_sor_ostlandet_weekdend,
     first_weekend_christmas_school_vacation,
+    seventeenth_may,
+    easter,
+    new_years_day,
+    first_may,
+    pinse,
+    himmelfart,
+    christmas_day,
+    new_year_romjul
 )
 
 from PredictionFunction.utils.utils import (
@@ -231,25 +223,19 @@ def karl_johan(
             firstweek_jan,
             easter,
             first_may,
-            easter_lowsaturday,
-            easter_mondaydayoff,
+            new_years_day,
             seventeenth_may,
             pinse,
             himmelfart,
             lockdown,
             closed_days,
-            tons_of_rock,
-            oya,
-            by_larm,
-            findings,
-            norway_cup,
             black_friday,
-            halloween_weekend,
-            halloween_day,
             hostferie_sor_ostlandet_weekdend,
             first_weekend_christmas_school_vacation,
             oslo_pride,
-            musikkfestival
+            musikkfestival,
+            christmas_day,
+            new_year_romjul
         )
     )
     # Didnt use, because the effect was too small or looked incorrect: piknik_i_parken,inferno
@@ -331,6 +317,9 @@ def karl_johan(
             dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
             venue_df[dataframe_name] = 1
             df = pd.merge(df, venue_df, how="left", on="ds", suffixes=("", "_venue"))
+            df = is_event_with_good_weather(df,dataframe_name)
+            df = is_event_with_bad_weather(df,dataframe_name)
+            df = is_event_with_normal_weather(df,dataframe_name)
             df[dataframe_name].fillna(0, inplace=True)
             regressors_to_add.append(
                 (venue_df, dataframe_name)
@@ -385,7 +374,10 @@ def karl_johan(
 
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:
-            m.add_regressor(regressor_name)
+            # m.add_regressor(regressor_name)
+            m.add_regressor(regressor_name + '_good_weather')
+            m.add_regressor(regressor_name + '_bad_weather')
+            m.add_regressor(regressor_name + '_normal_weather')
 
     # Add the payday columns as regressors
     m.add_regressor("days_since_last_30")
@@ -527,6 +519,9 @@ def karl_johan(
                 on="ds",
             )
             future[event_column].fillna(0, inplace=True)
+            future = is_event_with_good_weather(future,event_column)
+            future = is_event_with_bad_weather(future,event_column)
+            future = is_event_with_normal_weather(future,event_column)
 
     # Apply the future functions for weather regressions here
     future = heavy_rain_spring_weekend_future(future)
