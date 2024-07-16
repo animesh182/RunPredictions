@@ -47,10 +47,10 @@ def prepare_data(company, restaurant, start_date, end_date):
     
     logging.info(city)
    
-    if city =='Trondheim':
-        filtered_weather_data = fetch_weather("Stavanger",start_date,end_date)
-    else:
-        filtered_weather_data = fetch_weather(city,start_date,end_date)
+    # if city =='Trondheim':
+    #     filtered_weather_data = fetch_weather("Stavanger",start_date,end_date)
+    # else:
+    filtered_weather_data = fetch_weather(city,start_date,end_date)
     # else:
     #     # filtered_weather_data=None
     #     print(f"No city found for the restaurant {restaurant}")
