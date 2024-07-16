@@ -37,6 +37,7 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import (
     heavy_rain_spring_weekday_future,
     heavy_rain_spring_weekend,
     heavy_rain_spring_weekend_future,
+    warm_dry_weather_spring,
     # non_heavy_rain_fall_weekend,
     # non_heavy_rain_fall_weekend_future,
 )
@@ -73,7 +74,7 @@ from PredictionFunction.utils.fetch_events import fetch_events
 def fredrikstad(
     prediction_category, restaurant, merged_data, historical_data, future_data
 ):
-    event_holidays = pd.DataFrame(columns=["event_names", "name","date",])
+    event_holidays = pd.DataFrame()
     sales_data_df = historical_data
     sales_data_df = sales_data_df.rename(columns={"date": "ds"})
 
@@ -163,13 +164,14 @@ def fredrikstad(
             "air_temperature",
         ]
         # df['y'] = np.log(df['y'])
-    # df = warm_dry_weather_spring(df)
+    df = warm_dry_weather_spring(df)
     df = heavy_rain_fall_weekday(df)
     df = heavy_rain_fall_weekend(df)
     # df = heavy_rain_winter_weekday(df)
     # df = heavy_rain_winter_weekend(df)
     df = heavy_rain_spring_weekday(df)
     df = heavy_rain_spring_weekend(df)
+    df = add_opening_hours(df, "Fredrikstad", 11, 16)
     # df = non_heavy_rain_fall_weekend(df)
 
     m = Prophet()
@@ -177,182 +179,6 @@ def fredrikstad(
     ### Holidays and other repeating outliers
     m.add_country_holidays(country_name="NO")
 
-    # christmas_day = pd.DataFrame(
-    #     {
-    #         "holiday": "christmas eve",
-    #         "ds": pd.to_datetime(["2021-12-24", "2022-12-24"]),
-    #         "lower_window": -5,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # new_year_eve = pd.DataFrame(
-    #     {
-    #         "holiday": "new_year_eve",
-    #         "ds": pd.to_datetime(["2021-12-31", "2022-12-31"]),
-    #         "lower_window": -6,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # firstweek_jan = pd.DataFrame(
-    #     {
-    #         "holiday": "firstweek_jan",
-    #         "ds": pd.to_datetime(
-    #             [
-    #                 "2021-01-02",
-    #                 "2021-01-02",
-    #                 "2021-01-03",
-    #                 "2021-01-04",
-    #                 "2021-01-05",
-    #                 "2021-01-06",
-    #                 "2021-01-07",
-    #                 "2021-01-08",
-    #                 "2021-01-09",
-    #                 "2021-01-10",
-    #                 "2021-01-11",
-    #                 "2022-01-02",
-    #                 "2022-01-02",
-    #                 "2022-01-03",
-    #                 "2022-01-04",
-    #                 "2022-01-05",
-    #                 "2022-01-06",
-    #                 "2022-01-07",
-    #                 "2022-01-08",
-    #                 "2022-01-09",
-    #                 "2022-01-10",
-    #                 "2022-01-11",
-    #                 "2023-01-02",
-    #                 "2023-01-02",
-    #                 "2023-01-03",
-    #                 "2023-01-04",
-    #                 "2023-01-05",
-    #                 "2023-01-06",
-    #                 "2023-01-07",
-    #                 "2023-01-08",
-    #                 "2023-01-09",
-    #                 "2023-01-10",
-    #                 "2023-01-11",
-    #             ]
-    #         ),
-    #         "lower_window": 0,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # new_years_day = pd.DataFrame(
-    #     {
-    #         "holiday": "new_years_day",
-    #         "ds": pd.to_datetime(["2022-01-01", "2022-01-01", "2023-01-01"]),
-    #         "lower_window": 0,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # fadder_week = pd.DataFrame(
-    #     {
-    #         "holiday": "fadder_week",
-    #         "ds": pd.to_datetime(
-    #             ["2022-08-15", "2022-08-16", "2022-08-17", "2022-08-18"]
-    #         ),
-    #         "lower_window": 0,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # only when the holiday is on a weekday. If it is in the weekend there is no effect
-    # first_may = pd.DataFrame(
-    #     {
-    #         "holiday": "first_may",
-    #         "ds": pd.to_datetime(["2021-05-01", "2023-05-01"]),
-    #         "lower_window": -1,
-    #         "upper_window": 0,
-    #     }
-    # )
-    # seventeenth_may = pd.DataFrame(
-    #     {
-    #         "holiday": "seventeenth_may",
-    #         "ds": pd.to_datetime(
-    #             ["2021-05-17", "2022-05-17", "2023-05-17", "2024-05-17"]
-    #         ),
-    #         "lower_window": -1,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # easter = pd.DataFrame(
-    #     {
-    #         "holiday": "easter",
-    #         "ds": pd.to_datetime(
-    #             ["2022-04-14", "2022-04-15", "2022-04-16", "2022-04-17"]
-    #         ),
-    #         "lower_window": 0,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # pinse = pd.DataFrame(
-    #     {
-    #         "holiday": "pinse",
-    #         "ds": pd.to_datetime(["2022-06-06", "2023-05-29"]),
-    #         "lower_window": -4,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # 2023: falls the day after the national independence day, so no effect the day before this year
-    # himmelfart = pd.DataFrame(
-    #     {
-    #         "holiday": "himmelfart",
-    #         "ds": pd.to_datetime(["2022-05-26"]),
-    #         "lower_window": -1,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # stor_konsert_ukedag = pd.DataFrame(
-    #     {
-    #         "holiday": "stor_konsert_ukedag",
-    #         "ds": pd.to_datetime([]),
-    #         "lower_window": 0,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # idyll = pd.DataFrame(
-    #     {
-    #         "holiday": "idyll",
-    #         "ds": pd.to_datetime(["2022-06-19", "2023-06-18"]),
-    #         "lower_window": -3,
-    #         "upper_window": 0,
-    #     }
-    # )
-
-    # closed_days = pd.DataFrame(
-    #     {
-    #         "holiday": "closed_days",
-    #         "ds": pd.to_datetime(
-    #             [
-    #                 "2021-12-22",
-    #                 "2021-12-23",
-    #                 "2021-12-24",
-    #                 "2021-12-25",
-    #                 "2022-12-24",
-    #                 "2022-12-31",
-    #             ]
-    #         ),
-    #         "lower_window": 0,
-    #         "upper_window": 0,
-    #     }
-    # )
-    # black_friday = pd.DataFrame(
-    #     {
-    #         "holiday": "Black Friday",
-    #         "ds": pd.to_datetime(["2022-11-25", "2023-11-24"]),
-    #         "lower_window": -1,
-    #         "upper_window": 0,
-    #     }
-    # )
 
     holidays = pd.concat(
         (
@@ -420,7 +246,6 @@ def fredrikstad(
 
     df["is_specific_month"] = df["ds"].apply(is_specific_month)
     df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
-    df = add_opening_hours(df, "Fredrikstad", 11, 16)
     fredrikstad_venues = {  
                             "Tollbodplassen"
                             "Fredrikstad domkirke"
@@ -554,10 +379,16 @@ def fredrikstad(
     else:
         m = Prophet(
             holidays=holidays,
-            yearly_seasonality=True,
+            yearly_seasonality=5,
             daily_seasonality=False,
             changepoint_prior_scale=0.1,
         )
+    for event_df, regressor_name in regressors_to_add:
+        if "event" in event_df.columns:
+            # m.add_regressor(regressor_name)
+            m.add_regressor(regressor_name + '_good_weather')
+            m.add_regressor(regressor_name + '_bad_weather')
+            m.add_regressor(regressor_name + '_normal_weather')
 
     # Add the payday columns as regressors
     # m.add_regressor("days_since_last_30")
@@ -578,6 +409,7 @@ def fredrikstad(
     m.add_regressor("closed_jan")
     m.add_regressor("opening_duration")
     m.add_regressor("sunshine_amount")
+    m.add_regressor("rain_sum")
 
     m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
     m.add_seasonality(
@@ -612,19 +444,11 @@ def fredrikstad(
         fourier_order=3,
         condition_name="christmas_shopping",
     )
-    m.add_seasonality(name='monthly', period=30.5, fourier_order=5)
+    m.fit(df)
     # m.add_seasonality(name='not_christmas_shopping', period=7, fourier_order=3,
     #                  condition_name='not_christmas_shopping')
 
     # Add the conditional regressor to the model
-
-    for event_df, regressor_name in regressors_to_add:
-        if "event" in event_df.columns:
-            # m.add_regressor(regressor_name)
-            m.add_regressor(regressor_name + '_good_weather')
-            m.add_regressor(regressor_name + '_bad_weather')
-            m.add_regressor(regressor_name + '_normal_weather')
-    m.fit(df)
 
     future = m.make_future_dataframe(periods=60, freq="D")
 
@@ -664,6 +488,11 @@ def fredrikstad(
     future["windspeed"] = merged_data["windspeed"]
     future["air_temperature"] = merged_data["air_temperature"]
 
+    future.fillna(
+        {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
+        inplace=True,
+    )
+
     for event_df, event_column in regressors_to_add:
         if "event" in event_df.columns:
             event_df = event_df.drop_duplicates("ds")
@@ -677,10 +506,6 @@ def fredrikstad(
             future = is_event_with_good_weather(future,event_column)
             future = is_event_with_bad_weather(future,event_column)
             future = is_event_with_normal_weather(future,event_column)
-    future.fillna(
-        {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
-        inplace=True,
-    )
     future = warm_and_dry_future(future)
     future = heavy_rain_fall_weekday_future(future)
     future = heavy_rain_fall_weekend_future(future)
@@ -690,8 +515,6 @@ def fredrikstad(
     future = heavy_rain_spring_weekend_future(future)
     future = add_opening_hours(future, "Fredrikstad", 11, 16)
     # future = non_heavy_rain_fall_weekend_future(future)
-
-    future.fillna(0, inplace=True)
 
     return m, future, df, event_holidays, venue_list
 

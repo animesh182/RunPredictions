@@ -289,8 +289,8 @@ def stavanger(
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
 
     stavanger_venues = {
-        "Fiskepiren","Folken, Løkkeveien","Zetlitz","Cementen, Stavanger", 
-        "DNB Arena","Stavanger Konserthus","Stavanger Forum",
+        "Stavanger Konserthus","Folken, Løkkeveien","Stavanger","DNB Arena", 
+        "Fiskepiren","Sørmarka Arena","Stavanger","Stavanger Sentrum"
     }
     
     venue_list=stavanger_venues
@@ -426,6 +426,7 @@ def stavanger(
     # Add the conditional regressor to the model
     m.add_regressor("custom_regressor")
     m.add_regressor("sunshine_amount")
+    m.add_regressor("rain_sum")
     m.add_regressor("warm_and_dry")
     # m.add_regressor("heavy_rain_fall_weekday")
     m.add_regressor("heavy_rain_fall_weekend")

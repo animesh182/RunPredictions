@@ -578,11 +578,10 @@ def oslo_torggata(
     ].apply(custom_regressor)
     future.loc[~future_date_mask, "custom_regressor"] = 0
 
-    # Add the 'sunshine_amount' column to the future dataframe
-    if prediction_category != "hour":
-        future["ds"] = future["ds"].dt.date
-    future = future.drop_duplicates(subset="ds")
-    future.fillna(0, inplace=True)
+    # if prediction_category != "hour":
+    #     future["ds"] = future["ds"].dt.date
+    # future = future.drop_duplicates(subset="ds")
+    # future.fillna(0, inplace=True)
 
     return m, future, df, event_holidays, venue_list
 

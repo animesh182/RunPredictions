@@ -324,10 +324,16 @@ def oslo_storo(
             changepoint_prior_scale=0.1,
         )
 
+    for event_df, regressor_name in regressors_to_add:
+        if "event" in event_df.columns:
+            # m.add_regressor(regressor_name)
+            m.add_regressor(regressor_name + '_good_weather')
+            m.add_regressor(regressor_name + '_bad_weather')
+            m.add_regressor(regressor_name + '_normal_weather')
+
     # Add the payday columns as regressors
     m.add_regressor("days_since_last_30")
     m.add_regressor("days_until_next_30")
-
     m.add_regressor("warm_and_dry")
     m.add_regressor("heavy_rain_fall_weekday")
     m.add_regressor("heavy_rain_fall_weekend")
@@ -337,15 +343,10 @@ def oslo_storo(
     m.add_regressor("heavy_rain_spring_weekend")
     # m.add_regressor("non_heavy_rain_fall_weekend")
     m.add_regressor("sunshine_amount")
+    m.add_regressor("rain_sum")
     m.add_regressor("opening_duration")
     m.add_regressor("custom_regressor")
 
-    for event_df, regressor_name in regressors_to_add:
-        if "event" in event_df.columns:
-            # m.add_regressor(regressor_name)
-            m.add_regressor(regressor_name + '_good_weather')
-            m.add_regressor(regressor_name + '_bad_weather')
-            m.add_regressor(regressor_name + '_normal_weather')
 
     m.add_seasonality(
         name="specific_month", period=30.5, fourier_order=5, condition_name="specific_month"
@@ -393,7 +394,10 @@ def oslo_storo(
     future["sunshine_amount"] = merged_data["sunshine_amount"]
     future["windspeed"] = merged_data["windspeed"]
     future["air_temperature"] = merged_data["air_temperature"]
-
+    future.fillna(
+        {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
+        inplace=True,
+    )
     for event_df, event_column in regressors_to_add:
         if "event" in event_df.columns:
             event_df = event_df.drop_duplicates("ds")
@@ -425,11 +429,6 @@ def oslo_storo(
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
 
-
-    future.fillna(
-        {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
-        inplace=True,
-    )
     future = warm_and_dry_future(future)
     future = heavy_rain_fall_weekday_future(future)
     future = heavy_rain_fall_weekend_future(future)
@@ -439,7 +438,7 @@ def oslo_storo(
     future = heavy_rain_spring_weekend_future(future)
     future = add_opening_hours(future, "Oslo Storo", 11, 11)
     # future = non_heavy_rain_fall_weekend_future(future)
-    future.fillna(0, inplace=True)
+    # future.fillna(0, inplace=True)
     # event_holidays.to_csv("event_holidaysall.csv")
 
     return m, future, df, event_holidays, venue_list

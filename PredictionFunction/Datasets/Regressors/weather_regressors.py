@@ -114,8 +114,8 @@ def warm_dry_weather_spring(df):
     df['warm_and_dry'] = (
         (df['air_temperature'] >= warm_threshold) & 
         (df['rain_sum'] <= dry_threshold) & 
-        (df['day_of_week'].isin([4, 5, 6])) &
-        (df['month'].isin([3, 4, 5, 6]))
+        # (df['day_of_week'].isin([4, 5, 6])) &
+        (df['month'].isin([5,6,7]))
     ).astype(int)
     
     return df

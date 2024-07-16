@@ -314,7 +314,7 @@ def oslo_smestad(
     else:
         m = Prophet(
             holidays=holidays,
-            yearly_seasonality=True,
+            yearly_seasonality=5,
             daily_seasonality=False,
             changepoint_range=0.7,
             changepoint_prior_scale=1,
@@ -336,6 +336,7 @@ def oslo_smestad(
     # m.add_regressor("non_heavy_rain_fall_weekend")
     m.add_regressor("opening_duration")
     m.add_regressor("sunshine_amount")
+    m.add_regressor("rain_sum")
 
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:
@@ -395,6 +396,10 @@ def oslo_smestad(
     future["sunshine_amount"] = merged_data["sunshine_amount"]
     future["windspeed"] = merged_data["windspeed"]
     future["air_temperature"] = merged_data["air_temperature"]
+    future.fillna(
+        {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
+        inplace=True,
+    )
 
     for event_df, event_column in regressors_to_add:
         if "event" in event_df.columns:
@@ -430,10 +435,6 @@ def oslo_smestad(
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
 
-    future.fillna(
-        {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
-        inplace=True,
-    )
     future = warm_and_dry_future(future)
     future = heavy_rain_fall_weekday_future(future)
     future = heavy_rain_fall_weekend_future(future)
@@ -443,7 +444,7 @@ def oslo_smestad(
     future = add_opening_hours(future, "Oslo Smestad", 7, 7)
     # future = heavy_rain_spring_weekend_future(future)
     # future = non_heavy_rain_fall_weekend_future(future)
-    future.fillna(0, inplace=True)
+    # future.fillna(0, inplace=True)
 
     return m, future, df, event_holidays,venue_list
 

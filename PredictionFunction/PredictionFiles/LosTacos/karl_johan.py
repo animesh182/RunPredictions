@@ -208,15 +208,6 @@ def karl_johan(
     ### Holidays and other repeating outliers
     m.add_country_holidays(country_name="NO")
 
-    christmas_day = pd.DataFrame(
-        {
-            "holiday": "christmas eve",
-            "ds": pd.to_datetime(["2022-12-25","2021-12-25","2023-12-25","2024-12-25"]),
-            "lower_window": 0,
-            "upper_window": 0,
-        }
-    )
-
     holidays = pd.concat(
         (
             christmas_day,
@@ -366,11 +357,6 @@ def karl_johan(
             changepoint_prior_scale=0.1,
         )
 
-    # Weather regressors
-    m.add_regressor("heavy_rain_fall_weekday")
-    m.add_regressor("heavy_rain_fall_weekend")
-    m.add_regressor("heavy_rain_spring_weekday")
-    m.add_regressor("heavy_rain_spring_weekend")
 
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:
@@ -379,14 +365,20 @@ def karl_johan(
             m.add_regressor(regressor_name + '_bad_weather')
             m.add_regressor(regressor_name + '_normal_weather')
 
+    # Weather regressors
+    m.add_regressor("heavy_rain_fall_weekday")
+    m.add_regressor("heavy_rain_fall_weekend")
+    m.add_regressor("heavy_rain_spring_weekday")
+    m.add_regressor("heavy_rain_spring_weekend")
+    m.add_regressor('warm_and_dry')
     # Add the payday columns as regressors
     m.add_regressor("days_since_last_30")
     m.add_regressor("days_until_next_30")
     m.add_regressor("sunshine_amount")
+    m.add_regressor("rain_sum")
     m.add_regressor("opening_duration")
     m.add_regressor("custom_regressor")
     m.add_regressor("closed_jan")
-    m.add_regressor('warm_and_dry')
     m.add_regressor("high_weekend_spring",mode='multiplicative')
 
     # m.add_seasonality(name="monthly", period=30.5, fourier_order=5)

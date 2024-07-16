@@ -360,6 +360,7 @@ def oslo_lokka_jtorget_smestad_torggata(
 
     m.add_regressor("opening_duration")
     m.add_regressor("sunshine_amount")
+    m.add_regressor("rain_sum")
 
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:
@@ -528,7 +529,7 @@ def oslo_lokka_jtorget_smestad_torggata(
         inplace=True,
     )
     future = add_opening_hours(future, "Oslo Lokka", 12, 17)
-    future = warm_and_dry_future(future)
+    future = warm_dry_weather_spring(future)
     future = heavy_rain_fall_weekday_future(future)
     future = heavy_rain_fall_weekend_future(future)
     # future = heavy_rain_winter_weekday_future(future)
@@ -536,7 +537,6 @@ def oslo_lokka_jtorget_smestad_torggata(
     future = heavy_rain_spring_weekday_future(future)
     # future = heavy_rain_spring_weekend_future(future)
     # future = non_heavy_rain_fall_weekend_future(future)
-    future.fillna(0, inplace=True)
 
     return m, future, df, event_holidays, venue_list
 

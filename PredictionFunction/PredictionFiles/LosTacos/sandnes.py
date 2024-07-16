@@ -71,7 +71,7 @@ from PredictionFunction.utils.openinghours import add_opening_hours
 
 
 def sandnes(prediction_category, restaurant, merged_data, historical_data, future_data):
-    event_holidays = pd.DataFrame(columns=["event_names", "name","date"])
+    event_holidays = pd.DataFrame()
     sales_data_df = historical_data
     sales_data_df = sales_data_df.rename(columns={"date": "ds"})
     sales_data_df["ds"] = pd.to_datetime(sales_data_df["ds"])
@@ -237,31 +237,31 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
     df["ds"] = pd.to_datetime(df["ds"])
 
     # Define the start and end dates for the specific date interval
-    # start_date = "2022-08-22"
-    # end_date = "2022-09-11"
-    # # make start_date and end:date datetime
-    # start_date = pd.to_datetime(start_date)
-    # end_date = pd.to_datetime(end_date)
+    start_date = "2022-08-22"
+    end_date = "2022-09-11"
+    # make start_date and end:date datetime
+    start_date = pd.to_datetime(start_date)
+    end_date = pd.to_datetime(end_date)
 
-    # # Create a mask for the specific date interval
-    # date_mask = (df["ds"] >= start_date) & (df["ds"] <= end_date)
+    # Create a mask for the specific date interval
+    date_mask = (df["ds"] >= start_date) & (df["ds"] <= end_date)
 
-    # # Calculate the week number for the start and end dates
-    # start_week = pd.to_datetime(start_date).week
-    # end_week = pd.to_datetime(end_date).week
+    # Calculate the week number for the start and end dates
+    start_week = pd.to_datetime(start_date).week
+    end_week = pd.to_datetime(end_date).week
 
     # Calculate the week number for each date
     df["week_number"] = df["ds"].dt.isocalendar().week
 
     # Define a function to calculate the custom regressor value based on the week number
 
-    # # # Calculate the custom regressor values for the specific date interval
-    # df.loc[date_mask, "custom_regressor"] = df.loc[date_mask, "week_number"].apply(
-    #     custom_regressor
-    # )
+    # # Calculate the custom regressor values for the specific date interval
+    df.loc[date_mask, "custom_regressor"] = df.loc[date_mask, "week_number"].apply(
+        custom_regressor
+    )
 
-    # # # Fill the custom regressor with zeros for the rows outside the specific date interval
-    # df.loc[~date_mask, "custom_regressor"] = 0
+    # # Fill the custom regressor with zeros for the rows outside the specific date interval
+    df.loc[~date_mask, "custom_regressor"] = 0
 
     # Different weekly seasonality for 2 weeks in august related to starting fall semester/work
 
@@ -273,20 +273,8 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
     df = add_opening_hours(df, "Sandnes", 11, 9)
 
     sandnes_venues = {
-    #    "Bryne", "Campus Bjergsted",
-    # "Cementen, Stavanger", "City Centre", "Clarion Hotel Energy", "DNB Arena",
-    # "Egersund kirke", "Elefantteateret", "Fargegaten - Øvre Holmegate", "Fiskepiren",
-    # "Folken, Løkkeveien", "Gamle Stavanger", "Grand Hotell Egersund", "Haugesund Theater",
-    # "Hovedgata", "Hundvåg kirke, Ulsnesveien", "Høvleriet", "Jæren Bluesklubb", "Kinokino",
-    # "Kirkegata Stavanger", "Kongsgata", "Løkkeveien", "Mackkjelleren", "Maritim Hall",
-    # "Martinique", "Nasjonal turistveg Jæren", "Nedre Strandgate", "Nærbø", "Ogna Scene",
-    # "Ovenpaa", "Petri Kirke", "Påfyll, Kirkegata", "Radisson Blu Atlantic Hotel", "Ræge Kirke",
-    # "Sandness", "Sangerlosjen", "Sivert Høyem", "Skakke", "Skansegata", "Sola kulturhus",
-    # "Stavanger", "Stavanger Forum", "Stavanger Konserthus", "Stavanger Sentrum",
-    # "Stavanger kunstmuseum", "Sølvberget Library", "Søregaten", "Testing creation",
-    # "Tom And Lello, Stavanger", "Tou Scene", "Tungenes Fyr", "UIS Business School",
-    # "University of Stavanger", "Vaisenhusgata", "Varhaughallen", "Western Plus Victoria Hotel",
-    # "Zetlitz", "Åkra kirke", "Ølberg harbour"
+    "Stavanger Konserthus","Folken, Løkkeveien","Stavanger","DNB Arena", 
+        "Fiskepiren","Sørmarka Arena","Stavanger Sentrum","Stavanger"
     }
     venue_list = sandnes_venues
     data = {"name": [], "effect": []}
@@ -398,7 +386,9 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
     m.add_regressor("heavy_rain_spring_weekend")
     m.add_regressor("non_heavy_rain_fall_weekend")
     m.add_regressor("opening_duration")
+    m.add_regressor("custom_regressor")
     m.add_regressor("sunshine_amount")
+    m.add_regressor("rain_sum")
 
 
     for event_df, regressor_name in regressors_to_add:
@@ -522,6 +512,7 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
         return None  # Default if week number not found in clusters
 
     future["cluster_label"] = future["ds"].apply(get_cluster_label)
+    future['cluster_label'].fillna(0, inplace=True)
 
     # add the last working day and the +/- 5 days
     # future = calculate_days(future, last_working_day)
@@ -544,12 +535,12 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
 
     # Calculate the custom regressor values for the future dates
     future["ds"] = pd.to_datetime(future["ds"])
-    # future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)
-    # future["week_number"] = future["ds"].dt.isocalendar().week
-    # future.loc[future_date_mask, "custom_regressor"] = future.loc[
-    #     future_date_mask, "week_number"
-    # ].apply(custom_regressor)
-    # future.loc[~future_date_mask, "custom_regressor"] = 0
+    future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)
+    future["week_number"] = future["ds"].dt.isocalendar().week
+    future.loc[future_date_mask, "custom_regressor"] = future.loc[
+        future_date_mask, "week_number"
+    ].apply(custom_regressor)
+    future.loc[~future_date_mask, "custom_regressor"] = 0
 
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
@@ -583,6 +574,7 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
     future = heavy_rain_spring_weekday_future(future)
     future = heavy_rain_spring_weekend_future(future)
     future = non_heavy_rain_fall_weekend_future(future)
+    future= future.drop_duplicates('ds')
     future = add_opening_hours(future, "Sandnes", 11, 9)
     future.fillna(0, inplace=True)
 

@@ -98,20 +98,11 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
             "air_temperature",
         ]
 
+    df = add_opening_hours(df, "Bergen",12, 17)
     df = warm_dry_weather_spring_tfs(df)
-    #df = heavy_rain_fall_weekday(df)
-    #df = heavy_rain_fall_weekend(df)
-    #df = heavy_rain_winter_weekday(df)
     df = heavy_rain_winter_weekend(df)
-    #df = heavy_rain_spring_weekday(df)
     df = heavy_rain_spring_weekend(df)
     df = non_heavy_rain_fall_weekend(df)
-    df = add_opening_hours(df, "Bergen",12, 17)
-
-    m = Prophet()
-
-    ### Holidays and other repeating outliers
-    m.add_country_holidays(country_name="NO")
 
     holidays = pd.concat(
         (   
@@ -138,12 +129,11 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
         )
     )
 
-    df["fall_start"] = df["ds"].apply(is_fall_start)
-    df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
-    df["is_specific_month"] = df["ds"].apply(is_specific_month)
-    high_wekend_mask = (df['y'] >30000)
-    df.loc[high_wekend_mask, 'high_weekend_spring'] = df.loc[high_wekend_mask, 'ds'].apply(is_high_weekend_spring)
-    df.loc[~df['high_weekend_spring'].fillna(False), 'high_weekend_spring'] = False
+    m = Prophet()
+
+    ### Holidays and other repeating outliers
+    m.add_country_holidays(country_name="NO")
+
 
     bergen_venues = {
         "Åsane church",
@@ -178,6 +168,21 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
             holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)
 
     event_holidays= pd.concat(objs=[event_holidays, holidays], ignore_index=True)
+    df["fall_start"] = df["ds"].apply(is_fall_start)
+    df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
+    df["is_specific_month"] = df["ds"].apply(is_specific_month)
+    df['day_of_week'] = df['ds'].dt.dayofweek
+    high_wekend_mask = (df['y'] >30000)
+    df.loc[high_wekend_mask, 'high_weekend_spring'] = df.loc[high_wekend_mask, 'ds'].apply(is_high_weekend_spring)
+    df.loc[~df['high_weekend_spring'].fillna(False), 'high_weekend_spring'] = False
+
+    # setting the dates for early semester students going out trend - 2022
+    start_date_early_semester = pd.to_datetime("2022-08-21")
+    end_date_early_semester = pd.to_datetime("2022-10-20")
+    max_value = 100
+
+    params = (max_value, start_date_early_semester, end_date_early_semester)
+    df["students_early_semester"] = df["ds"].apply(lambda x: early_semester(x, params))
 
     # Create a Boolean column for each weekday
     for weekday in range(7):
@@ -207,28 +212,18 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
             holidays=holidays,
             yearly_seasonality=True,
             daily_seasonality=False,
-            changepoint_prior_scale=0.1,
+            changepoint_prior_scale=1,
             holidays_mode='additive'
         )
 
-    # Add high sales from after fadderuke in august until october 20th (appr). This represents that students go out
-    # partying in the beginning of the semester but that this trend is decreasing from a maximum point
-
-    # setting the dates for early semester students going out trend - 2022
-    start_date_early_semester = pd.to_datetime("2022-08-21")
-    end_date_early_semester = pd.to_datetime("2022-10-20")
-    max_value = 100
-
-    params = (max_value, start_date_early_semester, end_date_early_semester)
-    df["students_early_semester"] = df["ds"].apply(lambda x: early_semester(x, params))
+    m.add_regressor("opening_duration")
     m.add_regressor("students_early_semester")
     m.add_regressor("warm_and_dry")
     m.add_regressor("heavy_rain_winter_weekend")
     m.add_regressor("heavy_rain_spring_weekend")
     m.add_regressor("non_heavy_rain_fall_weekend")
-    m.add_regressor("sunshine_amount")
+    m.add_regressor("sunshine_amount",standardize='False')
     m.add_regressor("rain_sum")
-    m.add_regressor("opening_duration")
     m.add_regressor("high_weekend_spring")
 
     for event_df, regressor_name in regressors_to_add:
@@ -253,7 +248,6 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
 
     future = m.make_future_dataframe(periods=60, freq="D")
 
-    params = (max_value, start_date_early_semester, end_date_early_semester)
     future["students_early_semester"] = future["ds"].apply(
         lambda x: early_semester(x, params)
     )
@@ -261,16 +255,19 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
     future["fall_start"] = future["ds"].apply(is_fall_start)
     future["is_fellesferie"] = future["ds"].apply(is_fellesferie)
     future["is_specific_month"] = future["ds"].apply(is_specific_month)
-    future["early_semester_week"] = future["ds"].apply(
-        lambda x: early_semester(x, params)
-    )
     future["high_weekend_spring"] = future["ds"].apply(is_high_weekend_spring)
     future["fall_start"] = future["ds"].apply(is_fall_start)
+
     # Add relevant weather columns to the future df
     future["rain_sum"] = merged_data["rain_sum"]
     future["sunshine_amount"] = merged_data["sunshine_amount"]
     future["windspeed"] = merged_data["windspeed"]
     future["air_temperature"] = merged_data["air_temperature"]
+
+    future.fillna(
+        {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
+        inplace=True,
+    )
     
     for event_df, event_column in regressors_to_add:
         if 'event' in event_df.columns:
@@ -288,17 +285,10 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
 
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
-    future.fillna(
-            {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
-            inplace=True,
-        )
+
     future = add_opening_hours(future, "Bergen", 12,17)
     future = warm_dry_weather_spring_tfs(future)
-    #future = heavy_rain_fall_weekday_future(future)
-    #future = heavy_rain_fall_weekend_future(future)
-    #future = heavy_rain_winter_weekday_future(future)
     future = heavy_rain_winter_weekend_future(future)
-    #future = heavy_rain_spring_weekday_future(future)
     future = heavy_rain_spring_weekend_future(future)
     future = non_heavy_rain_fall_weekend_future(future)
     future.fillna(0, inplace=True)

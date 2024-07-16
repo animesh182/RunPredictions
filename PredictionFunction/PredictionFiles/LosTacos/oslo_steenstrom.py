@@ -362,6 +362,7 @@ def oslo_steenstrom(
     # m.add_regressor("non_heavy_rain_fall_weekend")
     m.add_regressor("opening_duration")
     m.add_regressor("sunshine_amount")
+    m.add_regressor("rain_sum")
     m.add_regressor("closed_jan")
 
     for event_df, regressor_name in regressors_to_add:
@@ -444,6 +445,10 @@ def oslo_steenstrom(
     future["sunshine_amount"] = merged_data["sunshine_amount"]
     future["windspeed"] = merged_data["windspeed"]
     future["air_temperature"] = merged_data["air_temperature"]
+    future.fillna(
+        {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
+        inplace=True,
+    )
 
     for event_df, event_column in regressors_to_add:
         if "event" in event_df.columns:
@@ -462,13 +467,7 @@ def oslo_steenstrom(
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
 
-    future.fillna(
-        {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
-        inplace=True,
-    )
-    merged_data["ds"] = pd.to_datetime(merged_data["ds"], format="%Y", errors="coerce")
-
-    future = warm_and_dry_future(future)
+    future = warm_dry_weather_spring(future)
     future = heavy_rain_fall_weekday_future(future)
     future = heavy_rain_fall_weekend_future(future)
     # future = heavy_rain_winter_weekday_future(future)
@@ -477,7 +476,7 @@ def oslo_steenstrom(
     future = heavy_rain_spring_weekend_future(future)
     future = add_opening_hours(future, "Oslo Steen_Strom", 9, 8)
     # future = non_heavy_rain_fall_weekend_future(future)
-    future.fillna(0, inplace=True)
+    # future.fillna(0, inplace=True)
 
     return m, future, df, event_holidays,venue_list
 

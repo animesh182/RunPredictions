@@ -309,40 +309,6 @@ def fisketorget_utsalg(
     df["covid_loose_fall21"] = df["ds"].apply(is_covid_loose_fall21)
 
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
-
-    fisketorget_venues = {
-        "Fiskepiren","Folken, Løkkeveien","Zetlitz","Cementen, Stavanger", 
-        "DNB Arena","Stavanger Konserthus","Stavanger Forum","Stavanger","Stavanger Sentrum"
-    }  
-
-    venue_list=fisketorget_venues
-
-    data = {"name": [], "effect": []}
-    for venue in fisketorget_venues:
-        regressors_to_add = []
-        # for venue in karl_johan_venues:
-        venue_df = fetch_events("Stavanger", venue)
-        event_holidays = pd.concat(objs=[event_holidays, venue_df], ignore_index=True)
-        if "name" in venue_df.columns:
-            venue_df = venue_df.drop_duplicates("date")
-            venue_df["date"] = pd.to_datetime(venue_df["date"])
-            venue_df = venue_df.rename(columns={"date": "ds"})
-            venue_df["ds"] = pd.to_datetime(venue_df["ds"])
-            venue_df = venue_df[["ds", "name"]]
-            venue_df.columns = ["ds", "event"]
-            dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
-            venue_df[dataframe_name] = 1
-            df = pd.merge(df, venue_df, how="left", on="ds", suffixes=("", "_venue"))
-            df = is_event_with_good_weather(df,dataframe_name)
-            df = is_event_with_bad_weather(df,dataframe_name)
-            df = is_event_with_normal_weather(df,dataframe_name)
-            df[dataframe_name].fillna(0, inplace=True)
-            regressors_to_add.append(
-                (venue_df, dataframe_name)
-            )  # Append venue_df along with venue name for regressor addition
-        else:
-            holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)
-    event_holidays= pd.concat(objs=[event_holidays, holidays], ignore_index=True)
     def calculate_days(df, last_working_day):
         # Convert 'ds' column to datetime if it's not already
         df["ds"] = pd.to_datetime(df["ds"])
@@ -373,6 +339,41 @@ def fisketorget_utsalg(
     # Create a Boolean column for each weekday
     for weekday in range(7):
         df[f"weekday_{weekday}"] = df["ds"].dt.weekday == weekday
+
+    fisketorget_venues = {
+        "Fiskepiren","Folken, Løkkeveien","Zetlitz","Cementen, Stavanger", 
+        "DNB Arena","Stavanger Konserthus","Stavanger Forum","Stavanger","Stavanger Sentrum"
+    }  
+
+    venue_list=fisketorget_venues
+
+    data = {"name": [], "effect": []}
+    regressors_to_add = []
+    for venue in fisketorget_venues:
+        # for venue in karl_johan_venues:
+        venue_df = fetch_events("Stavanger", venue)
+        event_holidays = pd.concat(objs=[event_holidays, venue_df], ignore_index=True)
+        if "name" in venue_df.columns:
+            venue_df = venue_df.drop_duplicates("date")
+            venue_df["date"] = pd.to_datetime(venue_df["date"])
+            venue_df = venue_df.rename(columns={"date": "ds"})
+            venue_df["ds"] = pd.to_datetime(venue_df["ds"])
+            venue_df = venue_df[["ds", "name"]]
+            venue_df.columns = ["ds", "event"]
+            dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
+            venue_df[dataframe_name] = 1
+            df = pd.merge(df, venue_df, how="left", on="ds", suffixes=("", "_venue"))
+            df = is_event_with_good_weather(df,dataframe_name)
+            df = is_event_with_bad_weather(df,dataframe_name)
+            df = is_event_with_normal_weather(df,dataframe_name)
+            df[dataframe_name].fillna(0, inplace=True)
+            regressors_to_add.append(
+                (venue_df, dataframe_name)
+            )  # Append venue_df along with venue name for regressor addition
+        else:
+            holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)
+    event_holidays= pd.concat(objs=[event_holidays, holidays], ignore_index=True)
+
 
     # Add the custom regressor and seasonalities before fitting the model
     if prediction_category == "hour":
@@ -432,10 +433,11 @@ def fisketorget_utsalg(
 
     # m.add_seasonality(name='weekly_in_may', period=7, fourier_order=3, condition_name='is_may')
 
-    m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
+    # m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
 
     # Add the conditional regressor to the model
     m.add_regressor("sunshine_amount", standardize=False)
+    m.add_regressor("rain_sum")
     m.add_regressor("warm_and_dry")
     # m.add_regressor("heavy_rain_fall_weekday")
     m.add_regressor("heavy_rain_fall_weekend")
@@ -444,7 +446,7 @@ def fisketorget_utsalg(
     # m.add_regressor("heavy_rain_spring_weekday")
     # m.add_regressor("heavy_rain_spring_weekend")
     m.add_regressor("non_heavy_rain_fall_weekend")
-    m.add_regressor("opening_duration")
+    # m.add_regressor("opening_duration")
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:
             # m.add_regressor(regressor_name)
