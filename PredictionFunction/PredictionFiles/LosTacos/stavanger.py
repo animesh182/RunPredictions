@@ -485,14 +485,7 @@ def stavanger(
 
     # Fit the model to your data
     m.fit(df)
-    print("klar for future")
-
-    if prediction_category == "hour":
-        future = m.make_future_dataframe(periods=700, freq="H")
-        for weekday in range(7):
-            future[f"weekday_{weekday}"] = future["ds"].dt.weekday == weekday
-    else:
-        future = m.make_future_dataframe(periods=60, freq="D")
+    future = m.make_future_dataframe(periods=60, freq="D")
 
     # Apply the mapping function to the dates in the future DataFrame
     def get_cluster_label(date):

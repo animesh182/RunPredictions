@@ -499,16 +499,8 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
 
     # Fit the model to your data
     m.fit(df)
-    print("klar for future")
 
-    if prediction_category == "hour":
-        future = m.make_future_dataframe(periods=700, freq="H")
-        # Add the Boolean columns for each weekday to the future DataFrame
-        for weekday in range(7):
-            future[f"weekday_{weekday}"] = future["ds"].dt.weekday == weekday
-
-    else:
-        future = m.make_future_dataframe(periods=60, freq="D")
+    future = m.make_future_dataframe(periods=60, freq="D")
 
     # if prediction_category=="hour":
     #     weekday_mask = future['ds'].dt.weekday < 5  # Monday to Friday

@@ -401,90 +401,11 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     #     condition_name="first_two_weeks_january_21",
     # )
     # m.add_seasonality(name='weekly_not_first_two_weeks_january_21', period=7, fourier_order=3, condition_name='not_first_two_weeks_january_21')
-    if prediction_category == "hour":
-        df["ds"] = pd.to_datetime(
-            df["ds"].astype(str) + " " + df["hour"].astype(str) + ":00:00"
-        )
-        # Filter the DataFrame based on the day and time
-        weekday_mask = df["ds"].dt.weekday < 4  # Monday to Friday
-        weekend_mask = df["ds"].dt.weekday >= 4  # Saturday and Sunday
-
-        df_weekday = df[weekday_mask]
-        df_weekend = df[weekend_mask]
-        # print(df_weekday)
-        # print(df_weekend)
-        # Set the hours dynamically based on the day of the week
-        df_weekday = df_weekday[
-            (
-                df_weekday["ds"].dt.hour
-                >= int(restaurant_hours["Bergen"]["weekday"]["starting"])
-            )
-            & (
-                df_weekday["ds"].dt.hour
-                <= int(restaurant_hours["Bergen"]["weekday"]["ending"])
-            )
-        ]
-
-        df_weekend = df_weekend[
-            (
-                df_weekend["ds"].dt.hour
-                >= int(restaurant_hours["Bergen"]["weekend"]["starting"])
-            )
-            | (
-                df_weekend["ds"].dt.hour
-                <= int(restaurant_hours["Bergen"]["weekend"]["ending"])
-            )
-        ]
-
-        # Concatenate the weekday and weekend DataFrames
-        df = pd.concat([df_weekday, df_weekend])
     m.fit(df)
 
-    if prediction_category == "hour":
-        future = m.make_future_dataframe(periods=700, freq="H")
-        # Add the Boolean columns for each weekday to the future DataFrame
-        for weekday in range(7):
-            future[f"weekday_{weekday}"] = future["ds"].dt.weekday == weekday
 
-    else:
-        future = m.make_future_dataframe(periods=60, freq="D")
+    future = m.make_future_dataframe(periods=60, freq="D")
 
-    if prediction_category == "hour":
-        # print(future)
-        # future['ds'] = pd.to_datetime(future['ds'].astype(str) + ' ' + future['hour'].astype(str) + ':00:00')
-        # Filter the DataFrame based on the day and time
-        weekday_mask = future["ds"].dt.weekday < 4  # Monday to Friday
-        weekend_mask = future["ds"].dt.weekday >= 4  # Saturday and Sunday
-
-        df_weekday = future[weekday_mask]
-        df_weekend = future[weekend_mask]
-        # print(df_weekday)
-        # print(df_weekend)
-        # Set the hours dynamically based on the day of the week
-        df_weekday = df_weekday[
-            (
-                df_weekday["ds"].dt.hour
-                >= int(restaurant_hours["Bergen"]["weekday"]["starting"])
-            )
-            & (
-                df_weekday["ds"].dt.hour
-                <= int(restaurant_hours["Bergen"]["weekday"]["ending"])
-            )
-        ]
-
-        df_weekend = df_weekend[
-            (
-                df_weekend["ds"].dt.hour
-                >= int(restaurant_hours["Bergen"]["weekend"]["starting"])
-            )
-            | (
-                df_weekend["ds"].dt.hour
-                <= int(restaurant_hours["Bergen"]["weekend"]["ending"])
-            )
-        ]
-
-        # Concatenate the weekday and weekend DataFrames
-        future = pd.concat([df_weekday, df_weekend])
 
     # add the last working day and the +/- 5 days
     #future = calculate_days_30(future, last_working_day)

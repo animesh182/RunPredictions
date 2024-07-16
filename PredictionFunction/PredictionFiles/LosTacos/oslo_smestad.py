@@ -385,14 +385,7 @@ def oslo_smestad(
         df = df[df["ds"].dt.hour > 4]
     m.fit(df)
 
-    if prediction_category == "hour":
-        future = m.make_future_dataframe(periods=700, freq="H")
-        # Add the Boolean columns for each weekday to the future DataFrame
-        for weekday in range(7):
-            future[f"weekday_{weekday}"] = future["ds"].dt.weekday == weekday
-
-    else:
-        future = m.make_future_dataframe(periods=60, freq="D")
+    future = m.make_future_dataframe(periods=60, freq="D")
 
     future["covid_restriction_christmas"] = future["ds"].apply(
         is_covid_restriction_christmas

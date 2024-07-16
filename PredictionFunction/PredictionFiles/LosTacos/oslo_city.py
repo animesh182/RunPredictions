@@ -660,42 +660,6 @@ def oslo_city(
         fourier_order=5,
         condition_name="is_fellesferie",
     )
-    if prediction_category == "hour":
-        df["ds"] = pd.to_datetime(
-            df["ds"].astype(str) + " " + df["hour"].astype(str) + ":00:00"
-        )
-        weekday_mask = df["ds"].dt.weekday < 4  # Monday to Friday
-        weekend_mask = df["ds"].dt.weekday >= 4  # Saturday and Sunday
-
-        df_weekday = df[weekday_mask]
-        df_weekend = df[weekend_mask]
-        # print(df_weekday)
-        # print(df_weekend)
-        # Set the hours dynamically based on the day of the week
-        df_weekday = df_weekday[
-            (
-                df_weekday["ds"].dt.hour
-                >= int(restaurant_hours["Oslo City"]["weekday"]["starting"])
-            )
-            & (
-                df_weekday["ds"].dt.hour
-                <= int(restaurant_hours["Oslo City"]["weekday"]["ending"])
-            )
-        ]
-
-        df_weekend = df_weekend[
-            (
-                df_weekend["ds"].dt.hour
-                >= int(restaurant_hours["Oslo City"]["weekend"]["starting"])
-            )
-            | (
-                df_weekend["ds"].dt.hour
-                <= int(restaurant_hours["Oslo City"]["weekend"]["ending"])
-            )
-        ]
-
-        # Concatenate the weekday and weekend DataFrames
-        df = pd.concat([df_weekday, df_weekend])
     df = df.drop_duplicates(subset="ds")
     m.fit(df)
     # m1.fit(df)
@@ -704,46 +668,8 @@ def oslo_city(
     # df = df[(df['hour'] < 20)]
     # df = df[(df['hour'] > 4 )]
 
-    if prediction_category == "hour":
-        future = m.make_future_dataframe(periods=700, freq="H")
-        # future_residual = m1.make_future_dataframe(periods = 700,freq ='H')
-        # Add the Boolean columns for each weekday to the future DataFrame
-        for weekday in range(7):
-            future[f"weekday_{weekday}"] = future["ds"].dt.weekday == weekday
-
-    else:
-        future = m.make_future_dataframe(periods=60, freq="D")
+    future = m.make_future_dataframe(periods=60, freq="D")
         # future_residual = m1.make_future_dataframe(periods = 60,freq ='D')
-    if prediction_category == "hour":
-        weekday_mask = future["ds"].dt.weekday < 4  # Monday to Friday
-        weekend_mask = future["ds"].dt.weekday >= 4  # Saturday and Sunday
-
-        df_weekday = future[weekday_mask]
-        df_weekend = future[weekend_mask]
-        df_weekday = df_weekday[
-            (
-                df_weekday["ds"].dt.hour
-                >= int(restaurant_hours["Oslo City"]["weekday"]["starting"])
-            )
-            & (
-                df_weekday["ds"].dt.hour
-                <= int(restaurant_hours["Oslo City"]["weekday"]["ending"])
-            )
-        ]
-
-        df_weekend = df_weekend[
-            (
-                df_weekend["ds"].dt.hour
-                >= int(restaurant_hours["Oslo City"]["weekend"]["starting"])
-            )
-            | (
-                df_weekend["ds"].dt.hour
-                <= int(restaurant_hours["Oslo City"]["weekend"]["ending"])
-            )
-        ]
-        # Concatenate the weekday and weekend DataFrames
-        future = pd.concat([df_weekday, df_weekend])
-
     # add the last working day and the +/- 5 days
     future = calculate_days_30(future, last_working_day)
 

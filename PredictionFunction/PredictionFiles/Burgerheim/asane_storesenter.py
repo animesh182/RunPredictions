@@ -57,40 +57,6 @@ from PredictionFunction.Datasets.Regressors.weather_regressors import(
 from PredictionFunction.utils.openinghours import add_opening_hours
 from PredictionFunction.utils.fetch_events import fetch_events
 
-# def filter_hours(df):
-#     # Filter the DataFrame based on the day and time
-#     weekday_mask = df["ds"].dt.weekday < 4  # Monday to Friday
-#     weekend_mask = df["ds"].dt.weekday >= 4  # Saturday and Sunday
-
-#     df_weekday = df[weekday_mask]
-#     df_weekend = df[weekend_mask]
-
-#     # Set the hours dynamically based on the day of the week
-#     df_weekday = df_weekday[
-#         (
-#             df_weekday["ds"].dt.hour
-#             >= int(restaurant_hours["Bergen"]["weekday"]["starting"])
-#         )
-#         & (
-#             df_weekday["ds"].dt.hour
-#             <= int(restaurant_hours["Bergen"]["weekday"]["ending"])
-#         )
-#     ]
-
-#     df_weekend = df_weekend[
-#         (
-#             df_weekend["ds"].dt.hour
-#             >= int(restaurant_hours["Bergen"]["weekend"]["starting"])
-#         )
-#         | (
-#             df_weekend["ds"].dt.hour
-#             <= int(restaurant_hours["Bergen"]["weekend"]["ending"])
-#         )
-#     ]
-
-#     # Concatenate the weekday and weekend DataFrames
-#     return pd.concat([df_weekday, df_weekend])
-
 
 def asane_storesenter(prediction_category,restaurant,merged_data,historical_data,future_data):
     # Group data in dataset by date to prepare it
@@ -132,60 +98,6 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
             "air_temperature",
         ]
 
-    elif prediction_category == "hour":
-        df = (
-            sales_data_df.groupby(["ds", "hour"])
-            .agg(
-                {
-                    "total_net": "sum",
-                    "sunshine_amount": "sum",
-                    "rain_sum": "sum",
-                    "windspeed": "mean",
-                    "air_temperature": "mean",
-                }
-            )
-            .reset_index()
-        )
-        df.fillna(
-            {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
-            inplace=True,
-        )
-        df.columns = [
-            "ds",
-            "hour",
-            "y",
-            "sunshine_amount",
-            "rain_sum",
-            "windspeed",
-            "air_temperature",
-        ]
-
-    elif prediction_category in ["type", "product"]:
-        df = (
-            sales_data_df.groupby(["ds"])
-            .agg(
-                {
-                    "percentage": "max",
-                    "sunshine_amount": "sum",
-                    "rain_sum": "sum",
-                    "windspeed": "mean",
-                    "air_temperature": "mean",
-                }
-            )
-            .reset_index()
-        )
-        df.fillna(
-            {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
-            inplace=True,
-        )
-        df.columns = [
-            "ds",
-            "y",
-            "sunshine_amount",
-            "rain_sum",
-            "windspeed",
-            "air_temperature",
-        ]
     df = warm_dry_weather_spring_tfs(df)
     #df = heavy_rain_fall_weekday(df)
     #df = heavy_rain_fall_weekend(df)
@@ -225,14 +137,6 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
             bergen_pride
         )
     )
-
-    # Different weekly seasonality for 2 weeks in august related to starting fall semester/work
-    # FALL_START_DATES = {
-    #     2022: {"start": "2022-08-08", "end": "2022-08-21"},
-    #     2023: {"start": "2023-08-07", "end": "2023-08-20"},
-    #     # Add more years and their respective dates as needed
-    # }
-
 
     df["fall_start"] = df["ds"].apply(is_fall_start)
     df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
@@ -274,38 +178,7 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
             holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)
 
     event_holidays= pd.concat(objs=[event_holidays, holidays], ignore_index=True)
-    # The training DataFrame (df) should also include 'days_since_last' and 'days_until_next' columns.
-    # df = calculate_days_30(df, fifteenth_working_days)
 
-    # def calculate_days_15(df, fifteenth_working_days):
-    #     # Convert 'ds' column to datetime if it's not already
-    #     df["ds"] = pd.to_datetime(df["ds"])
-
-    #     # Convert last_working_day list to datetime
-    #     fifteenth_working_days = pd.to_datetime(pd.Series(fifteenth_working_days))
-
-    #     df["days_since_last_15"] = df["ds"].apply(
-    #         lambda x: min([abs(x - y).days for y in fifteenth_working_days if x >= y])
-    #     )
-    #     df["days_until_next_15"] = df["ds"].apply(
-    #         lambda x: min(
-    #             [abs(x - y).days for y in fifteenth_working_days if x <= y],
-    #             default=None,  # Set a default value in case the list is empty
-    #         )
-    #     )
-
-    #     # Set 'days_since_last' and 'days_until_next' to 0 for days that are not within the -5 to +5 range
-    #     df.loc[df["days_since_last_15"] > 5, "days_since_last_15"] = 0
-    #     df.loc[df["days_until_next_15"] > 5, "days_until_next_15"] = 0
-
-    #     return df
-
-    # The training DataFrame (df) should also include 'days_since_last' and 'days_until_next' columns.
-   
-   
-    #df = calculate_days_15(df, fifteenth_working_days)
-
-    # create daily seasonality column setting a number for each day of the week, to be used later
     # Create a Boolean column for each weekday
     for weekday in range(7):
         df[f"weekday_{weekday}"] = df["ds"].dt.weekday == weekday
@@ -338,18 +211,6 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
             holidays_mode='additive'
         )
 
-    # Add the payday columns as regressors
-    # m.add_regressor("days_since_last_30")
-    # m.add_regressor("days_until_next_30")
-
-    # m.add_regressor("days_since_last_15")
-    # m.add_regressor("days_until_next_15")
-
-    # Add weather parameters as regressors
-    # print(parameter)
-    # for parameter in weather_parameters.keys():
-    #    m.add_regressor(parameter)
-
     # Add high sales from after fadderuke in august until october 20th (appr). This represents that students go out
     # partying in the beginning of the semester but that this trend is decreasing from a maximum point
 
@@ -377,36 +238,9 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
             m.add_regressor(regressor_name + '_bad_weather')
             m.add_regressor(regressor_name + '_normal_weather')
 
-    # setting the dates for early semester students goinf out trend/cutting covid restrictions at the same time - 2021
-    # start_date_early_semester_21 = pd.to_datetime('2021-09-26')
-    # end_date_early_semester_21 = pd.to_datetime('2021-11-21')
-    # max_value_21 = 100
-    #
-    # def early_semester_21(ds, params):
-    #     max_value_21, start_date_early_semester_21, end_date_early_semester_21 = params
-    #     date = pd.to_datetime(ds)
-    #     if start_date_early_semester_21 <= date <= end_date_early_semester_21:
-    #         duration = (end_date_early_semester_21 - start_date_early_semester_21).days
-    #         elapsed_days = (date - start_date_early_semester_21).days
-    #         return max_value * (1 - (elapsed_days / duration))
-    #     else:
-    #         return 0
-    #
-    # params_21 = (max_value_21, start_date_early_semester_21, end_date_early_semester_21)
-    # df['students_early_semester_21'] = df['ds'].apply(lambda x: early_semester_21(x, params_21))
-    # m.add_regressor('students_early_semester_21')
-
-    ### Conditional seasonality - weekly
-
-    # df["fellesferie"] = df["ds"].apply(is_fellesferie)
-    # df['not_fellesferie'] = ~df['ds'].apply(is_fellesferie)
-
-    # m.add_seasonality(name='weekly_not_fellesferie', period=7, fourier_order=3, condition_name='not_fellesferie')
-
     m.add_seasonality(
         name="weekly_fall_start", period=7, fourier_order=3, condition_name="fall_start"
     )
-
 
     m.add_seasonality(
         name="fellesferie", period=30.5, fourier_order=5, condition_name="is_fellesferie"
@@ -414,111 +248,10 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
     m.add_seasonality(
         name="is_specific_month", period=30.5, fourier_order=5, condition_name="is_specific_month"
     )
-
     m.add_seasonality(name='monthly', period=30.5, fourier_order=5)
-
-    # add function for is_first_two_weeks_january
-
-    # df["first_two_weeks_january_21"] = df["ds"].apply(is_first_two_weeks_january_21)
-    # df['not_first_two_weeks_january_21'] = ~df['ds'].apply(is_first_two_weeks_january_21)
-
-    # m.add_seasonality(
-    #     name="weekly_first_two_weeks_january_21",
-    #     period=7,
-    #     fourier_order=3,
-    #     condition_name="first_two_weeks_january_21",
-    # )
-    # m.add_seasonality(name='weekly_not_first_two_weeks_january_21', period=7, fourier_order=3, condition_name='not_first_two_weeks_january_21')
-    if prediction_category == "hour":
-        df["ds"] = pd.to_datetime(
-            df["ds"].astype(str) + " " + df["hour"].astype(str) + ":00:00"
-        )
-        # Filter the DataFrame based on the day and time
-        weekday_mask = df["ds"].dt.weekday < 4  # Monday to Friday
-        weekend_mask = df["ds"].dt.weekday >= 4  # Saturday and Sunday
-
-        df_weekday = df[weekday_mask]
-        df_weekend = df[weekend_mask]
-        # print(df_weekday)
-        # print(df_weekend)
-        # Set the hours dynamically based on the day of the week
-        df_weekday = df_weekday[
-            (
-                df_weekday["ds"].dt.hour
-                >= int(restaurant_hours["Bergen"]["weekday"]["starting"])
-            )
-            & (
-                df_weekday["ds"].dt.hour
-                <= int(restaurant_hours["Bergen"]["weekday"]["ending"])
-            )
-        ]
-
-        df_weekend = df_weekend[
-            (
-                df_weekend["ds"].dt.hour
-                >= int(restaurant_hours["Bergen"]["weekend"]["starting"])
-            )
-            | (
-                df_weekend["ds"].dt.hour
-                <= int(restaurant_hours["Bergen"]["weekend"]["ending"])
-            )
-        ]
-
-        # Concatenate the weekday and weekend DataFrames
-        df = pd.concat([df_weekday, df_weekend])
     m.fit(df)
 
-    if prediction_category == "hour":
-        future = m.make_future_dataframe(periods=700, freq="H")
-        # Add the Boolean columns for each weekday to the future DataFrame
-        for weekday in range(7):
-            future[f"weekday_{weekday}"] = future["ds"].dt.weekday == weekday
-
-    else:
-        future = m.make_future_dataframe(periods=60, freq="D")
-
-    # if prediction_category == "hour":
-    #     # print(future)
-    #     # future['ds'] = pd.to_datetime(future['ds'].astype(str) + ' ' + future['hour'].astype(str) + ':00:00')
-    #     # Filter the DataFrame based on the day and time
-    #     weekday_mask = future["ds"].dt.weekday < 4  # Monday to Friday
-    #     weekend_mask = future["ds"].dt.weekday >= 4  # Saturday and Sunday
-
-    #     df_weekday = future[weekday_mask]
-    #     df_weekend = future[weekend_mask]
-    #     # print(df_weekday)
-    #     # print(df_weekend)
-    #     # Set the hours dynamically based on the day of the week
-    #     df_weekday = df_weekday[
-    #         (
-    #             df_weekday["ds"].dt.hour
-    #             >= int(restaurant_hours["Bergen"]["weekday"]["starting"])
-    #         )
-    #         & (
-    #             df_weekday["ds"].dt.hour
-    #             <= int(restaurant_hours["Bergen"]["weekday"]["ending"])
-    #         )
-    #     ]
-
-    #     df_weekend = df_weekend[
-    #         (
-    #             df_weekend["ds"].dt.hour
-    #             >= int(restaurant_hours["Bergen"]["weekend"]["starting"])
-    #         )
-    #         | (
-    #             df_weekend["ds"].dt.hour
-    #             <= int(restaurant_hours["Bergen"]["weekend"]["ending"])
-    #         )
-    #     ]
-
-    #     # Concatenate the weekday and weekend DataFrames
-    #     future = pd.concat([df_weekday, df_weekend])
-
-    # # add the last working day and the +/- 5 days
-    #future = calculate_days_30(future, last_working_day)
-    
-    
-    #future = calculate_days_15(future, fifteenth_working_days)
+    future = m.make_future_dataframe(periods=60, freq="D")
 
     params = (max_value, start_date_early_semester, end_date_early_semester)
     future["students_early_semester"] = future["ds"].apply(
@@ -528,18 +261,10 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
     future["fall_start"] = future["ds"].apply(is_fall_start)
     future["is_fellesferie"] = future["ds"].apply(is_fellesferie)
     future["is_specific_month"] = future["ds"].apply(is_specific_month)
-    # future['not_fellesferie'] = ~future['ds'].apply(is_fellesferie)
     future["early_semester_week"] = future["ds"].apply(
         lambda x: early_semester(x, params)
     )
     future["high_weekend_spring"] = future["ds"].apply(is_high_weekend_spring)
-    # future["first_two_weeks_january_21"] = future["ds"].apply(
-    #     is_first_two_weeks_january_21
-    # )
-    # # future['not_first_two_weeks_january_21'] = ~future['ds'].apply(is_first_two_weeks_january_21)
-    # future["first_two_weeks_january_21"] = future["ds"].apply(
-    #     is_first_two_weeks_january_21
-    # )
     future["fall_start"] = future["ds"].apply(is_fall_start)
     # Add relevant weather columns to the future df
     future["rain_sum"] = merged_data["rain_sum"]
