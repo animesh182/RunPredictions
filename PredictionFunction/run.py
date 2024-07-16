@@ -28,6 +28,8 @@ from PredictionFunction.utils.create_temp_json import (
     save_json_file,
     select_minimum_restaurant,
 )
+import psycopg2
+from PredictionFunction.utils.params import prod_params
 
 
 async def main(mytimer: func.TimerRequest) -> None:
@@ -48,9 +50,22 @@ async def main(mytimer: func.TimerRequest) -> None:
         start_date = date(2023, 4, 18)
     else:
         start_date = date(2021, 9, 1)
-    end_date = (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")
+    # end_date = (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")
+    with psycopg2.connect(**prod_params) as conn:
+        with conn.cursor() as cursor:
+            end_date_query = '''
+            SELECT MAX(gastronomic_day)
+            FROM public."SalesData"
+            WHERE restaurant = %s
+        '''
+            cursor.execute(end_date_query,(restaurant,))
+            latest_gastronomic_day = cursor.fetchone()[0]
+            if latest_gastronomic_day:
+                latest_date = latest_gastronomic_day - timedelta(days=1)
+                end_date= latest_date.strftime("%Y-%m-%d")
+    conn.close()
     # end_date = date(2024,4,27)
-
+    logging.info(end_date)
     restaurant_func = location_specific_dictionary[restaurant]
     logging.info(f"Running predictions for now {restaurant}")
     if prediction_category == "hour":

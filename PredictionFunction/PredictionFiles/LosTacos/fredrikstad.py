@@ -74,7 +74,7 @@ from PredictionFunction.utils.fetch_events import fetch_events
 def fredrikstad(
     prediction_category, restaurant, merged_data, historical_data, future_data
 ):
-    event_holidays = pd.DataFrame()
+    event_holidays = pd.DataFrame(columns=["event_names", "name","date",])
     sales_data_df = historical_data
     sales_data_df = sales_data_df.rename(columns={"date": "ds"})
 
@@ -247,13 +247,13 @@ def fredrikstad(
     df["is_specific_month"] = df["ds"].apply(is_specific_month)
     df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
     fredrikstad_venues = {  
-                            "Tollbodplassen"
-                            "Fredrikstad domkirke"
-                            "City scene"
-                            "Fredrikstad Stadion"
-                            "Alibi Fredrikstad"
-                            "Kulturkirken Gamle Fredrikstad"
-                            "City Scene Fredrikstad"
+                            # "Tollbodplassen"
+                            # "Fredrikstad domkirke"
+                            # "City scene"
+                            # "Fredrikstad Stadion"
+                            # "Alibi Fredrikstad"
+                            # "Kulturkirken Gamle Fredrikstad"
+                            # "City Scene Fredrikstad"
                             }
     venue_list = fredrikstad_venues
     city='Fredrikstad'

@@ -98,6 +98,7 @@ def add_weather_parameters(prediction_category, sales_data_df):
 ## Warm and dry weather
 def warm_dry_weather_spring(df):
      # Add a column for the day of the week
+    df['ds'] = pd.to_datetime(df['ds'])
     df['day_of_week'] = df['ds'].dt.dayofweek
     df['month'] = df['ds'].dt.month
     
