@@ -261,9 +261,10 @@ def oslo_smestad(
     venue_list = oslo_smestad_venues
     data = {"name": [], "effect": []}
     regressors_to_add = []
+    city='Oslo'
     for venue in oslo_smestad_venues:
         # for venue in karl_johan_venues:
-        venue_df = fetch_events("Oslo Torggata", venue)
+        venue_df = fetch_events("Oslo Torggata", venue, city)
         event_holidays = pd.concat(objs=[event_holidays, venue_df], ignore_index=True)
         if "name" in venue_df.columns:
             venue_df = venue_df.drop_duplicates("date")

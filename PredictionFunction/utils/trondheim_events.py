@@ -25,9 +25,9 @@ def trondheim_events():
         "Havet, Djupet",
         "Havet, Heim, Trondheim",
     ]
-
+    city='Trondheim'
     for venue in locations:
-        venue_df = fetch_events("Trondheim", venue)
+        venue_df = fetch_events("Trondheim", venue,city)
         logging.info(venue)
         event_holidays = pd.concat(objs=[event_holidays, venue_df], ignore_index=True)
 

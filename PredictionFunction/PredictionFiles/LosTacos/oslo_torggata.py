@@ -322,10 +322,11 @@ def oslo_torggata(
     venue_list = oslo_torggata_venues
 
     data = {"name": [], "effect": []}
+    city='Oslo'
     regressors_to_add = []
     for venue in oslo_torggata_venues:
         # for venue in karl_johan_venues:
-        venue_df = fetch_events("Oslo Torggata", venue)
+        venue_df = fetch_events("Oslo Torggata", venue,city)
         event_holidays = pd.concat(objs=[event_holidays, venue_df], ignore_index=True)
         if "name" in venue_df.columns:
             venue_df = venue_df.drop_duplicates("date")

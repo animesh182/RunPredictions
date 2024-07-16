@@ -221,8 +221,9 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     
     venue_list = bergen_venues
     regressors_to_add = []
+    city='Bergen'
     for venue in bergen_venues:
-        venue_df = fetch_events("Bergen", venue)  # Assuming you have a function Events_dict()
+        venue_df = fetch_events("Bergen", venue,city)  # Assuming you have a function Events_dict()
         event_holidays = pd.concat(objs=[event_holidays, venue_df], ignore_index=True)
         # print(f'{venue}: {venue_df.columns}')
         if 'name' in venue_df.columns:

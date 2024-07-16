@@ -344,6 +344,7 @@ def fisketorget_utsalg(
         "Fiskepiren","Folken, Løkkeveien","Zetlitz","Cementen, Stavanger", 
         "DNB Arena","Stavanger Konserthus","Stavanger Forum","Stavanger","Stavanger Sentrum"
     }  
+    city='Stavanger'
 
     venue_list=fisketorget_venues
 
@@ -351,7 +352,7 @@ def fisketorget_utsalg(
     regressors_to_add = []
     for venue in fisketorget_venues:
         # for venue in karl_johan_venues:
-        venue_df = fetch_events("Stavanger", venue)
+        venue_df = fetch_events("Stavanger", venue,city)
         event_holidays = pd.concat(objs=[event_holidays, venue_df], ignore_index=True)
         if "name" in venue_df.columns:
             venue_df = venue_df.drop_duplicates("date")

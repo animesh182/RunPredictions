@@ -176,6 +176,7 @@ def save_to_db(
             "Oslo Smestad",
         ]:  
             event_restaurant= 'Oslo Torggata'
+            city= 'Oslo'
         if restaurant_name in [
             "Stavanger",
             "Sandnes",
@@ -183,10 +184,13 @@ def save_to_db(
             "Fisketorget Utsalg",
         ]:
             event_restaurant= 'Stavanger'
+            city='Stavanger'
         if restaurant_name in ["Bergen","Åsane Storsenter"]:
             event_restaurant= 'Bergen'
+            city='Bergen'
         if restaurant_name in ["Fredrikstad"]:
             event_restaurant= 'Fredrikstad'
+            city='Fredrikstad'
         # with psycopg2.connect(**prod_params) as conn:
         #     with conn.cursor() as cursor:
         #         cursor.execute(
@@ -200,7 +204,7 @@ def save_to_db(
         #         oslo_venues = cursor.fetchall()
         for venue in all_venues:
             dataframe_name = venue[0].lower().replace(" ", "_").replace(",", "")
-            dataframe = fetch_events(event_restaurant, venue)
+            dataframe = fetch_events(event_restaurant, venue, city)
             logging.info(venue)
             concert_dictionary[dataframe_name] = dataframe
             valid_concerts.append(dataframe_name)
@@ -403,7 +407,7 @@ def save_to_db(
                         for concert in valid_concerts:
                             if concert in name:
                                 actual_concert = concert_dictionary[concert]
-                                logging.info(name)
+                                # logging.info(name)
                                 if 'date' in actual_concert.columns:
                                     date_matching_df = actual_concert[
                                         actual_concert["date"] == date_key
