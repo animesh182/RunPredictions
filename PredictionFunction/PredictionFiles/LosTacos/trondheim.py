@@ -18,13 +18,13 @@ from PredictionFunction.Datasets.Regressors.general_regressors import (
     is_covid_loose_fall21,
     is_christmas_shopping,
 )
-from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holidays import (
-    fadder_week,
-    fjoge,
-    military_excercise,
-    outliers,
-    closed_days,
-)
+# from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holidays import (
+#     fadder_week,
+#     fjoge,
+#     military_excercise,
+#     outliers,
+#     closed_days,
+# )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     first_may,
@@ -195,35 +195,29 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
             "upper_window": 0,
         }
     )
-    seventh_feb = pd.DataFrame(
-        {
-            "holiday": "unexpected_closure",
-            "ds": pd.to_datetime(["2024-02-07"]),
-            "lower_window": 0,
-            "upper_window": 0,
-            "prior_scale":1
-        }
-    )
+    # seventh_feb = pd.DataFrame(
+    #     {
+    #         "holiday": "unexpected_closure",
+    #         "ds": pd.to_datetime(["2024-02-07"]),
+    #         "lower_window": 0,
+    #         "upper_window": 0,
+    #         "prior_scale":1
+    #     }
+    # )
 
     holidays = pd.concat(
         (
             christmas_day,
             firstweek_jan,
-            fadder_week,
             first_may,
             easter,
             seventeenth_may,
             pinse,
-            fjoge,
             himmelfart,
-            outliers,
-            closed_days,
-            military_excercise,
             hostferie_sor_ostlandet_weekdend,
             vinterferie_vestlandet_weekend_before,
             vinterferie_vestlandet_weekend,
             first_weekend_christmas_school_vacation,
-            seventh_feb,
             new_year_romjul,
             new_years_day
         )
@@ -361,6 +355,7 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
     )
 
     m.add_regressor("sunshine_amount", standardize=False)
+    m.add_regressor("rain_sum", standardize=False)
     m.add_regressor("warm_and_dry")
     m.add_regressor("opening_duration")
     m.add_regressor("heavy_rain_fall_weekend")

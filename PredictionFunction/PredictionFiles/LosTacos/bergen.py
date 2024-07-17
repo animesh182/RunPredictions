@@ -198,7 +198,7 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
             himmelfart,
             closed,
             unknown_outliers,
-            # july_closed,
+            july_closed,
             bergen_pride
         )
     )

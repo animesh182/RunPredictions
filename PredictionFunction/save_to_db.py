@@ -22,6 +22,7 @@ def save_to_db(
 ):
     # end_date = datetime.now().strftime("%Y-%m-%d")
     logging.info(f"started for {restaurant} in save_to_db")
+    # forecast_df.to_csv("forecast.csv")
     # end_date = "2024-04-27"
 
     unwanted_columns = [
@@ -205,10 +206,21 @@ def save_to_db(
         for venue in all_venues:
             dataframe_name = venue[0].lower().replace(" ", "_").replace(",", "")
             dataframe = fetch_events(event_restaurant, venue, city)
+            concert_dictionary[dataframe_name + '_good_weather'] = dataframe 
+            concert_dictionary[dataframe_name + '_bad_weather'] = dataframe 
+            concert_dictionary[dataframe_name + '_normal_weather'] = dataframe 
+
+            valid_concerts.append(dataframe_name + '_good_weather')
+            valid_concerts.append(dataframe_name + '_bad_weather')
+            valid_concerts.append(dataframe_name + '_normal_weather')
             logging.info(venue)
+            # concert_dictionary[dataframe_name] = dataframe
+            # valid_concerts.append(dataframe_name)
+        for venue in all_venues:
+            dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
+            dataframe = pd.DataFrame(fetch_events(event_restaurant, venue,city))
             concert_dictionary[dataframe_name] = dataframe
             valid_concerts.append(dataframe_name)
-
         # if restaurant_name in [
         #     "Stavanger",
         #     "Sandnes",
