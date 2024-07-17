@@ -386,8 +386,22 @@ def save_to_db(
                     date_obj = row["ds"].to_pydatetime()
                     total_gross_value = round(float(row["yhat"] / 500)) * 500
 
-                    insert_prediction = """INSERT INTO public."Predictions_predictions" (id, date, restaurant, total_gross, created_at, company, parent_restaurant)
-                            VALUES (gen_random_uuid(),%s,%s,%s,%s,%s,%s) RETURNING id"""
+                    cursor.execute(
+                            """SELECT total_gross FROM public."Predictions_predictions"
+                            WHERE date = %s AND restaurant = %s""",
+                            (date_obj.date(), restaurant)
+                        )
+                    existing_prediction = cursor.fetchone()
+
+                    # If prediction exists, calculate the percentage difference
+                    if existing_prediction:
+                        existing_total_gross = existing_prediction[0]
+                        percentage_difference = ((total_gross_value - existing_total_gross) / existing_total_gross) * 100
+                    else:
+                        percentage_difference = None
+                    
+                    insert_prediction = """INSERT INTO public."Predictions_predictions" (id, date, restaurant, total_gross, created_at, company, parent_restaurant,percentage_difference)
+                            VALUES (gen_random_uuid(),%s,%s,%s,%s,%s,%s,%s) RETURNING id"""
                     cursor.execute(
                         insert_prediction,
                         (
@@ -397,6 +411,7 @@ def save_to_db(
                             datetime.now(),
                             company,
                             parent_restaurant,
+                            percentage_difference
                         ),
                     )
                     prediction_id = cursor.fetchone()[0]
