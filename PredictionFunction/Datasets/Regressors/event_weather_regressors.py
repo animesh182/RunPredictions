@@ -6,7 +6,7 @@ def is_event_with_good_weather(df, dataframe_name):
     event_filter = df[dataframe_name] == 1
     warm_threshold = df['sunshine_amount'].quantile(0.70)
     dry_threshold = 5
-    condition = (df['sunshine_amount'] >= warm_threshold) & (df['rain_sum'] <= dry_threshold)
+    condition = (df['sunshine_amount'] > warm_threshold) & (df['rain_sum'] < dry_threshold)
     df[f'{dataframe_name}_good_weather'] = 0
     # Set the new column to 1 where both conditions are met
     df.loc[event_filter & condition, f'{dataframe_name}_good_weather'] = 1
