@@ -303,7 +303,7 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     else:
         m = Prophet(
             holidays=holidays,
-            yearly_seasonality=True,
+            yearly_seasonality=3,
             daily_seasonality=False,
             changepoint_prior_scale=0.1,
         )
