@@ -1,4 +1,6 @@
 import pandas as pd
+import psycopg2
+from PredictionFunction.utils.params import prod_params
 
 
 def calculate_days_30(df, last_working_day):
@@ -143,3 +145,33 @@ tourist_data={
         "August":"1",
     },
 }
+
+
+def get_closed_days(restaurant):
+    # restaurant_uuid = Restaurant.objects.get(name=restaurant)
+    with psycopg2.connect(**prod_params) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" select id from public."accounts_restaurant" where name=%s """,[restaurant])
+            restaurant_id= cursor.fetchone()[0]
+            get_closed_dates = '''select * from public."accounts_openinghours" where restaurant_id=%s and start_hour= 0 and end_hour= 0'''
+
+            # zero_hours_entries = OpeningHours.objects.filter(restaurant=bergen_uuid,start_hour=0, end_hour=0)
+            zero_hours_entries = pd.read_sql_query(
+                get_closed_dates,
+                conn,
+                params=[restaurant_id],
+            )
+            zero_hours_df= zero_hours_entries.drop_duplicates()
+            closed_days = []
+    zero_hours_df.to_csv("test_closed_days.csv")
+    # Iterate over the rows of the DataFrame
+    for _, row in zero_hours_df.iterrows():
+        start_date = row["start_date"]
+        end_date = row["end_date"]
+        current_date = start_date
+        while current_date <= end_date:
+            closed_event_copy = row.copy()
+            closed_event_copy["date"] = current_date
+            closed_days.append(closed_event_copy["date"])
+            current_date += pd.Timedelta(days=1)
+    # return closed_days
