@@ -396,11 +396,14 @@ def save_to_db(
                     # If prediction exists, calculate the percentage difference
                     if existing_prediction:
                         existing_total_gross = existing_prediction[0]
-                        percentage_difference = ((total_gross_value - existing_total_gross) / existing_total_gross) * 100
+                        if existing_total_gross is not None and existing_total_gross != 0:
+                            percentage_difference = ((total_gross_value - existing_total_gross) / existing_total_gross) * 100
+                        else:
+                            percentage_difference = None
                     else:
                         percentage_difference = None
                     if percentage_difference is not None and percentage_difference > 20:
-                        logging.info(f"Alert: Percentage difference for {restaurant} on {date} is {percentage_difference:.2f}%")
+                        logging.info(f"Alert: Percentage difference for {restaurant} on {date_obj.date()} is {percentage_difference:.2f}%")
                     insert_prediction = """INSERT INTO public."Predictions_predictions" (id, date, restaurant, total_gross, created_at, company, parent_restaurant,percentage_difference)
                             VALUES (gen_random_uuid(),%s,%s,%s,%s,%s,%s,%s) RETURNING id"""
                     cursor.execute(
