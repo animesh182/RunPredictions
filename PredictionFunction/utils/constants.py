@@ -22,6 +22,7 @@ holiday_parameter_type_categorization = {
     "covid_loose_fall21": "special",
     "christmas_shopping": "seasonal",
     "sunshine_amount": "weather",
+    "rain_sum": "weather",
     "heavy_rain_fall_weekend": "weather",
     "heavy_rain_winter_weekday": "weather",
     "heavy_rain_winter_weekend": "weather",

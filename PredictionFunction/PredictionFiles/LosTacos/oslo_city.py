@@ -29,7 +29,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.oslo_city_holiday
     # pinse,
     day_before_red_day,
     # himmelfart,
-    # closed_days,
+    closed_days,
     norway_cup,
     black_friday,
     december_open_2020_2021,
@@ -94,7 +94,6 @@ def oslo_city(
     sales_data_df = sales_data_df.rename(columns={"date": "ds"})
 
     future_data = future_data.rename(columns={"date": "ds"})
-
     merged_data = merged_data.rename(columns={"date": "ds"})
 
     sales_data_df["ds"] = pd.to_datetime(sales_data_df["ds"])
@@ -191,16 +190,16 @@ def oslo_city(
 
     ### Holidays and other repeating outliers
     m.add_country_holidays(country_name="NO")
-    closed_dates = get_closed_days("Oslo City")
-    closed_days_oslo = pd.DataFrame(
-        {
-            "holiday": "closed_days",
-            "ds": closed_dates,
-            "lower_window": 0,
-            "upper_window": 0,
-            "prior_scale": 0.05
-        }
-    )  
+    # closed_dates = get_closed_days("Oslo City")
+    # closed_days_oslo = pd.DataFrame(
+    #     {
+    #         "holiday": "closed_days",
+    #         "ds": closed_dates,
+    #         "lower_window": 0,
+    #         "upper_window": 0,
+    #         "prior_scale": 0.05
+    #     }
+    # )  
     holidays = pd.concat(
         (
             christmas_day,
@@ -211,7 +210,8 @@ def oslo_city(
             pinse,
             day_before_red_day,
             himmelfart,
-            closed_days_oslo,
+            closed_days,
+            # closed_days_oslo,
             lockdown,
             black_friday,
             norway_cup,
@@ -221,7 +221,7 @@ def oslo_city(
             december_2022,
             december_2023,
             sunday_2023,
-            # jan_closed,
+            jan_closed,
             unusual_low_sale,
             oslo_pride,
             musikkfestival,
@@ -309,20 +309,20 @@ def oslo_city(
     df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
 
         # closed days
-    # closed_dates = pd.to_datetime(
-    #     [
-    #         "2021-12-23",
-    #         "2021-12-24",
-    #         "2021-12-25",
-    #         "2022-12-31",
-    #         "2023-05-17",
-    #         "2023-05-18",
-    #     ]
-    # )
+    closed_dates = pd.to_datetime(
+        [
+            "2021-12-23",
+            "2021-12-24",
+            "2021-12-25",
+            "2022-12-31",
+            "2023-05-17",
+            "2023-05-18",
+        ]
+    )
 
-    # df["closed"] = df["ds"].apply(
-    #     lambda x: 1 if x in closed_dates or x.dayofweek == 6 else 0
-    # )
+    df["closed"] = df["ds"].apply(
+        lambda x: 1 if x in closed_dates or x.dayofweek == 6 else 0
+    )
 
     # create daily seasonality column setting a number for each day of the week, to be used later
     # Create a Boolean column for each weekday
@@ -448,8 +448,8 @@ def oslo_city(
     m.add_regressor("rain_windy_weekend")
     m.add_regressor("opening_duration")
     m.add_regressor("days_since_last_30")
-    m.add_regressor("sunshine_amount")
-    m.add_regressor("rain_sum")
+    m.add_regressor("sunshine_amount",standardize=False)
+    m.add_regressor("rain_sum",standardize=False)
     m.add_regressor('sunday_regressor')
 
     # add event regressors
@@ -553,9 +553,9 @@ def oslo_city(
             future = is_event_with_bad_weather(future,event_column)
             future = is_event_with_normal_weather(future,event_column)
 
-    # future["closed"] = future["ds"].apply(
-    #     lambda x: 1 if x in closed_dates or x.dayofweek == 6 else 0
-    # )
+    future["closed"] = future["ds"].apply(
+        lambda x: 1 if x in closed_dates or x.dayofweek == 6 else 0
+    )
 
     future["specific_month"] = future["ds"].apply(is_specific_month)
     # Calculate the custom regressor values for the future dates
