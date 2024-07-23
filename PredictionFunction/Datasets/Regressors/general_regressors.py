@@ -3,6 +3,7 @@ import pandas as pd
 FALL_START_DATES = {
         2022: {"start": "2022-08-08", "end": "2022-08-21"},
         2023: {"start": "2023-08-07", "end": "2023-08-20"},
+        2024: {"start": "2024-08-07", "end": "2024-08-20"},
         # Add more years and their respective dates as needed
     }
 def is_fall_start(ds):

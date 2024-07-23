@@ -192,6 +192,9 @@ def save_to_db(
         if restaurant_name in ["Fredrikstad"]:
             event_restaurant= 'Fredrikstad'
             city='Fredrikstad'
+        if restaurant_name in ["Trondheim"]:
+            event_restaurant= 'Trondheim'
+            city='Trondheim'
         # with psycopg2.connect(**prod_params) as conn:
         #     with conn.cursor() as cursor:
         #         cursor.execute(

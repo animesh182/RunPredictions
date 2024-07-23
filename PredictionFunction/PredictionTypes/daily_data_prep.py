@@ -25,11 +25,11 @@ def prepare_data(company, restaurant, start_date, end_date):
 
         filtered_sales_data= (
             sales_without_effect(
-                company,
+                'Los Tacos',
                 start_date,
                 end_date,
-                alcohol_reference,
-                food_reference,
+                'Karl Johan',
+                'Stavanger',
                 restaurant
             )
         )
@@ -47,10 +47,10 @@ def prepare_data(company, restaurant, start_date, end_date):
     
     logging.info(city)
    
-    # if city =='Trondheim':
-    #     filtered_weather_data = fetch_weather("Stavanger",start_date,end_date)
-    # else:
-    filtered_weather_data = fetch_weather(city,start_date,weather_end_date)
+    if city =='Trondheim':
+        filtered_weather_data = fetch_weather("Stavanger",start_date,end_date)
+    else:
+        filtered_weather_data = fetch_weather(city,start_date,weather_end_date)
     # else:
     #     # filtered_weather_data=None
     #     print(f"No city found for the restaurant {restaurant}")

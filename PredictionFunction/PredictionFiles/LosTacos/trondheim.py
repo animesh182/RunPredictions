@@ -11,20 +11,20 @@ from PredictionFunction.utils.utils import calculate_days_30, calculate_days_15,
 from PredictionFunction.Datasets.OpeningHours.lostacos_opening_hours import restaurant_opening_hours
 from PredictionFunction.Datasets.Seasonalities.LosTacos.weekly_seasonality import weekly_seasonalities
 from PredictionFunction.Datasets.Regressors.general_regressors import (
-    is_fellesferie_stavanger,
+    is_fellesferie,
     is_may,
     is_covid_restriction_christmas,
     is_fall_start,
     is_covid_loose_fall21,
     is_christmas_shopping,
 )
-# from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holidays import (
-#     fadder_week,
-#     fjoge,
-#     military_excercise,
-#     outliers,
-#     closed_days,
-# )
+from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holidays import (
+    fadder_week,
+    fjoge,
+    military_excercise,
+    outliers,
+    closed_days,
+)
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     first_may,
@@ -195,25 +195,21 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
             "upper_window": 0,
         }
     )
-    # seventh_feb = pd.DataFrame(
-    #     {
-    #         "holiday": "unexpected_closure",
-    #         "ds": pd.to_datetime(["2024-02-07"]),
-    #         "lower_window": 0,
-    #         "upper_window": 0,
-    #         "prior_scale":1
-    #     }
-    # )
 
     holidays = pd.concat(
         (
             christmas_day,
             firstweek_jan,
+            fadder_week,
             first_may,
             easter,
             seventeenth_may,
             pinse,
+            # fjoge,
             himmelfart,
+            outliers,
+            closed_days,
+            military_excercise,
             hostferie_sor_ostlandet_weekdend,
             vinterferie_vestlandet_weekend_before,
             vinterferie_vestlandet_weekend,
@@ -223,7 +219,7 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
         )
     )
 
-    df["fellesferie"] = df["ds"].apply(is_fellesferie_stavanger)
+    df["fellesferie"] = df["ds"].apply(is_fellesferie)
 
     df["is_may"] = df["ds"].apply(is_may)
 
@@ -330,7 +326,8 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
             yearly_seasonality=5,
             daily_seasonality=False,
             changepoint_prior_scale=0.5,
-            seasonality_prior_scale=0.4,
+            seasonality_prior_scale=0.4,# changepoint_prior_scale=0.5,
+            # seasonality_prior_scale=0.4,
         )
     
     m.add_regressor("custom_regressor")
@@ -355,7 +352,7 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
     )
 
     m.add_regressor("sunshine_amount", standardize=False)
-    m.add_regressor("rain_sum", standardize=False)
+    # m.add_regressor("rain_sum", standardize=False)
     m.add_regressor("warm_and_dry")
     m.add_regressor("opening_duration")
     m.add_regressor("heavy_rain_fall_weekend")
@@ -373,7 +370,7 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
         seasonality_params = {
             "name": f"weekly_{cluster_label}",
             "period": 7,
-            "fourier_order": 3,  # Adjust as needed
+            "fourier_order": 10,  # Adjust as needed
             # Other parameters may go here as needed
         }
 
@@ -395,7 +392,7 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
     future.dropna(inplace=True)
 
     future["sunshine_amount"] = merged_data["sunshine_amount"]
-    future["fellesferie"] = future["ds"].apply(is_fellesferie_stavanger)
+    future["fellesferie"] = future["ds"].apply(is_fellesferie)
     future["is_may"] = future["ds"].apply(is_may)
     future["covid_restriction_christmas"] = future["ds"].apply(
         is_covid_restriction_christmas
@@ -404,6 +401,8 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
     future["covid_loose_fall21"] = future["ds"].apply(is_covid_loose_fall21)
     future["christmas_shopping"] = future["ds"].apply(is_christmas_shopping)
     future["christmas_shopping"] = future["ds"].apply(is_christmas_shopping)
+    future = add_opening_hours(future,"Trondheim",12,17)
+
     future["rain_sum"] = merged_data["rain_sum"]
     future["windspeed"] = merged_data["windspeed"]
     future["air_temperature"] = merged_data["air_temperature"]
@@ -412,15 +411,11 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
             inplace=True,
         )
 
+    future = warm_dry_weather_spring_fss(future)
     future = heavy_rain_fall_weekend_future(future)
     future = heavy_rain_winter_weekday_future(future)
     future = heavy_rain_winter_weekend_future(future)
-    # future = heavy_rain_spring_weekday_future(future)
-    # future = heavy_rain_spring_weekend_future(future)
-    future = non_heavy_rain_fall_weekend_future(future)
-    future = add_opening_hours(future,"Trondheim",12,17)
-    future = warm_dry_weather_spring_fss(future)
-    # Calculate the custom regressor values for the future dates
+    
     future["ds"] = pd.to_datetime(future["ds"])
     future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)
     future["week_number"] = future["ds"].dt.isocalendar().week

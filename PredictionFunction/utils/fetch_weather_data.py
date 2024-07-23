@@ -4,9 +4,11 @@ import pandas as pd
 from datetime import timedelta,datetime
 # Define your database parameters here
 from PredictionFunction.utils.params import params,prod_params
+from datetime import timedelta
 
 def fetch_weather(city,start_date,end_date):
     # Define the query
+    end_date = end_date + timedelta(days=10)
     raw_query = """    select
                     *
                     from public."Weather"
