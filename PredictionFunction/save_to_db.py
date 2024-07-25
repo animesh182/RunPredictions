@@ -391,7 +391,7 @@ def save_to_db(
 
                     cursor.execute(
                             """SELECT total_gross FROM public."Predictions_predictions"
-                            WHERE date = %s AND restaurant = %s""",
+                            WHERE date = %s AND restaurant = %s order by created_at desc limit 1""",
                             (date_obj.date(), restaurant)
                         )
                     existing_prediction = cursor.fetchone()
