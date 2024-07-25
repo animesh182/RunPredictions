@@ -406,16 +406,27 @@ def fisketorget_restaurant(
             )
 
     else:
+        # m = Prophet(
+        #     holidays=holidays,
+        #     yearly_seasonality=5,
+        #     daily_seasonality=False,
+        #     n_changepoints=12,
+        #     changepoint_range=0.95,
+        #     changepoint_prior_scale=1.3,
+        #     seasonality_prior_scale=2,
+        #     holidays_prior_scale=5,
+        #     seasonality_mode="additive",
+        # )
         m = Prophet(
             holidays=holidays,
-            yearly_seasonality=5,
+            yearly_seasonality=True,
             daily_seasonality=False,
-            n_changepoints=12,
-            changepoint_range=0.95,
-            changepoint_prior_scale=1.3,
-            seasonality_prior_scale=2,
-            holidays_prior_scale=5,
-            seasonality_mode="additive",
+            # n_changepoints=12,
+            # changepoint_range=0.95,
+            changepoint_prior_scale=0.1,
+            # seasonality_prior_scale=2,
+            # holidays_prior_scale=5,
+            # seasonality_mode="additive",
         )
 
     m.add_regressor("custom_regressor")
