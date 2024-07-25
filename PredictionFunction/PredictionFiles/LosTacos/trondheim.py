@@ -415,6 +415,7 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
     future = heavy_rain_fall_weekend_future(future)
     future = heavy_rain_winter_weekday_future(future)
     future = heavy_rain_winter_weekend_future(future)
+    future = non_heavy_rain_fall_weekend_future(future)
     
     future["ds"] = pd.to_datetime(future["ds"])
     future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)
