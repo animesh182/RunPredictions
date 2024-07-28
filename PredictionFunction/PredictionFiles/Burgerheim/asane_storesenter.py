@@ -169,7 +169,7 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
             holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)
 
     event_holidays= pd.concat(objs=[event_holidays, holidays], ignore_index=True)
-    df["fall_start"] = df["ds"].apply(is_fall_start)
+    # df["fall_start"] = df["ds"].apply(is_fall_start)
     df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
     df["is_specific_month"] = df["ds"].apply(is_specific_month)
     df['day_of_week'] = df['ds'].dt.dayofweek
@@ -234,9 +234,9 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
             m.add_regressor(regressor_name + '_bad_weather')
             m.add_regressor(regressor_name + '_normal_weather')
 
-    m.add_seasonality(
-        name="weekly_fall_start", period=7, fourier_order=3, condition_name="fall_start"
-    )
+    # m.add_seasonality(
+    #     name="weekly_fall_start", period=7, fourier_order=3, condition_name="fall_start"
+    # )
 
     m.add_seasonality(
         name="fellesferie", period=30.5, fourier_order=5, condition_name="is_fellesferie"
@@ -253,11 +253,11 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
         lambda x: early_semester(x, params)
     )
     ## Add conditional seasonality
-    future["fall_start"] = future["ds"].apply(is_fall_start)
+    # future["fall_start"] = future["ds"].apply(is_fall_start)
     future["is_fellesferie"] = future["ds"].apply(is_fellesferie)
     future["is_specific_month"] = future["ds"].apply(is_specific_month)
     future["high_weekend_spring"] = future["ds"].apply(is_high_weekend_spring)
-    future["fall_start"] = future["ds"].apply(is_fall_start)
+    # future["fall_start"] = future["ds"].apply(is_fall_start)
 
     # Add relevant weather columns to the future df
     future["rain_sum"] = merged_data["rain_sum"]
