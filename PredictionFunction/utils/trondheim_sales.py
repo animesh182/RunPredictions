@@ -92,13 +92,19 @@ def sales_without_effect(
     scale_factor_for_food_feb = float(actual_food_sum)/average_sum_feb_food
     scale_factor_for_alcohol_feb = float(actual_alcohol_sum)/average_sum_feb_alcohol
 
+    reference_alcohol_sales.loc[reference_alcohol_sales['gastronomic_day'].dt.dayofweek == 5, 'total_net'] *= 0.35
+    reference_alcohol_sales.loc[reference_alcohol_sales['gastronomic_day'].dt.dayofweek == 4, 'total_net'] *=0.4
+
+    reference_food_sales.loc[reference_food_sales['gastronomic_day'].dt.dayofweek == 5, 'total_net'] *= 0.35
+    reference_food_sales.loc[reference_food_sales['gastronomic_day'].dt.dayofweek == 4, 'total_net'] *= 0.4
+    
     reference_alcohol_sales['total_net'] =reference_alcohol_sales['total_net'].astype(float) * float(scale_factor_for_alcohol_feb)
     reference_food_sales['total_net'] = reference_food_sales['total_net'].astype(float) * float(scale_factor_for_food_feb)
     # ----------------------------------------------------------------------------------------------------------------------------
     final_scaled_scales = pd.concat([reference_alcohol_sales,reference_food_sales])
     final_scaled_scales['gastronomic_day'] =pd.to_datetime(final_scaled_scales['gastronomic_day'])
-    final_scaled_scales.loc[final_scaled_scales['gastronomic_day'].dt.dayofweek == 5, 'total_net'] *= 0.4
-    final_scaled_scales.loc[final_scaled_scales['gastronomic_day'].dt.dayofweek == 4, 'total_net'] *= 0.5
+    # final_scaled_scales.loc[final_scaled_scales['gastronomic_day'].dt.dayofweek == 5, 'total_net'] *= 0.4
+    # final_scaled_scales.loc[final_scaled_scales['gastronomic_day'].dt.dayofweek == 4, 'total_net'] *= 0.5
     final_sales_grouped = final_scaled_scales.groupby('gastronomic_day')['total_net'].sum().reset_index()
 
     daily_sales = (actual_trondheim_sales.groupby(actual_trondheim_sales["gastronomic_day"].dt.date)["total_net"].sum().reset_index())
