@@ -91,6 +91,11 @@ def is_fellesferie_stavanger(ds):
 def is_may(ds):
         ds = pd.to_datetime(ds)
         return ds.month == 5
+
+def is_monday_Fisk_restaurant(ds):
+    ds = pd.to_datetime(ds)
+    return ds.dayofweek == 0
+
 def is_saturday_rainy_windy(row):
         return 1 if(row['ds'].dayofweek == 5) and (row['rain_sum']>5) and (row['windspeed']>4.5) else 0
 
@@ -143,6 +148,18 @@ def july_august_weekend_utsalg(df):
     df['weekend_july_august'] = (
         (df['day_of_week'].isin([4, 5])) &
         (df['month'].isin([7, 8]))  # Assuming fall is September, October, November
+    ).astype(int)
+    
+    return df
+
+
+def july_august_wednesnday_stavanger(df):
+    df['day_of_week'] = df['ds'].dt.dayofweek
+    df['month'] = df['ds'].dt.month
+    # Apply the conditions for heavy rain weekend
+    df['wednesday_high_sale'] = (
+        (df['day_of_week'].isin([2])) &
+        (df['month'].isin([6,7,8]))  # Assuming fall is September, October, November
     ).astype(int)
     
     return df

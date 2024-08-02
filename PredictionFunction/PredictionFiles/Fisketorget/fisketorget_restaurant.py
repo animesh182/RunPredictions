@@ -26,7 +26,8 @@ from PredictionFunction.Datasets.Regressors.general_regressors import (
     is_covid_loose_fall21,
     is_christmas_shopping,
     is_outdoor_seating,
-    is_high_weekend_spring
+    is_high_weekend_spring,
+    is_monday_Fisk_restaurant
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holidays import (
     # firstweek_jan,
@@ -267,6 +268,7 @@ def fisketorget_restaurant(
     ### Conditional seasonality - weekly
 
     df["fellesferie"] = df["ds"].apply(is_fellesferie)
+    df["week_start"] = df["ds"].apply(is_monday_Fisk_restaurant)
     df['day_of_week'] = df['ds'].dt.dayofweek
     df["high_weekend_spring"] = df["ds"].apply(is_high_weekend_spring)
     df["outdoor_seating"] =df['ds'].apply(is_outdoor_seating)
@@ -459,7 +461,7 @@ def fisketorget_restaurant(
     # m.add_seasonality(name='weekly_fellesferie', period=7, fourier_order=3, condition_name='fellesferie')
 
     # m.add_seasonality(name='weekly_in_may', period=7, fourier_order=3, condition_name='is_may')
-
+    m.add_seasonality(name='week_start', period=7, fourier_order=3, condition_name='week_start')
     m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
 
     # Add the conditional regressor to the model
@@ -546,6 +548,7 @@ def fisketorget_restaurant(
 
     ## Add conditional seasonality
     future["fellesferie"] = future["ds"].apply(is_fellesferie)
+    future["week_start"] = future["ds"].apply(is_monday_Fisk_restaurant)
     future["outdoor_seating"] = future["ds"].apply(is_outdoor_seating)
     future["high_weekend_spring"] = future["ds"].apply(is_high_weekend_spring)
 
