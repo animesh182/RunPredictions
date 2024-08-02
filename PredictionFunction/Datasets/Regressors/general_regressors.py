@@ -133,3 +133,16 @@ def is_outdoor_seating(ds):
     start_date = pd.Timestamp(outdoor_seating_dates[year]["start"])
     end_date = pd.Timestamp(outdoor_seating_dates[year]["end"])
     return start_date <= date <= end_date
+
+
+
+def july_august_weekend_utsalg(df):
+    df['day_of_week'] = df['ds'].dt.dayofweek
+    df['month'] = df['ds'].dt.month
+    # Apply the conditions for heavy rain weekend
+    df['weekend_july_august'] = (
+        (df['day_of_week'].isin([4, 5])) &
+        (df['month'].isin([7, 8]))  # Assuming fall is September, October, November
+    ).astype(int)
+    
+    return df

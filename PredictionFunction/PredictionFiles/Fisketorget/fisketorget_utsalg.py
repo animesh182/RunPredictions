@@ -25,6 +25,7 @@ from PredictionFunction.Datasets.Regressors.general_regressors import (
     is_fall_start,
     is_covid_loose_fall21,
     is_christmas_shopping,
+    july_august_weekend_utsalg
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holidays import (
     # firstweek_jan,
@@ -193,6 +194,7 @@ def fisketorget_utsalg(
     # df = warm_dry_weather_spring(df)
     # df = heavy_rain_fall_weekday(df)
     df = warm_dry_weather_spring_tfs(df)
+    df = july_august_weekend_utsalg(df)
     df = heavy_rain_fall_weekend(df)
     df = heavy_rain_winter_weekday(df)
     df = heavy_rain_winter_weekend(df)
@@ -440,6 +442,7 @@ def fisketorget_utsalg(
     m.add_regressor("sunshine_amount", standardize=False)
     m.add_regressor("rain_sum")
     m.add_regressor("warm_and_dry")
+    m.add_regressor("weekend_july_august")
     # m.add_regressor("heavy_rain_fall_weekday")
     m.add_regressor("heavy_rain_fall_weekend")
     m.add_regressor("heavy_rain_winter_weekday")
@@ -556,6 +559,7 @@ def fisketorget_utsalg(
             future = is_event_with_normal_weather(future,event_column)
 
     future = warm_dry_weather_spring_tfs(future)
+    future = july_august_weekend_utsalg(future)
     # future = warm_and_dry_future(future)
     # future = heavy_rain_fall_weekday_future(future)
     future = heavy_rain_fall_weekend_future(future)
