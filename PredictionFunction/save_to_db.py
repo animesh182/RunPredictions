@@ -15,6 +15,7 @@ from PredictionFunction.meta_tables import data
 import numpy as np
 from PredictionFunction.utils.constants import holiday_parameter_type_categorization,holiday_names_negative
 from PredictionFunction.utils.trondheim_events import trondheim_events
+from PredictionFunction.utils.openinghours import get_opening_closing_hours
 
 
 def save_to_db(
@@ -56,46 +57,33 @@ def save_to_db(
     # filtered_df = forecast_df
 
     if prediction_category == "day":
+        restaurant_name = restaurant
+        with psycopg2.connect(**prod_params) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(""" select id from public."accounts_restaurant" where name=%s """,[restaurant_name])
+                restaurant_id= cursor.fetchone()[0]
+                opening_hour_query = """
+                        SELECT *
+                        FROM public."accounts_openinghours"
+                        WHERE restaurant_id = %s
+                    """
+                opening_hours_df = pd.read_sql_query(opening_hour_query,conn,params=[restaurant_id])
+  
         for index, row in filtered_df.iterrows():
             # date_obj = datetime.strptime(row["ds"], "%Y-%m-%d")
-            date_obj = datetime.strptime(str(row["ds"]).split()[0], "%Y-%m-%d")
-            day_type = date_obj.strftime("%w")  # 5 and 6 are Saturday and Sunday
-            restaurant_name = restaurant
-            with psycopg2.connect(**prod_params) as conn:
-                with conn.cursor() as cursor:
-                    cursor.execute(
-                        'SELECT id FROM public."accounts_restaurant" WHERE name = %s',
-                        [restaurant_name],
-                    )
-                    restaurant_uuid = cursor.fetchone()[0]
-                    opening_hour_query = """
-                            SELECT *
-                            FROM public."accounts_openinghours"
-                            WHERE restaurant_id = %s
-                            AND day_of_week = %s
-                            AND DATE(start_date) <= %s
-                            AND DATE(end_date) >= %s
-                            ORDER BY created_at DESC
-                            LIMIT 1
-                        """
-                    cursor.execute(
-                        opening_hour_query,
-                        [restaurant_uuid, day_type, date_obj, date_obj],
-                    )
-                    opening_hours = cursor.fetchone()
-                    if opening_hours:
-                        start = opening_hours[1]
-                        end = opening_hours[2]
-                        if start > end:
-                            duration = (24 - start) + end
-                        elif start == end:
-                            duration = 0
-                            filtered_df.at[index, "yhat"] = 0
-                        else:
-                            duration = end - start
-                    filtered_df.at[index, "duration"] = duration
-                    common_duration = filtered_df["duration"].value_counts().idxmax()
-                    filtered_df.at[index, "common_duration"] = common_duration
+            date_obj = pd.to_datetime(row['ds'])
+            day_type = int(date_obj.strftime("%w"))  # 5 and 6 are Saturday and Sunday
+            start,end = get_opening_closing_hours(opening_hours_df,day_type,date_obj)
+            if start > end:
+                duration = (24 - start) + end
+            elif start == end:
+                duration = 0
+                filtered_df.at[index, "yhat"] = 0
+            else:
+                duration = end - start
+            filtered_df.at[index, "duration"] = duration
+            common_duration = filtered_df["duration"].value_counts().idxmax()
+            filtered_df.at[index, "common_duration"] = common_duration
 
         normal_hour = opening_hours_dict[restaurant_name]["normal_hours"]
         normal_hour_2 = opening_hours_dict[restaurant_name]["special_hours"]

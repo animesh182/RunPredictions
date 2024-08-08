@@ -5,32 +5,31 @@ from PredictionFunction.utils.params import params,prod_params
 
 
 def add_opening_hours(df, restaurant_name,normal_hour,special_hour):
-    # restaurant_id = Restaurant.objects.get(name=restaurant_name).id
     with psycopg2.connect(**prod_params) as conn:
         with conn.cursor() as cursor:
             cursor.execute(""" select id from public."accounts_restaurant" where name=%s """,[restaurant_name])
             restaurant_id= cursor.fetchone()[0]
-
+            opening_hour_query = """
+                    SELECT *
+                    FROM public."accounts_openinghours"
+                    WHERE restaurant_id = %s
+                """
+            opening_hours_df = pd.read_sql_query(opening_hour_query,conn,params=[restaurant_id])
+    opening_hours_df['start_date'] = pd.to_datetime(opening_hours_df['start_date'])
+    opening_hours_df['end_date'] = pd.to_datetime(opening_hours_df['end_date'])
     def get_opening_duration(date):
         day_type = int(date.strftime("%w"))
-        with psycopg2.connect(**prod_params) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(""" select * from public."accounts_openinghours" where restaurant_id=%s and start_date <= %s and end_date >= %s and day_of_week=%s """,
-                            [restaurant_id,date,date,day_type])
-                rows= cursor.fetchall()
-            opening_hours = []
-            for row in rows:
-                hour = {
-                    "start_hour": row[1],
-                    "end_hour": row[2],
-                    "start_date": row[3],
-                    "end_date": row[4],
-                    "day_of_week": row[7],
-                }
-                opening_hours.append(hour)
-        if opening_hours:
-            start = opening_hours[0]["start_hour"]
-            end = opening_hours[0]["end_hour"]
+        date = pd.to_datetime(date)
+        opening_df = opening_hours_df[
+            (opening_hours_df['day_of_week'] == int(day_type)) &  # Ensure day_type matches the 'day_of_week' values in the DataFrame
+            (opening_hours_df['start_date'] <= date) &
+            (opening_hours_df['end_date'] >= date)
+            ]
+            
+        if not opening_df.empty:
+            latest_entry = opening_df.sort_values(by='created_at', ascending=False).iloc[0]
+            start = latest_entry['start_hour']
+            end = latest_entry['end_hour']
             if start > end:
                 duration = (24 - start) + end
             elif start==end:
@@ -62,3 +61,31 @@ def add_opening_hours(df, restaurant_name,normal_hour,special_hour):
         axis=1,
     )
     return df
+
+
+
+def get_opening_closing_hours(df, day_type, date_obj):
+
+    # Assuming df is your DataFrame and date_obj is your Timestamp object
+    df['start_date'] = pd.to_datetime(df['start_date'])
+    df['end_date'] = pd.to_datetime(df['end_date'])
+
+    # Convert Series to date
+    df['start_date_date'] = df['start_date'].dt.date
+    df['end_date_date'] = df['end_date'].dt.date
+    date_obj_date = date_obj.date()
+
+    # Filter the DataFrame
+    opening_df = df[
+        (df['day_of_week'] == int(day_type)) &  # Ensure day_type matches the 'day_of_week' values in the DataFrame
+        (df['start_date_date'] <= date_obj_date) &
+        (df['end_date_date'] >= date_obj_date)
+    ]
+    if not opening_df.empty:
+        # Sort by created_at in descending order to get the latest entry
+        latest_entry = opening_df.sort_values(by='created_at', ascending=False).iloc[0]
+        start_hour = latest_entry['start_hour']
+        end_hour = latest_entry['end_hour']
+        return start_hour, end_hour
+    else:
+        return None, None
