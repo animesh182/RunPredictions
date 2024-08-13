@@ -81,7 +81,7 @@ data = [
     },
     {
         "Restaurant": "Åsane Storsenter",
-        "City": "Bergen",
+        "City": "Asane",
         "Company": "Burgerheim",
         "Parent Restaurant": "",
     },

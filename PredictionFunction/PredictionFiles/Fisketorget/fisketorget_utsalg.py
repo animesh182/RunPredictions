@@ -402,7 +402,7 @@ def fisketorget_utsalg(
             holidays=holidays,
             yearly_seasonality=True,
             daily_seasonality=False,
-            changepoint_prior_scale=0.1,
+            changepoint_prior_scale=0.05,
         )
 
     m.add_regressor("custom_regressor")
@@ -442,7 +442,7 @@ def fisketorget_utsalg(
     m.add_regressor("sunshine_amount", standardize=False)
     m.add_regressor("rain_sum")
     m.add_regressor("warm_and_dry")
-    m.add_regressor("weekend_july_august")
+    m.add_regressor("weekend_august")
     # m.add_regressor("heavy_rain_fall_weekday")
     m.add_regressor("heavy_rain_fall_weekend")
     m.add_regressor("heavy_rain_winter_weekday")

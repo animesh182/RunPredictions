@@ -13,5 +13,14 @@ def predict(m, future):
     if future.empty:
         raise ValueError("The future DataFrame is empty.")
     forecast = m.predict(future)
+
+    # from prophet.diagnostics import cross_validation, performance_metrics
+
+    # # Perform cross-validation
+    # df_cv = cross_validation(m, initial='730 days', period='104 days', horizon='180 days')
+
+    # # Compute performance metrics
+    # df_p = performance_metrics(df_cv)
+    # print(df_p.head())
     forecast = pd.DataFrame(forecast)
     return forecast

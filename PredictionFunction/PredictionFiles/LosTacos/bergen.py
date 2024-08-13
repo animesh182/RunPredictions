@@ -305,7 +305,8 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
             holidays=holidays,
             yearly_seasonality=3,
             daily_seasonality=False,
-            changepoint_prior_scale=0.1,
+            changepoint_prior_scale=0.01,
+            changepoint_range=0.9
         )
 
     # Add the payday columns as regressors

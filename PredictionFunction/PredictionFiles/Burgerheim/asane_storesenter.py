@@ -98,7 +98,7 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
             "air_temperature",
         ]
 
-    df = add_opening_hours(df, "Bergen",12, 17)
+    df = add_opening_hours(df, "Åsane Storsenter",12, 9)
     df = warm_dry_weather_spring_tfs(df)
     df = heavy_rain_winter_weekend(df)
     df = heavy_rain_spring_weekend(df)
@@ -287,7 +287,7 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
 
-    future = add_opening_hours(future, "Bergen", 12,17)
+    future = add_opening_hours(future, "Åsane Storsenter", 12,9)
     future = warm_dry_weather_spring_tfs(future)
     future = heavy_rain_winter_weekend_future(future)
     future = heavy_rain_spring_weekend_future(future)

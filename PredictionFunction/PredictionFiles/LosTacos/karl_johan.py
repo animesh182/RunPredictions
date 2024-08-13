@@ -353,9 +353,10 @@ def karl_johan(
     else:
         m = Prophet(
             holidays=holidays,
-            yearly_seasonality=True,
+            yearly_seasonality=10,
             daily_seasonality=False,
             changepoint_prior_scale=0.1,
+            changepoint_range=0.8
         )
 
 
@@ -382,7 +383,7 @@ def karl_johan(
     m.add_regressor("closed_jan")
     m.add_regressor("high_weekend_spring",mode='multiplicative')
 
-    # m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
+    m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
 
     m.add_seasonality(
         name="covid_restriction_christmas",
