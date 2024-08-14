@@ -18,6 +18,11 @@ from PredictionFunction.Datasets.Regressors.general_regressors import (
     is_covid_loose_fall21,
     is_christmas_shopping,
 )
+from PredictionFunction.Datasets.Regressors.event_weather_regressors import (
+    is_event_with_bad_weather,
+    is_event_with_good_weather,
+    is_event_with_normal_weather
+)
 from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holidays import (
     fadder_week,
     fjoge,
@@ -266,6 +271,42 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
     df= add_opening_hours(df,"Trondheim",12,17)
 
+    trondheim_venues = {
+            "Olavshallen Store Sal", "Studentersamfundet", "Litteraturhuset i Trondheim", "ISAK Kulturhus", "Lokal Bar",
+            "Dokkhuset Scene", "Uka i Trondheim", "Byscenen", "Bar Moskus", "Kunsthallen",
+            "Verkstedhallen", "Tapperiet Paa Dahls", "Lerkendal stadion", "Krigsseilerplassen", "Kafe Skuret",
+            "Havet, Djupet", "Trondheim", "Trondheim Spektrum", "Havet, Langhuset", "Tapperiet EC Dahls Arena",
+            "Havet, Heim, Trondheim"
+    }
+    data = {"name": [], "effect": []}
+    city='Trondheim'
+    venue_list = trondheim_venues
+    regressors_to_add = []
+    for venue in trondheim_venues:
+        # for venue in karl_johan_venues:
+        venue_df = fetch_events("Trondheim", venue,city)
+        event_holidays = pd.concat(objs=[event_holidays, venue_df], ignore_index=True)
+        if "name" in venue_df.columns:
+            venue_df = venue_df.drop_duplicates("date")
+            venue_df["date"] = pd.to_datetime(venue_df["date"])
+            venue_df = venue_df.rename(columns={"date": "ds"})
+            venue_df["ds"] = pd.to_datetime(venue_df["ds"])
+            venue_df = venue_df[["ds", "name"]]
+            venue_df.columns = ["ds", "event"]
+            dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
+            venue_df[dataframe_name] = 1
+            df = pd.merge(df, venue_df, how="left", on="ds", suffixes=("", "_venue"))
+            df = is_event_with_good_weather(df,dataframe_name)
+            df = is_event_with_bad_weather(df,dataframe_name)
+            df = is_event_with_normal_weather(df,dataframe_name)
+            df[dataframe_name].fillna(0, inplace=True)
+            regressors_to_add.append(
+                (venue_df, dataframe_name)
+            )  # Append venue_df along with venue name for regressor addition
+        else:
+            holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)
+    event_holidays= pd.concat(objs=[event_holidays, holidays], ignore_index=True)
+
     def calculate_days(df, last_working_day):
         # Convert 'ds' column to datetime if it's not already
         df["ds"] = pd.to_datetime(df["ds"])
@@ -329,6 +370,12 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
             seasonality_prior_scale=0.4,# changepoint_prior_scale=0.5,
             # seasonality_prior_scale=0.4,
         )
+    for event_df, regressor_name in regressors_to_add:
+        if "event" in event_df.columns:
+            # m.add_regressor(regressor_name)
+            m.add_regressor(regressor_name + '_good_weather')
+            m.add_regressor(regressor_name + '_bad_weather')
+            m.add_regressor(regressor_name + '_normal_weather')
     
     m.add_regressor("custom_regressor")
     m.add_seasonality(
@@ -362,7 +409,7 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
 
     clusters = weekly_seasonalities(df)
 
-    venue_list = {}
+    # venue_list = {}
 
     for cluster_label, weeks in clusters.items():
         # Here, you would define the custom seasonality parameters for each cluster
@@ -410,6 +457,19 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
             {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
             inplace=True,
         )
+    for event_df, event_column in regressors_to_add:
+        if "event" in event_df.columns:
+            event_df = event_df.drop_duplicates("ds")
+            future = pd.merge(
+                future,
+                event_df[["ds", event_column]],
+                how="left",
+                on="ds",
+            )
+            future[event_column].fillna(0, inplace=True)
+            future = is_event_with_good_weather(future,event_column)
+            future = is_event_with_bad_weather(future,event_column)
+            future = is_event_with_normal_weather(future,event_column)
 
     future = warm_dry_weather_spring_fss(future)
     future = heavy_rain_fall_weekend_future(future)

@@ -23,4 +23,5 @@ def predict(m, future):
     # df_p = performance_metrics(df_cv)
     # print(df_p.head())
     forecast = pd.DataFrame(forecast)
+    forecast.to_csv('forecast.csv')
     return forecast

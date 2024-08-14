@@ -151,7 +151,7 @@ def save_to_db(
             #         parent_restaurant=None,
             #         effect = 0
             #     )
-        filtered_df = filtered_df[filtered_df["ds"] >= datetime.now()]
+        # filtered_df = filtered_df[filtered_df["ds"] >= datetime.now()]
         concert_dictionary = {}
         valid_concerts = []
         all_venues = venues_list
@@ -320,56 +320,56 @@ def save_to_db(
         else:
             parent_restaurant = None
 
-        if restaurant == "Trondheim":
-            event_holidays_trondheim = trondheim_events()
-            event_holidays_trondheim = event_holidays_trondheim[
-                pd.to_datetime(event_holidays_trondheim["event_date"]) >= datetime.now()
-            ]
-            holiday_param_insert_trondheim = """ INSERT INTO public."Predictions_holidayparameters" (id,prediction_id, name, effect, type, date, restaurant, company, parent_restaurant,created_at)
-                VALUES (gen_random_uuid(),%s, %s, %s,'event', %s, %s, %s, %s,%s)"""
-            with psycopg2.connect(**params) as conn:
-                with conn.cursor() as cursor:
-                    for index, row in event_holidays_trondheim.iterrows():
-                        prediction_id = None
-                        event_name = row["event_names"]
-                        event_date = row["event_date"]
-                        restaurant = "Trondheim"
-                        company = "Los Tacos"
-                        parent_restaurant = parent_restaurant
-                        effect_value = 0
-                        created_at = datetime.now()
-                        cursor.execute(
-                            holiday_param_insert_trondheim,
-                            (
-                                prediction_id,
-                                event_name,
-                                effect_value,
-                                event_date,
-                                restaurant,
-                                company,
-                                parent_restaurant,
-                                created_at,
-                            ),
-                        )
-                    conn.commit()
+        # if restaurant == "Trondheim":
+        #     event_holidays_trondheim = trondheim_events()
+        #     event_holidays_trondheim = event_holidays_trondheim[
+        #         pd.to_datetime(event_holidays_trondheim["event_date"]) >= datetime.now()
+        #     ]
+        #     holiday_param_insert_trondheim = """ INSERT INTO public."Predictions_holidayparameters" (id,prediction_id, name, effect, type, date, restaurant, company, parent_restaurant,created_at)
+        #         VALUES (gen_random_uuid(),%s, %s, %s,'event', %s, %s, %s, %s,%s)"""
+        #     with psycopg2.connect(**params) as conn:
+        #         with conn.cursor() as cursor:
+        #             for index, row in event_holidays_trondheim.iterrows():
+        #                 prediction_id = None
+        #                 event_name = row["event_names"]
+        #                 event_date = row["event_date"]
+        #                 restaurant = "Trondheim"
+        #                 company = "Los Tacos"
+        #                 parent_restaurant = parent_restaurant
+        #                 effect_value = 0
+        #                 created_at = datetime.now()
+        #                 cursor.execute(
+        #                     holiday_param_insert_trondheim,
+        #                     (
+        #                         prediction_id,
+        #                         event_name,
+        #                         effect_value,
+        #                         event_date,
+        #                         restaurant,
+        #                         company,
+        #                         parent_restaurant,
+        #                         created_at,
+        #                     ),
+        #                 )
+        #             conn.commit()
         # filtered_df.to_csv('filtered_df.csv')
+        # else:
+        if "holiday" in event_holidays.columns:
+            event_holidays["event_names"] = event_holidays["holiday"].fillna(
+                event_holidays["name"]
+            )
+            event_holidays["ds"] = pd.to_datetime(event_holidays["ds"])
+            event_holidays["date"] = pd.to_datetime(event_holidays["date"])
+            # event_holidays.to_csv("events_before.csv")
+            event_holidays["event_date"] = event_holidays["date"].fillna(
+                event_holidays["ds"].dt.date
+            )
+            event_holidays["event_date"] = (
+                event_holidays["event_date"].dt.strftime("%Y-%m-%d").astype(str)
+            )
         else:
-            if "holiday" in event_holidays.columns:
-                event_holidays["event_names"] = event_holidays["holiday"].fillna(
-                    event_holidays["name"]
-                )
-                event_holidays["ds"] = pd.to_datetime(event_holidays["ds"])
-                event_holidays["date"] = pd.to_datetime(event_holidays["date"])
-                # event_holidays.to_csv("events_before.csv")
-                event_holidays["event_date"] = event_holidays["date"].fillna(
-                    event_holidays["ds"].dt.date
-                )
-                event_holidays["event_date"] = (
-                    event_holidays["event_date"].dt.strftime("%Y-%m-%d").astype(str)
-                )
-            else:
-                event_holidays["event_names"] = event_holidays["name"]
-                event_holidays["event_date"] = pd.to_datetime(event_holidays["date"])
+            event_holidays["event_names"] = event_holidays["name"]
+            event_holidays["event_date"] = pd.to_datetime(event_holidays["date"])
         with psycopg2.connect(**params) as conn:
             with conn.cursor() as cursor:
                 for index, row in filtered_df.iterrows():

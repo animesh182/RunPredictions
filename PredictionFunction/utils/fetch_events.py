@@ -17,6 +17,11 @@ def fetch_events(restaurant, location_name, city_name):
                         AND pl.name = %s
                         And ac.name = %s
                         """
+    if restaurant=='Trondheim':
+        from_date = '2024-02-01'
+        raw_query = raw_query + f"And e.start_date > '{from_date}'"
+    
+    logging.info(raw_query)
     with psycopg2.connect(**prod_params) as conn:
         with conn.cursor() as cursor:
             cursor.execute(raw_query, [restaurant, location_name, city_name])
