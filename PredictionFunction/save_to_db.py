@@ -62,6 +62,7 @@ def save_to_db(
             with conn.cursor() as cursor:
                 cursor.execute(""" select id from public."accounts_restaurant" where name=%s """,[restaurant_name])
                 restaurant_id= cursor.fetchone()[0]
+                logging.info(f'restaurant id is : {restaurant_id}')
                 opening_hour_query = """
                         SELECT *
                         FROM public."accounts_openinghours"
@@ -163,6 +164,9 @@ def save_to_db(
             "Oslo Lokka",
             "Oslo Steen_Strom",
             "Oslo Smestad",
+            "Alexander Kielland",
+            "Bjørvika",
+            "Restaurantdrift AS"
         ]:  
             event_restaurant= 'Oslo Torggata'
             city= 'Oslo'

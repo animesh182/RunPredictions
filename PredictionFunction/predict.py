@@ -17,11 +17,11 @@ def predict(m, future):
     # from prophet.diagnostics import cross_validation, performance_metrics
 
     # # Perform cross-validation
-    # df_cv = cross_validation(m, initial='730 days', period='104 days', horizon='180 days')
+    # df_cv = cross_validation(m, initial='60 days', period='30 days', horizon='15 days')
 
     # # Compute performance metrics
     # df_p = performance_metrics(df_cv)
     # print(df_p.head())
     forecast = pd.DataFrame(forecast)
-    forecast.to_csv('forecast.csv')
+    # forecast.to_csv('forecast.csv')
     return forecast

@@ -14,6 +14,9 @@ opening_hours_dict = {
     "Fisketorget Utsalg": {"normal_hours": [7], "special_hours": [6]},
     "Trondheim": {"normal_hours": [12], "special_hours": [17]},
     "Åsane Storsenter": {"normal_hours": [12,11], "special_hours": [9]},
+    "Alexander Kielland": {"normal_hours": [17], "special_hours": [13]},
+    "Bjørvika": {"normal_hours": [11], "special_hours": [13]},
+    "Restaurantdrift AS": {"normal_hours": [12], "special_hours": [13,15,14,7]},
 }
 
 holiday_parameter_type_categorization = {

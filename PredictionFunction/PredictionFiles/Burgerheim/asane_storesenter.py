@@ -30,7 +30,9 @@ from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.holidays_asane im
     covid_christmas21_startjan22,
     first_day_of_school,
     last_day_of_school,
-    bergen_pride
+    bergen_pride,
+    christmas,
+    black_friday
 )
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     first_may,
@@ -38,7 +40,6 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     new_years_day,
     pinse,
     himmelfart,
-    christmas,
     new_year_romjul,
     seventeenth_may,
     easter,
@@ -125,7 +126,8 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
             # unknown_outliers,
             first_day_of_school,
             last_day_of_school,
-            bergen_pride
+            bergen_pride,
+            black_friday
         )
     )
 

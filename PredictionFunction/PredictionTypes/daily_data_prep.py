@@ -38,6 +38,7 @@ def prepare_data(company, restaurant, start_date, end_date):
     else:
         filtered_sales_data=fetch_salesdata(company,restaurant,start_date,end_date)
     sales_data_df = filtered_sales_data  
+    # sales_data_df.to_csv('sales.csv')
     sales_data_df.drop_duplicates('date', inplace=True)
     end_date= pd.to_datetime(end_date)
     weather_end_date = end_date + dt.timedelta(days=60)
@@ -47,7 +48,7 @@ def prepare_data(company, restaurant, start_date, end_date):
     
     logging.info(city)
    
-    if city =='Trondheim':
+    if restaurant =='Trondheim':
         filtered_weather_data = fetch_weather("Stavanger",start_date,end_date)
     else:
         filtered_weather_data = fetch_weather(city,start_date,weather_end_date)

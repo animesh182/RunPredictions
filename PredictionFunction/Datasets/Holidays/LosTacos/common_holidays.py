@@ -7,6 +7,7 @@ first_may = pd.DataFrame(
             "holiday": "First of may",
             "ds": pd.to_datetime(["2021-05-01", "2022-05-01", "2023-05-01", "2024-05-01","2025-05-01", "2026-05-01", "2027-05-01"]),
             "upper_window": 0,
+            "lower_window": 0,
         }
     )
 

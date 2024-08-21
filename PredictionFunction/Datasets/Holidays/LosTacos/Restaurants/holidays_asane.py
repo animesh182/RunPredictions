@@ -187,3 +187,20 @@ first_day_of_school = pd.DataFrame(
             "upper_window": 0,
         }
     )
+
+black_friday =  pd.DataFrame(
+        {
+            "holiday": "Black Friday",
+            "ds": pd.to_datetime(["2022-11-26","2022-11-25","2023-11-24","2024-11-29"]),
+            "lower_window": -4,
+            "upper_window": 0,
+        }
+    )
+christmas =  pd.DataFrame(
+        {
+            "holiday": "Christmas shopping week",
+            "ds": pd.to_datetime(["2021-12-22","2022-12-22","2023-12-22","2024-12-22"]),
+            "lower_window": -2,
+            "upper_window": 0,
+        }
+    )
