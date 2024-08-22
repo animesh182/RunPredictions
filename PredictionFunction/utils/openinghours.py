@@ -47,9 +47,9 @@ def add_opening_hours(df, restaurant_name,normal_hour,special_hour):
         elif duration >= 24:
             return 1  # Open 24 hours
         elif duration in special_hour:
-            return 1
+            return 0
         elif duration in normal_hour:
-            return 1
+            return 0
         else:
             return 0
 
