@@ -244,7 +244,7 @@ def oslo_smestad(
     df["fall_start"] = df["ds"].apply(is_fall_start)
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
     df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
-    df = add_opening_hours(df,"Oslo Smestad",7,7)
+    df = add_opening_hours(df,"Oslo Smestad",[7],[7])
 
     oslo_smestad_venues = {
         "Sentrum Scene",
@@ -442,7 +442,7 @@ def oslo_smestad(
     # future = heavy_rain_winter_weekday_future(future)
     # future = heavy_rain_winter_weekend_future(future)
     future = heavy_rain_spring_weekday_future(future)
-    future = add_opening_hours(future, "Oslo Smestad", 7, 7)
+    future = add_opening_hours(future, "Oslo Smestad", [7], [7])
     # future = heavy_rain_spring_weekend_future(future)
     # future = non_heavy_rain_fall_weekend_future(future)
     # future.fillna(0, inplace=True)

@@ -189,7 +189,7 @@ def oslo_torggata(
     # df = warm_dry_weekend_spring(df)
     # df = warm_dry_weekday_spring(df)
     # df = warm_dry_weekend_fall(df)
-    df = add_opening_hours(df, "Oslo Torggata", 13, 17)
+    df = add_opening_hours(df, "Oslo Torggata", [13], [17])
 
     # Initialize Prophet
     m = Prophet()
@@ -569,7 +569,7 @@ def oslo_torggata(
     future["christmas_shopping"] = future["ds"].apply(is_christmas_shopping)
     future["specific_month"] = future["ds"].apply(is_specific_month)
     future["is_fellesferie"] = future["ds"].apply(is_fellesferie)
-    future = add_opening_hours(future, "Oslo Torggata", 13, 17)
+    future = add_opening_hours(future, "Oslo Torggata", [13], [17])
     # Calculate the custom regressor values for the future dates
     future["ds"] = pd.to_datetime(future["ds"])
     future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)

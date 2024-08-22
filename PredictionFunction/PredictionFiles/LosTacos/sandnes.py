@@ -270,7 +270,7 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
     df["covid_loose_fall21"] = df["ds"].apply(is_covid_loose_fall21)
 
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
-    df = add_opening_hours(df, "Sandnes", 11, 9)
+    df = add_opening_hours(df, "Sandnes", [11], [9])
 
     sandnes_venues = {
     "Stavanger Konserthus","Folken, Løkkeveien","Stavanger","DNB Arena", 
@@ -577,7 +577,7 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
     future = heavy_rain_spring_weekend_future(future)
     future = non_heavy_rain_fall_weekend_future(future)
     # future= future.drop_duplicates('ds')
-    future = add_opening_hours(future, "Sandnes", 11, 9)
+    future = add_opening_hours(future, "Sandnes", [11], [9])
     future.fillna(0, inplace=True)
 
     print(future.dtypes)

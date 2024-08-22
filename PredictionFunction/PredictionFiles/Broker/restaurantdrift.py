@@ -104,7 +104,7 @@ def restaurantdrift_function(
             "air_temperature",
         ]
     # df = heavy_rain_spring_weekend(df)
-    df = add_opening_hours(df, "Restaurantdrift AS", 12, [13,15,14,7])
+    df = add_opening_hours(df, "Restaurantdrift AS", [12], [13,15,14,7])
     m = Prophet()
 
     ### Holidays and other repeating outliers
@@ -252,7 +252,7 @@ def restaurantdrift_function(
     future["ds"] = pd.to_datetime(future["ds"])
 
     future.fillna(0, inplace=True)
-    future = add_opening_hours(future, "Restaurantdrift AS", 12, [13,15,14,7])
+    future = add_opening_hours(future, "Restaurantdrift AS", [12], [13,15,14,7])
     # future.to_csv("future.csv")
 
     return m, future, df, event_holidays, venue_list

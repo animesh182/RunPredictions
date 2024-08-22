@@ -211,7 +211,7 @@ def oslo_lokka_jtorget_smestad_torggata(
     # Define a function to check if the date is within the period of heavy COVID restrictions
     # Add new columns in your dataframe to indicate if a date is within or outside the restrictions period
     df["covid_restriction_christmas"] = df["ds"].apply(is_covid_restriction_christmas)
-    df = add_opening_hours(df, "Oslo Lokka", 12, 17)
+    df = add_opening_hours(df, "Oslo Lokka", [12], [17])
 
     # Some weeks have the same weekly seasonality but more extreme and just higher. Add that here
     # Convert 'ds' column to datetime if it is not already
@@ -529,7 +529,7 @@ def oslo_lokka_jtorget_smestad_torggata(
         {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
         inplace=True,
     )
-    future = add_opening_hours(future, "Oslo Lokka", 12, 17)
+    future = add_opening_hours(future, "Oslo Lokka", [12], [17])
     future = warm_dry_weather_spring(future)
     future = heavy_rain_fall_weekday_future(future)
     future = heavy_rain_fall_weekend_future(future)

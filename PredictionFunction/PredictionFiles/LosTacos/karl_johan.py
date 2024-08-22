@@ -201,7 +201,7 @@ def karl_johan(
     df = heavy_rain_fall_weekday(df)
     df = warm_dry_weather_spring(df)
     df = calculate_days_15(df, fifteenth_working_days)
-    df = add_opening_hours(df, "Karl Johan", 12, 17)
+    df = add_opening_hours(df, "Karl Johan", [12], [17])
 
     m = Prophet()
 
@@ -480,7 +480,7 @@ def karl_johan(
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
     future.fillna(0, inplace=True)
-    future = add_opening_hours(future, "Karl Johan", 12, 17)
+    future = add_opening_hours(future, "Karl Johan", [12], [17])
 
     return m, future, df, event_holidays, venue_list
 

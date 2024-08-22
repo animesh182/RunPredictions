@@ -334,7 +334,7 @@ def oslo_city(
     df["rain_windy_weekend"] = df.apply(is_saturday_rainy_windy, axis=1)
     # df['rain_weekend'] =df['rain_weekend'].fillna(0)
     df["rain_windy_weekend"] = df["rain_windy_weekend"].fillna(0)
-    df = add_opening_hours(df, "Oslo City", 12, 10)
+    df = add_opening_hours(df, "Oslo City", [12], [10])
     # df['not_christmas_shopping'] = ~df['ds'].apply(is_christmas_shopping)
 
     oslo_city_venues = {
@@ -592,7 +592,7 @@ def oslo_city(
     # future = non_heavy_rain_fall_weekend_future(future)
     future.fillna(0, inplace=True)
     future = future.drop_duplicates(subset="ds")
-    future = add_opening_hours(future, "Oslo City", 12, 10)
+    future = add_opening_hours(future, "Oslo City", [12], [10])
 
     return m, future, df, event_holidays, venue_list
 

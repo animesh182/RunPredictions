@@ -171,7 +171,7 @@ def fredrikstad(
     # df = heavy_rain_winter_weekend(df)
     df = heavy_rain_spring_weekday(df)
     df = heavy_rain_spring_weekend(df)
-    df = add_opening_hours(df, "Fredrikstad", 11, 16)
+    df = add_opening_hours(df, "Fredrikstad", [11], [16])
     # df = non_heavy_rain_fall_weekend(df)
 
     m = Prophet()
@@ -514,7 +514,7 @@ def fredrikstad(
     # future = heavy_rain_winter_weekend_future(future)
     future = heavy_rain_spring_weekday_future(future)
     future = heavy_rain_spring_weekend_future(future)
-    future = add_opening_hours(future, "Fredrikstad", 11, 16)
+    future = add_opening_hours(future, "Fredrikstad", [11], [16])
     # future = non_heavy_rain_fall_weekend_future(future)
 
     return m, future, df, event_holidays, venue_list

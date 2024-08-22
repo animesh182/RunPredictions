@@ -104,7 +104,7 @@ def alexander_function(
             "air_temperature",
         ]
     # df = heavy_rain_spring_weekend(df)
-    df = add_opening_hours(df, "Alexander Kielland", 13, 17)
+    df = add_opening_hours(df, "Alexander Kielland", [13], [17])
     m = Prophet()
 
     ### Holidays and other repeating outliers
@@ -209,7 +209,7 @@ def alexander_function(
     m.add_regressor("rain_sum")
     m.add_regressor("opening_duration")
     m.add_regressor("high_weekend")
-    m.add_regressor("is_may")
+    # m.add_regressor("is_may")
     m.add_regressor("fall_start")
 
     m.add_seasonality(name="monthly", period=30.5, fourier_order=10)
@@ -262,7 +262,7 @@ def alexander_function(
     future["ds"] = pd.to_datetime(future["ds"])
 
     future.fillna(0, inplace=True)
-    future = add_opening_hours(future, "Alexander Kielland", 13, 17)
+    future = add_opening_hours(future, "Alexander Kielland", [13], [17])
 
     return m, future, df, event_holidays, venue_list
 

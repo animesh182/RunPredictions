@@ -201,7 +201,7 @@ def fisketorget_utsalg(
     # df = heavy_rain_spring_weekday(df)
     # df = heavy_rain_spring_weekend(df)
     df = non_heavy_rain_fall_weekend(df)
-    df = add_opening_hours(df, "Fisketorget Utsalg", 7, 6)
+    df = add_opening_hours(df, "Fisketorget Utsalg", [7], [6])
 
     m = Prophet()
 
@@ -568,7 +568,7 @@ def fisketorget_utsalg(
     # future = heavy_rain_spring_weekday_future(future)
     # future = heavy_rain_spring_weekend_future(future)
     future = non_heavy_rain_fall_weekend_future(future)
-    future = add_opening_hours(future, "Fisketorget Utsalg", 7, 6)
+    future = add_opening_hours(future, "Fisketorget Utsalg", [7], [6])
     # Calculate the custom regressor values for the future dates
     future["ds"] = pd.to_datetime(future["ds"])
     future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)

@@ -104,7 +104,7 @@ def bjorvika_function(
             "air_temperature",
         ]
     # df = heavy_rain_spring_weekend(df)
-    df = add_opening_hours(df, "Bjørvika", 13, 17)
+    df = add_opening_hours(df, "Bjørvika", [13], [17])
     m = Prophet()
 
     ### Holidays and other repeating outliers
@@ -264,7 +264,7 @@ def bjorvika_function(
     future["ds"] = pd.to_datetime(future["ds"])
 
     future.fillna(0, inplace=True)
-    future = add_opening_hours(future, "Bjørvika", 11, 13)
+    future = add_opening_hours(future, "Bjørvika", [11], [13])
 
     return m, future, df, event_holidays, venue_list
 

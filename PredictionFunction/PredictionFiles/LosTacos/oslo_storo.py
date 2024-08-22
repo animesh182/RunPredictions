@@ -253,7 +253,7 @@ def oslo_storo(
 
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
     df = calculate_days_30(df, fifteenth_working_days)
-    df = add_opening_hours(df, "Oslo Storo", 11, 11)
+    df = add_opening_hours(df, "Oslo Storo", [11], [11])
 
     oslo_storo_venues = {
         "Ulleval",
@@ -437,7 +437,7 @@ def oslo_storo(
     # future = heavy_rain_winter_weekend_future(future)
     future = heavy_rain_spring_weekday_future(future)
     future = heavy_rain_spring_weekend_future(future)
-    future = add_opening_hours(future, "Oslo Storo", 11, 11)
+    future = add_opening_hours(future, "Oslo Storo", [11], [11])
     # future = non_heavy_rain_fall_weekend_future(future)
     # future.fillna(0, inplace=True)
     # event_holidays.to_csv("event_holidaysall.csv")

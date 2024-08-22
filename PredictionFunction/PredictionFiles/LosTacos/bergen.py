@@ -163,7 +163,7 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
             "windspeed",
             "air_temperature",
         ]
-    df = add_opening_hours(df, "Bergen",12, 17)
+    df = add_opening_hours(df, "Bergen",[12], [17])
     # df = warm_dry_weather_spring(df)
     df = warm_dry_weather_spring_fss(df)    #df = heavy_rain_fall_weekday(df)
     #df = heavy_rain_fall_weekend(df)
@@ -463,7 +463,7 @@ def bergen(prediction_category,restaurant,merged_data,historical_data,future_dat
     if prediction_category != "hour":
         future["ds"] = future["ds"].dt.date
 
-    future = add_opening_hours(future, "Bergen", 12,17)
+    future = add_opening_hours(future, "Bergen", [12],[17])
     future = warm_dry_weather_spring_fss(future)
     #future = heavy_rain_fall_weekday_future(future)
     #future = heavy_rain_fall_weekend_future(future)
