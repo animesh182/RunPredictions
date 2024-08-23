@@ -67,8 +67,8 @@ data = [
     {"Restaurant": "Oslo Steen_Strom", "City": "Oslo", "Company": "Los Tacos"},
     {"Restaurant": "Oslo Smestad", "City": "Oslo", "Company": "Los Tacos"},
     {"Restaurant": "Sandnes", "City": "Stavanger", "Company": "Los Tacos"},
-    # {"Restaurant": "Alexander Kielland", "City": "Oslo", "Company": "Los Tacos"},
-    # {"Restaurant": "Bjørvika", "City": "Oslo", "Company": "Los Tacos"},
+    {"Restaurant": "Alexander Kielland", "City": "Oslo", "Company": "Los Tacos"},
+    {"Restaurant": "Bjørvika", "City": "Oslo", "Company": "Los Tacos"},
     {
         "Restaurant": "Restaurant",
         "City": "Stavanger",

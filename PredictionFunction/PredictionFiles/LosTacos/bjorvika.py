@@ -154,12 +154,9 @@ def bjorvika_function(
         "Oslo Konserthus",
         "Nordic Black Theatre",
         "Oslo Concert Hall",
-        "Salt Langhuset",
         "Tons of Rock",
         "Parkteatret Scene",
         "Oslo Opera House",
-
-
     }
 
     data = {"name": [], "effect": []}
@@ -193,11 +190,10 @@ def bjorvika_function(
     # holidays.to_csv('holidays.csv')
     m = Prophet(
         holidays=holidays,
-        # yearly_seasonality=a,
-        # weekly_seasonality=False,
+        # yearly_seasonality=True,
+        weekly_seasonality=True,
         # daily_seasonality=False,
         changepoint_prior_scale=0.05,
-        n_changepoints=15
         # holidays_prior_scale=1,
     )
 
@@ -216,8 +212,8 @@ def bjorvika_function(
     m.add_regressor("high_weekend_spring")
     
 
-    m.add_seasonality(name="monthly", period=30.5, fourier_order=10)
-    m.add_seasonality(name="weekly", period=7, fourier_order=3)
+    # m.add_seasonality(name="monthly", period=30.5, fourier_order=10)
+    # m.add_seasonality(name="weekly", period=7, fourier_order=3)
 
     m.add_seasonality(
         name="is_fellesferie",
