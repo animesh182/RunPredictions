@@ -50,6 +50,8 @@ async def main(mytimer: func.TimerRequest) -> None:
         start_date = date(2023, 4, 18)
     elif restaurant == "Alexander Kielland":
         start_date = date(2024, 4, 10)
+    elif restaurant == "Åsane Storsenter":
+        start_date = date(2022, 5, 1)
     elif restaurant == "Bjørvika":
         start_date = date(2024, 4, 19)
         end_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
@@ -73,7 +75,8 @@ async def main(mytimer: func.TimerRequest) -> None:
                 end_date= latest_date.strftime("%Y-%m-%d")
     conn.close()
     # end_date = date(2024,4,27)
-    logging.info(end_date)
+    logging.info(f'startDate : {start_date}')
+    logging.info(f'endDate : {end_date}')
     restaurant_func = location_specific_dictionary[restaurant]
     logging.info(f"Running predictions for now {restaurant}")
     if prediction_category == "hour":

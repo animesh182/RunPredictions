@@ -215,7 +215,7 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
             holidays=holidays,
             yearly_seasonality=True,
             daily_seasonality=False,
-            changepoint_prior_scale=1,
+            changepoint_prior_scale=10,
             holidays_mode='additive'
         )
 
