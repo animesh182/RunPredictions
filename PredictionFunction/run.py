@@ -34,16 +34,13 @@ from PredictionFunction.utils.params import prod_params
 
 async def main(mytimer: func.TimerRequest) -> None:
     utc_timestamp = datetime.utcnow().replace(tzinfo=timezone.utc).isoformat()
-    start_date = "2021-09-01"
+    # start_date = "2021-09-01"
     prediction_category = "day"
 
     data = fetch_or_initialize_json()
     company, restaurant = select_minimum_restaurant(data)
     # city = instance["City"]
 
-    if company == "Fisketorget":
-        start_date = date(2021, 9, 1)
-        end_date = (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")
     if restaurant == "Oslo Torggata":
         start_date = date(2022, 5, 10)
     elif restaurant == "Sandnes":
@@ -55,12 +52,18 @@ async def main(mytimer: func.TimerRequest) -> None:
     elif restaurant == "Bjørvika":
         start_date = date(2024, 4, 19)
         end_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+    elif restaurant == "Oslo Smestad":
+        start_date = date(2022, 10, 1)
     # elif restaurant == "Restaurantdrift AS":
     #     start_date = date(2023, 9, 1)
     #     end_date = date(2024,7,7)
     else:
         start_date = date(2021, 9, 1)
-    # end_date = (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")
+
+    if company == "Fisketorget":
+        start_date = date(2021, 9, 1)
+        end_date = (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")
+
     with psycopg2.connect(**prod_params) as conn:
         with conn.cursor() as cursor:
             end_date_query = '''

@@ -208,19 +208,19 @@ def fisketorget_utsalg(
     ### Holidays and other repeating outliers
     m.add_country_holidays(country_name="NO")
 
-    ONS = pd.DataFrame(
-        {
-            "holiday": "ONS",
-            "ds": pd.to_datetime(["2022-08-31",
-                                  "2024-08-26",
-                                  "2024-08-27",
-                                  "2024-08-28",
-                                  "2024-08-29",
-                                  ]),
-            "lower_window": 0,
-            "upper_window": 0,
-        }
-    )
+    # ONS = pd.DataFrame(
+    #     {
+    #         "holiday": "ONS",
+    #         "ds": pd.to_datetime(["2022-08-31",
+    #                               "2024-08-26",
+    #                               "2024-08-27",
+    #                               "2024-08-28",
+    #                               "2024-08-29",
+    #                               ]),
+    #         "lower_window": 0,
+    #         "upper_window": 0,
+    #     }
+    # )
 
     holidays = pd.concat(
         (
@@ -234,7 +234,7 @@ def fisketorget_utsalg(
             pinse,
             fjoge,
             himmelfart,
-            ONS,
+            # ONS,
             outliers,
             closed_days,
             # cruise_ship_arrivals_holiday,

@@ -171,7 +171,7 @@ def oslo_smestad(
     m = Prophet()
 
     ### Holidays and other repeating outliers
-    m.add_country_holidays(country_name="NO")
+    # m.add_country_holidays(country_name="NO")
 
     holidays = pd.concat(
         (
@@ -317,11 +317,12 @@ def oslo_smestad(
             holidays=holidays,
             yearly_seasonality=5,
             daily_seasonality=False,
-            changepoint_range=0.7,
-            changepoint_prior_scale=1,
+            changepoint_range=0.8,
+            changepoint_prior_scale=0.05,
             # seasonality_prior_scale=1,
             # holidays_prior_scale=1,
             seasonality_mode="additive",
+            uncertainty_samples=0
         )
 
     m.add_regressor("custom_regressor")
