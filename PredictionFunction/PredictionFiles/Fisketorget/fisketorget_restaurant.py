@@ -209,19 +209,19 @@ def fisketorget_restaurant(
     ### Holidays and other repeating outliers
     m.add_country_holidays(country_name="NO")
 
-    ONS = pd.DataFrame(
-        {
-            "holiday": "ONS",
-            "ds": pd.to_datetime(["2022-08-31"]),
-            "lower_window": 0,
-            "upper_window": 0,
-        }
-    )
-
     june_july = pd.DataFrame(
         {
             "holiday": "june_july",
-            "ds": pd.to_datetime(["2022-07-02", "2023-07-01"]),
+            "ds": pd.to_datetime(["2024-08-20","2024-08-22", 
+                                  "2024-08-23","2024-08-15",
+                                  "2024-08-09","2024-08-10",
+                                  "2024-08-07","2024-08-03",
+                                  "2024-07-30","2024-07-17",
+                                  "2024-07-11","2024-07-12",
+                                  "2024-07-13","2024-07-02",
+                                  "2024-07-04","2024-07-05",
+                                  "2024-07-06","2024-06-04",
+                                  "2024-06-05","2024-06-06"]),
             "lower_window": -3,
             "upper_window": 0,
         }
@@ -241,7 +241,6 @@ def fisketorget_restaurant(
             fjoge,
             stor_konsert_ukedag,
             himmelfart,
-            ONS,
             outliers,
             closed_days,
             cruise_ship_arrivals_holiday,
@@ -425,7 +424,7 @@ def fisketorget_restaurant(
             daily_seasonality=False,
             # n_changepoints=12,
             # changepoint_range=0.95,
-            changepoint_prior_scale=0.1,
+            changepoint_prior_scale=0.2,
             # seasonality_prior_scale=2,
             # holidays_prior_scale=5,
             # seasonality_mode="additive",

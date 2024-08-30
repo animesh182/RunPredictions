@@ -61,7 +61,7 @@ async def main(mytimer: func.TimerRequest) -> None:
         start_date = date(2021, 9, 1)
 
     if company == "Fisketorget":
-        start_date = date(2021, 9, 1)
+        start_date = date(2023, 4, 1)
         end_date = (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")
 
     with psycopg2.connect(**prod_params) as conn:
