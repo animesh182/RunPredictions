@@ -80,8 +80,6 @@ async def main(mytimer: func.TimerRequest) -> None:
     # end_date = date(2024,4,27)
     logging.info(f'startDate : {start_date}')
     logging.info(f'endDate : {end_date}')
-    if restaurant == "Åsane Storsenter":
-        end_date = date(2024, 8, 7)
     restaurant_func = location_specific_dictionary[restaurant]
     logging.info(f"Running predictions for now {restaurant}")
     if prediction_category == "hour":
