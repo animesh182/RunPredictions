@@ -104,6 +104,15 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
     df = heavy_rain_winter_weekend(df)
     df = heavy_rain_spring_weekend(df)
     df = non_heavy_rain_fall_weekend(df)
+    
+    temp_closed = pd.DataFrame(
+        {
+            "holiday": "temp_cloed",
+            "ds": pd.to_datetime(["2024-08-18"]),
+            "lower_window": -10,
+            "upper_window": 0,
+        }
+    )
 
     holidays = pd.concat(
         (   
@@ -127,7 +136,8 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
             first_day_of_school,
             last_day_of_school,
             bergen_pride,
-            black_friday
+            black_friday,
+            temp_closed
         )
     )
 
@@ -220,12 +230,12 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
         )
 
     m.add_regressor("opening_duration")
-    m.add_regressor("students_early_semester")
+    # m.add_regressor("students_early_semester")
     m.add_regressor("warm_and_dry")
     m.add_regressor("heavy_rain_winter_weekend")
     m.add_regressor("heavy_rain_spring_weekend")
     m.add_regressor("non_heavy_rain_fall_weekend")
-    m.add_regressor("sunshine_amount",standardize='False')
+    # m.add_regressor("sunshine_amount",standardize='False')
     m.add_regressor("rain_sum")
     # m.add_regressor("high_weekend_spring")
 

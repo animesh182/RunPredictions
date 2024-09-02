@@ -41,7 +41,6 @@ from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holiday
     maijazz_lørdag,
     military_excercise,
     outliers,
-    closed_days,
     cruise_ship_arrivals_holiday,
     pay_day,
     utopia_friday,
@@ -96,6 +95,7 @@ from PredictionFunction.Datasets.Regressors.event_weather_regressors import (
     is_event_with_good_weather,
     is_event_with_normal_weather
 )
+from PredictionFunction.utils.utils import get_closed_days
 
 
 def fisketorget_restaurant(
@@ -216,16 +216,27 @@ def fisketorget_restaurant(
                                   "2024-08-23","2024-08-15",
                                   "2024-08-09","2024-08-10",
                                   "2024-08-07","2024-08-03",
-                                  "2024-07-30","2024-07-17",
+                                  "2024-07-30","2024-07-31","2024-07-17",
                                   "2024-07-11","2024-07-12",
                                   "2024-07-13","2024-07-02",
                                   "2024-07-04","2024-07-05",
                                   "2024-07-06","2024-06-04",
                                   "2024-06-05","2024-06-06"]),
-            "lower_window": -3,
+            "lower_window": 0,
             "upper_window": 0,
         }
     )
+
+    closed_dates_ds = df.query('y == 0')['ds'].dt.strftime('%Y-%m-%d').tolist()
+    closed_days = pd.DataFrame(
+        {
+            "holiday": "closed_day",
+            "ds": pd.to_datetime(closed_dates_ds),
+            "lower_window": 0,
+            "upper_window": 0,
+        }
+    )
+
 
     holidays = pd.concat(
         (
@@ -428,6 +439,7 @@ def fisketorget_restaurant(
             # seasonality_prior_scale=2,
             # holidays_prior_scale=5,
             # seasonality_mode="additive",
+            # uncertainty_samples=0
         )
 
     m.add_regressor("custom_regressor")

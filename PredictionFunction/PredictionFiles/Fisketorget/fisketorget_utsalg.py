@@ -39,7 +39,6 @@ from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holiday
     maijazz_lørdag,
     military_excercise,
     outliers,
-    closed_days,
     cruise_ship_arrivals_holiday,
     pay_day,
     utopia_friday,

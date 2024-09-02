@@ -5,7 +5,7 @@ import logging
 
 # Retrieve the connection string and container name from environment variables
 storage_account_link = os.environ.get("SecondaryStorage", None)
-storage_account_location = os.environ.get("storage_name", None)
+storage_account_location = os.environ.get("store_name", None)
 import random
 
 # Initial JSON data
@@ -26,7 +26,7 @@ initial_json = {
         "Alexander Kielland": 0,
         "Bjørvika": 0
     },
-    "Fisketorget": {"Restaurant": 0, "Fisketorget Utsalg": 0},
+    "Fisketorget": {"Restaurant": -1, "Fisketorget Utsalg": 0},
     "Burgerheim": {"Åsane Storsenter": 0},
     # "The Broker": {"Restaurantdrift AS":-1}
 }

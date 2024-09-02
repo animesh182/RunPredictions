@@ -6,13 +6,13 @@ prod_params = {
     "host": "sales-prediction-svr-v2.postgres.database.azure.com",
     "port": "5432",
 }
-params = {
-    "dbname": "salesdb1",
-    "user": "salespredictionsql",
-    "password": "Shajir86@ms9",
-    "host": "sales-prediction-svr-v2.postgres.database.azure.com",
-    "port": "5432",
-}
+# params = {
+#     "dbname": "salesdb1",
+#     "user": "salespredictionsql",
+#     "password": "Shajir86@ms9",
+#     "host": "sales-prediction-svr-v2.postgres.database.azure.com",
+#     "port": "5432",
+# }
 
 # # staging
 # params = {
@@ -24,13 +24,13 @@ params = {
 # }
 
 # # local
-# params = {
-#     'dbname': 'salesdb',
-#     'user': 'postgres',
-#     'password': '',
-#     'host': 'localhost',
-#     'port': '5432'
-# }
+params = {
+    'dbname': 'salesdb',
+    'user': 'postgres',
+    'password': '',
+    'host': 'localhost',
+    'port': '5432'
+}
 # prod_params = {
 #     'dbname': 'salesdb',
 #     'user': 'postgres',

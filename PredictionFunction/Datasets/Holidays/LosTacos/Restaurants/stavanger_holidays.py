@@ -140,25 +140,25 @@ outliers = pd.DataFrame(
             "upper_window": 0,
         }
     )
-closed_days = pd.DataFrame(
-        {
-            "holiday": "closed_days",
-            "ds": pd.to_datetime(
-                ["2021-12-23", "2021-12-24", "2021-12-25", "2021-12-26",
-                 "2023-12-24",
-                    "2023-12-25",
-                    "2023-12-31",
-                    "2024-12-24",
-                    "2024-12-25",
-                    "2024-12-31",
-                    "2025-12-24",
-                    "2025-12-25",
-                    "2025-12-31",]
-            ),
-            "lower_window": 0,
-            "upper_window": 0,
-        }
-    )
+# closed_days = pd.DataFrame(
+#         {
+#             "holiday": "closed_days",
+#             "ds": pd.to_datetime(
+#                 ["2021-12-23", "2021-12-24", "2021-12-25", "2021-12-26",
+#                  "2023-12-24",
+#                     "2023-12-25",
+#                     "2023-12-31",
+#                     "2024-12-24",
+#                     "2024-12-25",
+#                     "2024-12-31",
+#                     "2025-12-24",
+#                     "2025-12-25",
+#                     "2025-12-31",]
+#             ),
+#             "lower_window": 0,
+#             "upper_window": 0,
+#         }
+#     )
 cruise_ship_arrivals_holiday = pd.DataFrame(
         {
             "holiday": "cruise_ship_arrivals",

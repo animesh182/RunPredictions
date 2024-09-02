@@ -33,7 +33,6 @@ from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holiday
     fjoge,
     military_excercise,
     outliers,
-    closed_days,
     skeiva_natta,
 )
 

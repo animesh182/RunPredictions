@@ -28,7 +28,6 @@ from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.stavanger_holiday
     fjoge,
     military_excercise,
     outliers,
-    closed_days,
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
