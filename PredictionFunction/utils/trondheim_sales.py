@@ -134,7 +134,7 @@ def sales_without_effect(
     for day in range(7):
         for month in range(1, 13):
             key = (day, month)
-            if month in [2, 3, 4, 5,6]:
+            if month in [2, 3, 4, 5,6,7,8]:
                 if day == 5:  # If the day is Saturday
                     scales[key] = 1
                 else:

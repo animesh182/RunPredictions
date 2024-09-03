@@ -212,7 +212,7 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
             # fjoge,
             himmelfart,
             outliers,
-            closed_days,
+            # closed_days,
             military_excercise,
             hostferie_sor_ostlandet_weekdend,
             vinterferie_vestlandet_weekend_before,

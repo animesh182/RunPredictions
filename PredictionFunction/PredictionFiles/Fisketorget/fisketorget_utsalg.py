@@ -192,7 +192,7 @@ def fisketorget_utsalg(
 
     # df = warm_dry_weather_spring(df)
     # df = heavy_rain_fall_weekday(df)
-    df = warm_dry_weather_spring_tfs(df)
+    # df = warm_dry_weather_spring_tfs(df)
     df = july_august_weekend_utsalg(df)
     df = heavy_rain_fall_weekend(df)
     df = heavy_rain_winter_weekday(df)
@@ -439,7 +439,8 @@ def fisketorget_utsalg(
     m.add_regressor("sunshine_amount", standardize=False)
     m.add_regressor("rain_sum")
     # m.add_regressor("warm_and_dry")
-    # m.add_regressor("weekend_august")
+    m.add_regressor("is_weekend")
+    
     # m.add_regressor("heavy_rain_fall_weekday")
     m.add_regressor("heavy_rain_fall_weekend")
     # m.add_regressor("heavy_rain_winter_weekday")

@@ -152,7 +152,7 @@ def save_to_db(
             #         parent_restaurant=None,
             #         effect = 0
             #     )
-        # filtered_df = filtered_df[filtered_df["ds"] >= end_date]
+        filtered_df = filtered_df[filtered_df["ds"] >= end_date]
         concert_dictionary = {}
         valid_concerts = []
         all_venues = venues_list

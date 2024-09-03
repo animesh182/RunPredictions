@@ -22,11 +22,11 @@ initial_json = {
         "Oslo Steen_Strom": 0,
         "Oslo Smestad": 0,
         "Sandnes": 0,
-        "Trondheim": 0,
+        "Trondheim": -1,
         "Alexander Kielland": 0,
         "Bjørvika": 0
     },
-    "Fisketorget": {"Restaurant": -1, "Fisketorget Utsalg": 0},
+    "Fisketorget": {"Restaurant": 0, "Fisketorget Utsalg": 0},
     "Burgerheim": {"Åsane Storsenter": 0},
     # "The Broker": {"Restaurantdrift AS":-1}
 }

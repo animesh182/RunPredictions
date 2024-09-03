@@ -179,6 +179,16 @@ def oslo_steenstrom(
 
     ### Holidays and other repeating outliers
     m.add_country_holidays(country_name="NO")
+    closed_dates_list = df.query('y == 0')['ds'].dt.strftime('%Y-%m-%d').tolist()
+
+    closed_dates = pd.DataFrame(
+    {
+        "holiday": "Restaurant Closed",
+        "ds": pd.to_datetime(closed_dates_list),
+        "lower_window": 0,
+        "upper_window": 0,
+    }
+) 
 
     holidays = pd.concat(
         (
@@ -190,14 +200,15 @@ def oslo_steenstrom(
             pinse,
             himmelfart,
             lockdown,
-            closed_days,
+            # closed_days,
             oslo_pride,
             black_friday,
             hostferie_sor_ostlandet_weekdend,
             first_weekend_christmas_school_vacation,
             musikkfestival,
             new_years_day,
-            new_year_romjul
+            new_year_romjul,
+            closed_dates
         )
     )
 
@@ -258,6 +269,9 @@ def oslo_steenstrom(
     df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
     df = add_opening_hours(df, "Oslo Steen_Strom", [9], [8])
+    df["closed"] = df["ds"].apply(
+        lambda x: 1 if x in closed_dates or x.dayofweek == 6 else 0
+    )
     # df['not_christmas_shopping'] = ~df['ds'].apply(is_christmas_shopping)
 
     oslo_steen_strom_venues = {
@@ -299,22 +313,6 @@ def oslo_steenstrom(
         else:
             holidays = pd.concat(objs=[holidays, venue_df], ignore_index=True)
     event_holidays= pd.concat(objs=[event_holidays, holidays], ignore_index=True)
-    # closed days
-    closed_dates = pd.to_datetime(
-        [
-            "2021-12-23",
-            "2021-12-24",
-            "2021-12-25",
-            "2022-12-31",
-            "2023-05-17",
-            "2023-05-18",
-        ]
-    )
-    # closed every sunday
-    df["closed"] = df["ds"].apply(
-        lambda x: 1 if x in closed_dates or x.dayofweek == 6 else 0
-    )
-
     # Add the custom regressor and seasonalities before fitting the model
     # create daily seasonality column setting a number for each day of the week, to be used later
     # Create a Boolean column for each weekday

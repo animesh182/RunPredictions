@@ -225,7 +225,7 @@ def oslo_city(
             december_2022,
             december_2023,
             sunday_2023,
-            jan_closed,
+            # jan_closed,
             unusual_low_sale,
             oslo_pride,
             musikkfestival,

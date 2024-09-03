@@ -74,7 +74,7 @@ async def main(mytimer: func.TimerRequest) -> None:
             cursor.execute(end_date_query,(restaurant,))
             latest_gastronomic_day = cursor.fetchone()[0]
             if latest_gastronomic_day:
-                latest_date = latest_gastronomic_day - timedelta(days=1)
+                latest_date = latest_gastronomic_day
                 end_date= latest_date.strftime("%Y-%m-%d")
     conn.close()
     # end_date = date(2024,4,27)
