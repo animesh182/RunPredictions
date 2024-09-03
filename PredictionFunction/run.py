@@ -60,10 +60,6 @@ async def main(mytimer: func.TimerRequest) -> None:
     else:
         start_date = date(2021, 9, 1)
 
-    if company == "Fisketorget":
-        start_date = date(2021, 9, 1)
-        end_date = (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")
-
     with psycopg2.connect(**prod_params) as conn:
         with conn.cursor() as cursor:
             end_date_query = '''
@@ -74,7 +70,7 @@ async def main(mytimer: func.TimerRequest) -> None:
             cursor.execute(end_date_query,(restaurant,))
             latest_gastronomic_day = cursor.fetchone()[0]
             if latest_gastronomic_day:
-                latest_date = latest_gastronomic_day - timedelta(days=1)
+                latest_date = latest_gastronomic_day
                 end_date= latest_date.strftime("%Y-%m-%d")
     conn.close()
     # end_date = date(2024,4,27)
