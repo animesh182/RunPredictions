@@ -100,10 +100,10 @@ def sales_without_effect(
 
 
     reference_alcohol_sales.loc[reference_alcohol_sales['gastronomic_day'].dt.dayofweek == 5, 'total_net'] *= 0.6
-    reference_alcohol_sales.loc[reference_alcohol_sales['gastronomic_day'].dt.dayofweek == 4, 'total_net'] *=0.45
+    reference_alcohol_sales.loc[reference_alcohol_sales['gastronomic_day'].dt.dayofweek == 4, 'total_net'] *=0.6
 
     reference_food_sales.loc[reference_food_sales['gastronomic_day'].dt.dayofweek == 5, 'total_net'] *= 0.6
-    reference_food_sales.loc[reference_food_sales['gastronomic_day'].dt.dayofweek == 4, 'total_net'] *= 0.45
+    reference_food_sales.loc[reference_food_sales['gastronomic_day'].dt.dayofweek == 4, 'total_net'] *= 0.6
 
 
 
@@ -134,7 +134,7 @@ def sales_without_effect(
     for day in range(7):
         for month in range(1, 13):
             key = (day, month)
-            if month in [2, 3, 4, 5,6]:
+            if month in [2, 3, 4, 5,6,7,8]:
                 if day == 5:  # If the day is Saturday
                     scales[key] = 1
                 else:
