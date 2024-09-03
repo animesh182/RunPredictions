@@ -207,19 +207,15 @@ def fisketorget_utsalg(
     ### Holidays and other repeating outliers
     m.add_country_holidays(country_name="NO")
 
-    # ONS = pd.DataFrame(
-    #     {
-    #         "holiday": "ONS",
-    #         "ds": pd.to_datetime(["2022-08-31",
-    #                               "2024-08-26",
-    #                               "2024-08-27",
-    #                               "2024-08-28",
-    #                               "2024-08-29",
-    #                               ]),
-    #         "lower_window": 0,
-    #         "upper_window": 0,
-    #     }
-    # )
+    closed_dates_ds = df.query('y == 0')['ds'].dt.strftime('%Y-%m-%d').tolist()
+    closed_dates = pd.DataFrame(
+        {
+            "holiday": "closed_day",
+            "ds": pd.to_datetime(closed_dates_ds),
+            "lower_window": 0,
+            "upper_window": 0,
+        }
+    )
 
     holidays = pd.concat(
         (
@@ -235,7 +231,7 @@ def fisketorget_utsalg(
             himmelfart,
             # ONS,
             outliers,
-            closed_days,
+            closed_dates,
             # cruise_ship_arrivals_holiday,
             skeiva_natta,
             military_excercise,
@@ -272,7 +268,9 @@ def fisketorget_utsalg(
     df["ds"] = pd.to_datetime(df["ds"])
     # Calculate the week number for each date
     df["week_number"] = df["ds"].dt.isocalendar().week
-
+    df["closed"] = df["ds"].apply(
+        lambda x: 1 if x in closed_dates or x.dayofweek == 6 else 0
+    )
     # Convert 'ds' column to datetime if it is not already
     df["ds"] = pd.to_datetime(df["ds"])
 
@@ -514,6 +512,9 @@ def fisketorget_utsalg(
     future["cluster_label"] = future["ds"].apply(get_cluster_label)
 
     future["sunshine_amount"] = merged_data["sunshine_amount"]
+    future["closed"] = future["ds"].apply(
+        lambda x: 1 if x in closed_dates or x.dayofweek == 6 else 0
+    )
 
     # add the last working day and the +/- 5 days
     # future = calculate_days(future, last_working_day)

@@ -29,7 +29,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.Restaurants.oslo_city_holiday
     # pinse,
     day_before_red_day,
     # himmelfart,
-    closed_days,
+    # closed_days,
     norway_cup,
     black_friday,
     december_open_2020_2021,
@@ -190,16 +190,20 @@ def oslo_city(
 
     ### Holidays and other repeating outliers
     m.add_country_holidays(country_name="NO")
-    # closed_dates = get_closed_days("Oslo City")
-    # closed_days_oslo = pd.DataFrame(
-    #     {
-    #         "holiday": "closed_days",
-    #         "ds": closed_dates,
-    #         "lower_window": 0,
-    #         "upper_window": 0,
-    #         "prior_scale": 0.05
-    #     }
-    # )  
+
+
+    #declaring days where historical sales == 0 as closed days in holidays
+    closed_dates_list = df.query('y == 0')['ds'].dt.strftime('%Y-%m-%d').tolist()
+
+    closed_dates = pd.DataFrame(
+    {
+        "holiday": "Restaurant Closed",
+        "ds": pd.to_datetime(closed_dates_list),
+        "lower_window": 0,
+        "upper_window": 0,
+    }
+) 
+
     holidays = pd.concat(
         (
             christmas_day,
@@ -210,8 +214,8 @@ def oslo_city(
             pinse,
             day_before_red_day,
             himmelfart,
-            closed_days,
-            # closed_days_oslo,
+            # closed_days,
+            closed_dates,
             lockdown,
             black_friday,
             norway_cup,
@@ -307,18 +311,6 @@ def oslo_city(
     df["christmas_shopping"] = df["ds"].apply(is_christmas_shopping)
     df["specific_month"] = df["ds"].apply(is_specific_month)
     df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
-
-        # closed days
-    closed_dates = pd.to_datetime(
-        [
-            "2021-12-23",
-            "2021-12-24",
-            "2021-12-25",
-            "2022-12-31",
-            "2023-05-17",
-            "2023-05-18",
-        ]
-    )
 
     df["closed"] = df["ds"].apply(
         lambda x: 1 if x in closed_dates or x.dayofweek == 6 else 0

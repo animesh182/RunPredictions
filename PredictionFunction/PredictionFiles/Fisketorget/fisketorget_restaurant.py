@@ -228,7 +228,7 @@ def fisketorget_restaurant(
     )
 
     closed_dates_ds = df.query('y == 0')['ds'].dt.strftime('%Y-%m-%d').tolist()
-    closed_days = pd.DataFrame(
+    closed_dates = pd.DataFrame(
         {
             "holiday": "closed_day",
             "ds": pd.to_datetime(closed_dates_ds),
@@ -253,7 +253,7 @@ def fisketorget_restaurant(
             stor_konsert_ukedag,
             himmelfart,
             outliers,
-            closed_days,
+            closed_dates,
             cruise_ship_arrivals_holiday,
             maijazz_lørdag,
             utopia_friday,
@@ -269,7 +269,7 @@ def fisketorget_restaurant(
             fiskesprell,
             stavanger_vinfest,
             gladmat,
-            april_closed
+            # april_closed
         )
     )
 
@@ -283,6 +283,9 @@ def fisketorget_restaurant(
     df["high_weekend_spring"] = df["ds"].apply(is_high_weekend_spring)
     df["outdoor_seating"] =df['ds'].apply(is_outdoor_seating)
     df["is_may"] = df["ds"].apply(is_may)
+    df["closed"] = df["ds"].apply(
+        lambda x: 1 if x in closed_dates or x.dayofweek == 6 else 0
+    )
 
     # Define a function to check if the date is within the period of heavy COVID restrictions
 
@@ -489,6 +492,7 @@ def fisketorget_restaurant(
     # m.add_regressor("heavy_rain_spring_weekend")
     m.add_regressor("non_heavy_rain_fall_weekend")
     m.add_regressor("opening_duration")
+    m.add_regressor("closed")
 
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:
@@ -562,6 +566,9 @@ def fisketorget_restaurant(
     future["week_start"] = future["ds"].apply(is_monday_Fisk_restaurant)
     future["outdoor_seating"] = future["ds"].apply(is_outdoor_seating)
     future["high_weekend_spring"] = future["ds"].apply(is_high_weekend_spring)
+    future["closed"] = future["ds"].apply(
+        lambda x: 1 if x in closed_dates or x.dayofweek == 6 else 0
+    )
 
     # Add 'is_may' column to future DataFrame
     future["is_may"] = future["ds"].apply(is_may)
