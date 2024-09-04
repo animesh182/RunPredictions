@@ -315,10 +315,10 @@ def oslo_smestad(
     else:
         m = Prophet(
             holidays=holidays,
-            yearly_seasonality=5,
+            yearly_seasonality=True,
             daily_seasonality=False,
-            changepoint_range=0.8,
-            changepoint_prior_scale=0.05,
+            # changepoint_range=0.8,
+            changepoint_prior_scale=1,
             # seasonality_prior_scale=1,
             # holidays_prior_scale=1,
             seasonality_mode="additive",
