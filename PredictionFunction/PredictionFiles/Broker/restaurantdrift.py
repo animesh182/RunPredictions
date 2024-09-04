@@ -107,6 +107,37 @@ def restaurantdrift_function(
     df = add_opening_hours(df, "Restaurantdrift AS", [12], [13,15,14,7])
     m = Prophet()
 
+    low_sales = pd.DataFrame(
+        {
+            "holiday": "low_sales",
+            "ds": pd.to_datetime(
+                ["2024-07-13","2024-07-20"]
+            ),
+            "lower_window": -4,
+            "upper_window": 0,
+        }
+    )
+    july_5_6 = pd.DataFrame(
+        {
+            "holiday": "weekend july",
+            "ds": pd.to_datetime(
+                ["2024-07-06"]
+            ),
+            "lower_window": -1,
+            "upper_window": 0,
+        }
+    )
+    unusual_low_sale = pd.DataFrame(
+        {
+            "holiday": "low_sale",
+            "ds": pd.to_datetime(
+                ["2024-07-21","2024-06-30"]
+            ),
+            "lower_window": 0,
+            "upper_window": 0,
+        }
+    )
+
     ### Holidays and other repeating outliers
     m.add_country_holidays(country_name="NO")
     holidays = pd.concat(
@@ -125,6 +156,9 @@ def restaurantdrift_function(
             musikkfestival,
             christmas_day,
             new_year_romjul,
+            low_sales,
+            july_5_6,
+            unusual_low_sale
         )
     )
     df["ds"] = pd.to_datetime(df["ds"])
@@ -164,9 +198,9 @@ def restaurantdrift_function(
             dataframe_name = venue.lower().replace(" ", "_").replace(",", "")
             venue_df[dataframe_name] = 1
             df = pd.merge(df, venue_df, how="left", on="ds", suffixes=("", "_venue"))
-            df = is_event_with_good_weather(df,dataframe_name)
-            df = is_event_with_bad_weather(df,dataframe_name)
-            df = is_event_with_normal_weather(df,dataframe_name)
+            # df = is_event_with_good_weather(df,dataframe_name)
+            # df = is_event_with_bad_weather(df,dataframe_name)
+            # df = is_event_with_normal_weather(df,dataframe_name)
             df[dataframe_name].fillna(0, inplace=True)
             regressors_to_add.append(
                 (venue_df, dataframe_name)
@@ -188,9 +222,9 @@ def restaurantdrift_function(
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:
             m.add_regressor(regressor_name)
-            m.add_regressor(regressor_name + '_good_weather')
-            m.add_regressor(regressor_name + '_bad_weather')
-            m.add_regressor(regressor_name + '_normal_weather')
+            # m.add_regressor(regressor_name + '_good_weather')
+            # m.add_regressor(regressor_name + '_bad_weather')
+            # m.add_regressor(regressor_name + '_normal_weather')
 
     # Weather regressors
     # m.add_regressor("sunshine_amount",standardize=False)
@@ -198,7 +232,7 @@ def restaurantdrift_function(
     m.add_regressor('heavy_rain_fall_weekend')
     m.add_regressor('warm_and_dry')
     # m.add_regressor('sunday_low_sales')
-    # m.add_regressor("opening_duration")
+    m.add_regressor("opening_duration")
     # m.add_regressor("fall_start")
 
     # m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
@@ -236,9 +270,9 @@ def restaurantdrift_function(
                 on="ds",
             )
             future[event_column].fillna(0, inplace=True)
-            future = is_event_with_good_weather(future,event_column)
-            future = is_event_with_bad_weather(future,event_column)
-            future = is_event_with_normal_weather(future,event_column)
+            # future = is_event_with_good_weather(future,event_column)
+            # future = is_event_with_bad_weather(future,event_column)
+            # future = is_event_with_normal_weather(future,event_column)
 
     # Apply the future functions for weather regressions here
     # future = heavy_rain_spring_weekend_future(future)
