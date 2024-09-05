@@ -96,12 +96,12 @@ data = [
         "Company": "Burgerheim",
         "Parent Restaurant": "",
     },
-    # {
-    #     "Restaurant": "Restaurantdrift AS",
-    #     "City": "Oslo",
-    #     "Company": "The Broker",
-    #     "Parent Restaurant": "",
-    # },
+    {
+        "Restaurant": "Restaurantdrift AS",
+        "City": "Oslo",
+        "Company": "The Broker",
+        "Parent Restaurant": "",
+    },
 ]
 location_specific_dictionary = {
     "Stavanger": stavanger_function,

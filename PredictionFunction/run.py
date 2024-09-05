@@ -54,9 +54,6 @@ async def main(mytimer: func.TimerRequest) -> None:
         end_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
     elif restaurant == "Oslo Smestad":
         start_date = date(2022, 10, 1)
-    # elif restaurant == "Restaurantdrift AS":
-    #     start_date = date(2023, 9, 1)
-    #     end_date = date(2024,7,7)
     else:
         start_date = date(2021, 9, 1)
 
@@ -73,6 +70,9 @@ async def main(mytimer: func.TimerRequest) -> None:
                 latest_date = latest_gastronomic_day
                 end_date= latest_date.strftime("%Y-%m-%d")
     conn.close()
+
+    if restaurant == "Restaurantdrift AS":
+        start_date = date(2023, 9, 1)
     # end_date = date(2024,4,27)
     logging.info(f'startDate : {start_date}')
     logging.info(f'endDate : {end_date}')
