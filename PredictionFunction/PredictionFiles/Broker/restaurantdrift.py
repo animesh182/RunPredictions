@@ -111,7 +111,7 @@ def restaurantdrift_function(
         {
             "holiday": "low_sales",
             "ds": pd.to_datetime(
-                ["2024-07-13","2024-07-20"]
+                ["2024-07-13","2024-07-20","2024-07-27","2024-08-03","2024-08-10","2024-08-17"]
             ),
             "lower_window": -4,
             "upper_window": 0,
