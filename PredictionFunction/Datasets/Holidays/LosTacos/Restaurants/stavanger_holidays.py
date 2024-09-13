@@ -142,7 +142,7 @@ outliers = pd.DataFrame(
     )
 closed_days = pd.DataFrame(
         {
-            "holiday": "closed_days",
+            "holiday": "closed_days_holidays",
             "ds": pd.to_datetime(
                 ["2021-12-23", "2021-12-24", "2021-12-25", "2021-12-26",
                  "2023-12-24",

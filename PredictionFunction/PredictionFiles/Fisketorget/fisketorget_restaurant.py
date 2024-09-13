@@ -11,6 +11,7 @@ from PredictionFunction.utils.utils import (
     calculate_days_30,
     calculate_days_15,
     custom_regressor,
+    get_closed_days,
 )
 from PredictionFunction.Datasets.OpeningHours.lostacos_opening_hours import (
     restaurant_opening_hours,
@@ -120,7 +121,7 @@ def fisketorget_restaurant(
                     "total_net": "sum",
                     "sunshine_amount": "sum",
                     "rain_sum": "sum",
-                    "windspeed": "mean",
+                    "windspeed": "max",
                     "air_temperature": "mean",
                 }
             )
@@ -202,6 +203,7 @@ def fisketorget_restaurant(
     # df = heavy_rain_spring_weekday(df)
     # df = heavy_rain_spring_weekend(df)
     df = non_heavy_rain_fall_weekend(df)
+    df = is_outdoor_seating(df)
     df = add_opening_hours(df, "Restaurant", [13], [13])
 
     m = Prophet()
@@ -226,6 +228,32 @@ def fisketorget_restaurant(
             "upper_window": 0,
         }
     )
+
+    # outdoor_seating = pd.DataFrame(
+    #     {
+    #         "holiday": "outdoor_seating",
+    #         "ds": pd.to_datetime(['2024-05-01', '2024-05-02', '2024-05-03', '2024-05-04',
+    #                               '2024-05-06', '2024-05-07','2024-05-08', '2024-05-10', '2024-05-11', 
+    #                               '2024-05-13', '2024-05-14', '2024-05-15', '2024-05-16', '2024-05-17', '2024-05-18', 
+    #                               '2024-05-21', '2024-05-22', '2024-05-23', '2024-05-24', '2024-05-25', '2024-05-27', 
+    #                               '2024-05-28', '2024-05-29', '2024-05-30', '2024-05-31', '2024-06-01', '2024-06-03', 
+    #                               '2024-06-04', '2024-06-05', '2024-06-07', '2024-06-08', '2024-06-11', '2024-06-12', 
+    #                               '2024-06-13', '2024-06-14', '2024-06-15', '2024-06-17', '2024-06-18', '2024-06-19', 
+    #                               '2024-06-20', '2024-06-21', '2024-06-22', '2024-06-24', '2024-06-25', '2024-06-26', 
+    #                               '2024-06-27', '2024-06-28', '2024-06-29', '2024-07-01', '2024-07-03', '2024-07-06', 
+    #                               '2024-07-08', '2024-07-09', '2024-07-10', '2024-07-11', '2024-07-12', '2024-07-13', 
+    #                               '2024-07-15', '2024-07-16', '2024-07-17', '2024-07-18', '2024-07-19', '2024-07-20', 
+    #                               '2024-07-22', '2024-07-23', '2024-07-24', '2024-07-25', '2024-07-26', '2024-07-27', 
+    #                               '2024-07-29', '2024-07-30', '2024-07-31', '2024-08-01', '2024-08-02', '2024-08-03', 
+    #                               '2024-08-05', '2024-08-06', '2024-08-07', '2024-08-08', '2024-08-09', '2024-08-10', 
+    #                               '2024-08-12', '2024-08-13', '2024-08-14', '2024-08-15', '2024-08-16', '2024-08-17', 
+    #                               '2024-08-19', '2024-08-21', '2024-08-24', '2024-08-26', '2024-08-27', '2024-08-28', 
+    #                               '2024-08-29', '2024-08-30', '2024-08-31', '2024-09-02', '2024-09-03', '2024-09-04',
+    #                               '2024-09-05', '2024-09-06', '2024-09-07', '2024-09-09']),
+    #         "lower_window": 0,
+    #         "upper_window": 0,
+    #     }
+    # ) 
 
     holidays = pd.concat(
         (
@@ -259,7 +287,7 @@ def fisketorget_restaurant(
             fiskesprell,
             stavanger_vinfest,
             gladmat,
-            april_closed
+            april_closed,
         )
     )
 
@@ -271,9 +299,12 @@ def fisketorget_restaurant(
     df["week_start"] = df["ds"].apply(is_monday_Fisk_restaurant)
     df['day_of_week'] = df['ds'].dt.dayofweek
     df["high_weekend_spring"] = df["ds"].apply(is_high_weekend_spring)
-    df["outdoor_seating"] =df['ds'].apply(is_outdoor_seating)
+    # df["outdoor_seating"] =df['ds'].apply(is_outdoor_seating)
     df["is_may"] = df["ds"].apply(is_may)
 
+    df["closed"] = df["ds"].apply(
+        lambda x: 1 if x.dayofweek == 6 else 0
+    )
     # Define a function to check if the date is within the period of heavy COVID restrictions
 
     # Add new columns in your dataframe to indicate if a date is within or outside the restrictions period
@@ -380,6 +411,12 @@ def fisketorget_restaurant(
             df = is_event_with_good_weather(df,dataframe_name)
             df = is_event_with_bad_weather(df,dataframe_name)
             df = is_event_with_normal_weather(df,dataframe_name)
+            # Assuming 'dt' is a datetime column and 6 represents Sunday
+            df[f'{dataframe_name}_normal_weather'] = df.apply(lambda row: 0 if row['ds'].dayofweek == 6 and row[f'{dataframe_name}_normal_weather'] == 1 else row[f'{dataframe_name}_normal_weather'], axis=1)
+            df[f'{dataframe_name}_good_weather'] = df.apply(lambda row: 0 if row['ds'].dayofweek == 6 and row[f'{dataframe_name}_good_weather'] == 1 else row[f'{dataframe_name}_good_weather'], axis=1)
+            df[f'{dataframe_name}_bad_weather'] = df.apply(lambda row: 0 if row['ds'].dayofweek == 6 and row[f'{dataframe_name}_bad_weather'] == 1 else row[f'{dataframe_name}_bad_weather'], axis=1)
+
+
             df[dataframe_name].fillna(0, inplace=True)
             regressors_to_add.append(
                 (venue_df, dataframe_name)
@@ -425,7 +462,7 @@ def fisketorget_restaurant(
             daily_seasonality=False,
             # n_changepoints=12,
             # changepoint_range=0.95,
-            changepoint_prior_scale=0.1,
+            changepoint_prior_scale=1,
             # seasonality_prior_scale=2,
             # holidays_prior_scale=5,
             # seasonality_mode="additive",
@@ -478,6 +515,7 @@ def fisketorget_restaurant(
     # m.add_regressor("heavy_rain_spring_weekend")
     m.add_regressor("non_heavy_rain_fall_weekend")
     m.add_regressor("opening_duration")
+    m.add_regressor("closed")
 
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:
@@ -549,7 +587,7 @@ def fisketorget_restaurant(
     ## Add conditional seasonality
     future["fellesferie"] = future["ds"].apply(is_fellesferie)
     future["week_start"] = future["ds"].apply(is_monday_Fisk_restaurant)
-    future["outdoor_seating"] = future["ds"].apply(is_outdoor_seating)
+    # future["outdoor_seating"] = future["ds"].apply(is_outdoor_seating)
     future["high_weekend_spring"] = future["ds"].apply(is_high_weekend_spring)
 
     # Add 'is_may' column to future DataFrame
@@ -569,6 +607,11 @@ def fisketorget_restaurant(
     future["sunshine_amount"] = merged_data["sunshine_amount"]
     future["windspeed"] = merged_data["windspeed"]
     future["air_temperature"] = merged_data["air_temperature"]
+
+    future["closed"] = future["ds"].apply(
+        lambda x: 1 if x.dayofweek == 6 else 0
+    )
+
     future.fillna(
         {"sunshine_amount": 0, "rain_sum": 0, "windspeed": 0, "air_temperature": 0},
         inplace=True,
@@ -587,7 +630,9 @@ def fisketorget_restaurant(
             future = is_event_with_good_weather(future,event_column)
             future = is_event_with_bad_weather(future,event_column)
             future = is_event_with_normal_weather(future,event_column)
-
+            future[f'{event_column}_normal_weather'] = future.apply(lambda row: 0 if row['ds'].dayofweek == 6 and row[f'{event_column}_normal_weather'] == 1 else row[f'{event_column}_normal_weather'], axis=1)
+            future[f'{event_column}_good_weather'] = future.apply(lambda row: 0 if row['ds'].dayofweek == 6 and row[f'{event_column}_good_weather'] == 1 else row[f'{event_column}_good_weather'], axis=1)
+            future[f'{event_column}_bad_weather'] = future.apply(lambda row: 0 if row['ds'].dayofweek == 6 and row[f'{event_column}_bad_weather'] == 1 else row[f'{event_column}_bad_weather'], axis=1)
     future = warm_dry_weather_spring_tfs(future)
     # future = heavy_rain_fall_weekday_future(future)
     future = heavy_rain_fall_weekend_future(future)
@@ -597,6 +642,7 @@ def fisketorget_restaurant(
     # future = heavy_rain_spring_weekend_future(future)
     future = non_heavy_rain_fall_weekend_future(future)
     future = add_opening_hours(future, "Restaurant", [13], [13])
+    future = is_outdoor_seating(future)
     # Calculate the custom regressor values for the future dates
     future["ds"] = pd.to_datetime(future["ds"])
     future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)
