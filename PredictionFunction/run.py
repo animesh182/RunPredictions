@@ -73,6 +73,8 @@ async def main(mytimer: func.TimerRequest) -> None:
 
     if restaurant == "Restaurantdrift AS":
         start_date = date(2023, 9, 1)
+    if restaurant == "Restaurant":
+        start_date = date(2022, 9, 1)
     # end_date = date(2024,4,27)
     logging.info(f'startDate : {start_date}')
     logging.info(f'endDate : {end_date}')
