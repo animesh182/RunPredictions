@@ -134,7 +134,7 @@ def is_outdoor_seating(df):
         ((df['rain_sum'] < fixed_heavy_rain_threshold) & (df['windspeed'] < wind_speed_threshold)) &
         (df['month'].isin([5, 6, 7, 8, 9])) & (~df['day_of_week'] == 6)  # Assuming fall is September, October, November
     ).astype(int)
-    df.to_csv('outdoor_seating.csv')
+    # df.to_csv('outdoor_seating.csv')
     return df
 
 

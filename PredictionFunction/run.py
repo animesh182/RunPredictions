@@ -52,10 +52,8 @@ async def main(mytimer: func.TimerRequest) -> None:
     elif restaurant == "Bjørvika":
         start_date = date(2024, 4, 19)
         end_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
-    elif restaurant == "Oslo Smestad":
-        start_date = date(2022, 10, 1)
     else:
-        start_date = date(2021, 9, 1)
+        start_date = date(2021, 10, 1)
 
     with psycopg2.connect(**prod_params) as conn:
         with conn.cursor() as cursor:

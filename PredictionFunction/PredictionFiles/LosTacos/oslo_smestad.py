@@ -173,6 +173,15 @@ def oslo_smestad(
     ### Holidays and other repeating outliers
     # m.add_country_holidays(country_name="NO")
 
+    high_sales_2023= pd.DataFrame(
+    {
+        "holiday": "high_sales",
+        "ds": pd.to_datetime(["2023-10-01"]),
+        "lower_window": -50,
+        "upper_window": 0,
+    }
+) 
+
     holidays = pd.concat(
         (
             christmas_day,
@@ -188,7 +197,8 @@ def oslo_smestad(
             hostferie_sor_ostlandet_weekdays,
             hostferie_sor_ostlandet_weekdend,
             musikkfestival,
-            new_year_romjul
+            new_year_romjul,
+            high_sales_2023
         )
     )
 
