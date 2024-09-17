@@ -235,7 +235,7 @@ def restaurantdrift_function(
     m.add_regressor('warm_and_dry')
     # m.add_regressor('sunday_low_sales')
     m.add_regressor("opening_duration")
-    m.add_regressor("outdoor_seating")
+    # m.add_regressor("outdoor_seating")
     # m.add_regressor("fall_start")
 
     # m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
