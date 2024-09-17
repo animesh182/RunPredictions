@@ -100,10 +100,10 @@ def sales_without_effect(
 
 
     reference_alcohol_sales.loc[reference_alcohol_sales['gastronomic_day'].dt.dayofweek == 5, 'total_net'] *= 0.6
-    reference_alcohol_sales.loc[reference_alcohol_sales['gastronomic_day'].dt.dayofweek == 4, 'total_net'] *=0.45
+    reference_alcohol_sales.loc[reference_alcohol_sales['gastronomic_day'].dt.dayofweek == 4, 'total_net'] *=0.6
 
     reference_food_sales.loc[reference_food_sales['gastronomic_day'].dt.dayofweek == 5, 'total_net'] *= 0.6
-    reference_food_sales.loc[reference_food_sales['gastronomic_day'].dt.dayofweek == 4, 'total_net'] *= 0.45
+    reference_food_sales.loc[reference_food_sales['gastronomic_day'].dt.dayofweek == 4, 'total_net'] *= 0.6
 
 
 

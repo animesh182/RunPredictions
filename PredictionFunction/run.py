@@ -82,6 +82,11 @@ async def main(mytimer: func.TimerRequest) -> None:
                 latest_date = latest_gastronomic_day
                 end_date= latest_date.strftime("%Y-%m-%d")
     conn.close()
+
+    if restaurant == "Restaurantdrift AS":
+        start_date = date(2023, 9, 1)
+    if restaurant == "Restaurant":
+        start_date = date(2022, 9, 1)
     # end_date = date(2024,4,27)
     logging.info(f'startDate : {start_date}')
     logging.info(f'endDate : {end_date}')

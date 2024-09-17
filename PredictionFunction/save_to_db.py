@@ -83,9 +83,8 @@ def save_to_db(
             else:
                 duration = end - start
             filtered_df.at[index, "duration"] = duration
-            common_duration = filtered_df["duration"].value_counts().idxmax()
-            filtered_df.at[index, "common_duration"] = common_duration
-
+        common_duration = filtered_df["duration"].value_counts().idxmax()
+        filtered_df["common_duration"] = common_duration
         normal_hour = opening_hours_dict[restaurant_name]["normal_hours"]
         normal_hour_2 = opening_hours_dict[restaurant_name]["special_hours"]
         filtered_df["special_opening_hour"] = 0

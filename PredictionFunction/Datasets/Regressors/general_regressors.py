@@ -122,22 +122,20 @@ def is_high_weekend_spring(ds):
         return False
 
 
-def is_outdoor_seating(ds):
-    outdoor_seating_dates = {
-        2022: {"start": "2022-04-22", "end": "2022-09-20"},
-        2023: {"start": "2023-05-15", "end": "2023-09-20"},
-        2024: {"start": "2024-05-15", "end": "2024-09-20"},
-        # Add more years and their respective dates as needed
-    }
-    date = pd.to_datetime(ds)
-    year = date.year  # Extract the year from the input date
+def is_outdoor_seating(df):
+    df['month'] = df['ds'].dt.month
+    df['day_of_week'] = df['ds'].dt.dayofweek
+    #Define what constitutes 'dry' and 'wet'
+    fixed_heavy_rain_threshold = 10
+    wind_speed_threshold = 10
 
-    if year not in outdoor_seating_dates:
-        return False  # or raise an error if you prefer
-
-    start_date = pd.Timestamp(outdoor_seating_dates[year]["start"])
-    end_date = pd.Timestamp(outdoor_seating_dates[year]["end"])
-    return start_date <= date <= end_date
+    # Apply the conditions for heavy rain weekend
+    df['outdoor_seating'] = (
+        ((df['rain_sum'] < fixed_heavy_rain_threshold) & (df['windspeed'] < wind_speed_threshold)) &
+        (df['month'].isin([5, 6, 7, 8, 9])) & (~df['day_of_week'] == 6)  # Assuming fall is September, October, November
+    ).astype(int)
+    # df.to_csv('outdoor_seating.csv')
+    return df
 
 
 
