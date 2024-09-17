@@ -5,6 +5,7 @@ from PredictionFunction.Datasets.OpeningHours.lostacos_opening_hours import (
     restaurant_opening_hours,
 )
 import numpy as np
+# from PredictionFunction.Datasets.Regressors.Broker.regressor import is_outdoor_seating_broker
 from PredictionFunction.utils.fetch_events import fetch_events
 from PredictionFunction.Datasets.Regressors.weather_regressors import (
     warm_dry_weather_spring,
@@ -168,6 +169,7 @@ def restaurantdrift_function(
     df["fall_start"] = df["ds"].apply(is_fall_start)
     df = heavy_rain_fall_weekend(df)
     df = warm_dry_weather_spring(df)
+    # df = is_outdoor_seating_broker(df)
 
     prediction_venues = {
         "Rockefeller",
@@ -233,6 +235,7 @@ def restaurantdrift_function(
     m.add_regressor('warm_and_dry')
     # m.add_regressor('sunday_low_sales')
     m.add_regressor("opening_duration")
+    m.add_regressor("outdoor_seating")
     # m.add_regressor("fall_start")
 
     # m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
@@ -280,6 +283,7 @@ def restaurantdrift_function(
     future["fall_start"] = future["ds"].apply(is_fall_start)
     future = heavy_rain_fall_weekend(future)
     future = warm_dry_weather_spring(future)
+    # future = is_outdoor_seating_broker(future)
 
     merged_data["ds"] = pd.to_datetime(merged_data["ds"], format="%Y", errors="coerce")
     # Calculate the custom regressor values for the future dates
