@@ -48,6 +48,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
     firstweek_jan,
     oslo_pride,
     musikkfestival,
+    oslo_marathon
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
@@ -159,7 +160,8 @@ def restaurantdrift_function(
             new_year_romjul,
             low_sales,
             july_5_6,
-            unusual_low_sale
+            unusual_low_sale,
+            oslo_marathon
         )
     )
     df["ds"] = pd.to_datetime(df["ds"])

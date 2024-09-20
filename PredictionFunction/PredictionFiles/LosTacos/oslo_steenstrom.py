@@ -53,7 +53,8 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
     firstweek_jan,
     lockdown,
     oslo_pride,
-    musikkfestival
+    musikkfestival,
+    oslo_marathon
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
@@ -197,7 +198,8 @@ def oslo_steenstrom(
             first_weekend_christmas_school_vacation,
             musikkfestival,
             new_years_day,
-            new_year_romjul
+            new_year_romjul,
+            oslo_marathon
         )
     )
 

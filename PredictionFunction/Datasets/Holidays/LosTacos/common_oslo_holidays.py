@@ -118,3 +118,12 @@ musikkfestival = pd.DataFrame(
             "upper_window": 1,
         }
     ) 
+
+oslo_marathon = pd.DataFrame(
+        {
+            "holiday": "Oslo Marathon",
+            "ds": pd.to_datetime(["2024-09-21", "2023-09-16",'2022-09-17']),
+            "lower_window": 0,
+            "upper_window": 0,
+        }
+    ) 
