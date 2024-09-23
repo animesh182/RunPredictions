@@ -17,7 +17,8 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
     lockdown,
     oslo_pride,
     musikkfestival,
-    oslo_marathon
+    oslo_marathon,
+    kk_mila
 )
 from PredictionFunction.Datasets.Regressors.general_regressors import (
     is_specific_month,
@@ -200,7 +201,8 @@ def oslo_smestad(
             musikkfestival,
             new_year_romjul,
             high_sales_2023,
-            oslo_marathon
+            oslo_marathon,
+            kk_mila
         )
     )
 
