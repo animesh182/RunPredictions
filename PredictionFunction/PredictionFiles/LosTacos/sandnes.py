@@ -274,8 +274,7 @@ def sandnes(prediction_category, restaurant, merged_data, historical_data, futur
 
     sandnes_venues = {
     "Stavanger Konserthus","Folken, Løkkeveien","Stavanger","DNB Arena", 
-        "Fiskepiren","Sørmarka Arena","Stavanger Sentrum","Stavanger"
-    }
+        "Fiskepiren","Sørmarka Arena","Stavanger Sentrum"}
     venue_list = sandnes_venues
     data = {"name": [], "effect": []}
     regressors_to_add = []

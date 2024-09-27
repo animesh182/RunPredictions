@@ -42,7 +42,7 @@ async def main(mytimer: func.TimerRequest) -> None:
     # city = instance["City"]
 
     if restaurant == "Oslo Torggata":
-        start_date = date(2022, 5, 10)
+        start_date = date(2023, 5, 10)
     elif restaurant == "Sandnes":
         start_date = date(2023, 4, 18)
     elif restaurant == "Alexander Kielland":
@@ -71,7 +71,7 @@ async def main(mytimer: func.TimerRequest) -> None:
 
     if restaurant == "Restaurantdrift AS":
         start_date = date(2023, 9, 1)
-    if restaurant == "Restaurant":
+    if company == "Fisketorget":
         start_date = date(2022, 9, 1)
     # end_date = date(2024,4,27)
     logging.info(f'startDate : {start_date}')

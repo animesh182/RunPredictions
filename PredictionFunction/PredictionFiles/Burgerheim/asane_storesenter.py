@@ -6,6 +6,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.dataset_holidays import (
     fifteenth_working_days,
 )
 import logging
+from PredictionFunction.Datasets.Regressors.Burgerheim.regressor import is_weekend_september, low_mondays_august_sept
 from PredictionFunction.Datasets.Regressors.general_regressors import( 
     is_fall_start,
     is_fellesferie,
@@ -101,6 +102,8 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
 
     df = add_opening_hours(df, "Åsane Storsenter",[12], [9])
     df = warm_dry_weather_spring_tfs(df)
+    # df = is_weekend_september(df)
+    # df = low_mondays_august_sept(df)
     df = heavy_rain_winter_weekend(df)
     df = heavy_rain_spring_weekend(df)
     df = non_heavy_rain_fall_weekend(df)
@@ -120,7 +123,7 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
             seventeenth_may,
             pinse,
             military_excercise,
-            helg_før_fellesferie,
+            # helg_før_fellesferie,
             himmelfart,
             closed,
             # unknown_outliers,
@@ -219,14 +222,16 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
             holidays_mode='additive'
         )
 
-    m.add_regressor("opening_duration")
+    m.add_regressor("opening_duration",standardize='False')
     m.add_regressor("students_early_semester")
-    m.add_regressor("warm_and_dry")
-    m.add_regressor("heavy_rain_winter_weekend")
-    m.add_regressor("heavy_rain_spring_weekend")
-    m.add_regressor("non_heavy_rain_fall_weekend")
+    m.add_regressor("warm_and_dry",standardize='False')
+    m.add_regressor("heavy_rain_winter_weekend",standardize='False')
+    m.add_regressor("heavy_rain_spring_weekend",standardize='False')
+    m.add_regressor("non_heavy_rain_fall_weekend",standardize='False')
     m.add_regressor("sunshine_amount",standardize='False')
     m.add_regressor("rain_sum")
+    # m.add_regressor("high_weekends",standardize='False')
+    # m.add_regressor("low_mondays",standardize='False')
     # m.add_regressor("high_weekend_spring")
 
     for event_df, regressor_name in regressors_to_add:
@@ -291,6 +296,9 @@ def asane_storesenter(prediction_category,restaurant,merged_data,historical_data
 
     future = add_opening_hours(future, "Åsane Storsenter", [12],[9])
     future = warm_dry_weather_spring_tfs(future)
+    # future = is_weekend_september(future)
+    # future = low_mondays_august_sept(future)
+    # future.to_csv('future.csv')
     future = heavy_rain_winter_weekend_future(future)
     future = heavy_rain_spring_weekend_future(future)
     future = non_heavy_rain_fall_weekend_future(future)

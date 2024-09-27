@@ -424,6 +424,7 @@ def oslo_torggata(
             yearly_seasonality=True,
             daily_seasonality=False,
             changepoint_prior_scale=0.1,
+            uncertainty_samples=0
         )
 
 
@@ -454,7 +455,7 @@ def oslo_torggata(
     # m.add_regressor('warm_dry_weekday_spring')
     # m.add_regressor('warm_dry_weekend_fall')
     m.add_regressor("opening_duration")
-    m.add_regressor("sunshine_amount")
+    m.add_regressor("sunshine_amount",standardize=False)
     m.add_regressor("rain_sum")
 
     for event_df, regressor_name in regressors_to_add:
