@@ -291,7 +291,7 @@ def stavanger(
 
     stavanger_venues = {
         "Stavanger Konserthus","Folken, Løkkeveien","Stavanger","DNB Arena", 
-        "Fiskepiren","Sørmarka Arena","Stavanger","Stavanger Sentrum"
+        "Fiskepiren","Sørmarka Arena","Stavanger Sentrum"
     }
     
     venue_list=stavanger_venues

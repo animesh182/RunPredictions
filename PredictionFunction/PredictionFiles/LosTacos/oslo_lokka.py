@@ -49,6 +49,8 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
     lockdown,
     oslo_pride,
     musikkfestival,
+    oslo_marathon,
+    kk_mila
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
@@ -199,7 +201,9 @@ def oslo_lokka_jtorget_smestad_torggata(
             oslo_pride,
             musikkfestival,
             new_years_day,
-            new_year_romjul
+            new_year_romjul,
+            oslo_marathon,
+            kk_mila
         )
     )
 

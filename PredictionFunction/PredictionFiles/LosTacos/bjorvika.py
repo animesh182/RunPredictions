@@ -47,6 +47,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
     firstweek_jan,
     oslo_pride,
     musikkfestival,
+    oslo_marathon
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
@@ -134,7 +135,8 @@ def bjorvika_function(
             musikkfestival,
             christmas_day,
             new_year_romjul,
-            closed
+            closed,
+            oslo_marathon
         )
     )
 

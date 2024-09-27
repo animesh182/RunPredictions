@@ -69,6 +69,8 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
     lockdown,
     oslo_pride,
     musikkfestival,
+    oslo_marathon,
+    kk_mila
 )
 
 from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
@@ -81,7 +83,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     pinse,
     himmelfart,
     christmas_day,
-    new_year_romjul
+    new_year_romjul,
 )
 
 from PredictionFunction.utils.utils import (
@@ -226,7 +228,9 @@ def karl_johan(
             oslo_pride,
             musikkfestival,
             christmas_day,
-            new_year_romjul
+            new_year_romjul,
+            oslo_marathon,
+            kk_mila
         )
     )
     # Didnt use, because the effect was too small or looked incorrect: piknik_i_parken,inferno
