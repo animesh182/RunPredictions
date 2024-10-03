@@ -462,7 +462,7 @@ def fisketorget_restaurant(
             daily_seasonality=False,
             # n_changepoints=12,
             # changepoint_range=0.95,
-            changepoint_prior_scale=1,
+            changepoint_prior_scale=0.5,
             # seasonality_prior_scale=2,
             # holidays_prior_scale=5,
             # seasonality_mode="additive",

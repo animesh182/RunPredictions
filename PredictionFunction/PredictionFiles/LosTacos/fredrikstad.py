@@ -71,6 +71,17 @@ from PredictionFunction.utils.openinghours import add_opening_hours
 from PredictionFunction.utils.fetch_events import fetch_events
 
 
+def fall_weekday(df):
+    df['day_of_week'] = df['ds'].dt.dayofweek
+    df['month'] = df['ds'].dt.month
+    # Apply the conditions for heavy rain weekend
+    df['fall_weekday'] = (
+        (df['day_of_week'].isin([0,1,2,3,6])) &
+        (df['month'].isin([8,9,10]))  # Assuming fall is September, October, November
+    ).astype(int)
+    
+    return df
+
 def fredrikstad(
     prediction_category, restaurant, merged_data, historical_data, future_data
 ):
@@ -171,6 +182,7 @@ def fredrikstad(
     # df = heavy_rain_winter_weekend(df)
     df = heavy_rain_spring_weekday(df)
     df = heavy_rain_spring_weekend(df)
+    df = fall_weekday(df)
     df = add_opening_hours(df, "Fredrikstad", [11], [16])
     # df = non_heavy_rain_fall_weekend(df)
 
@@ -247,13 +259,13 @@ def fredrikstad(
     df["is_specific_month"] = df["ds"].apply(is_specific_month)
     df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
     fredrikstad_venues = {  
-                            # "Tollbodplassen"
-                            # "Fredrikstad domkirke"
-                            # "City scene"
-                            # "Fredrikstad Stadion"
-                            # "Alibi Fredrikstad"
-                            # "Kulturkirken Gamle Fredrikstad"
-                            # "City Scene Fredrikstad"
+                            "Tollbodplassen",
+                            "Fredrikstad domkirke",
+                            "City scene",
+                            "Fredrikstad Stadion",
+                            "Alibi Fredrikstad",
+                            "Kulturkirken Gamle Fredrikstad",
+                            "City Scene Fredrikstad"
                             }
     venue_list = fredrikstad_venues
     city='Fredrikstad'
@@ -261,7 +273,7 @@ def fredrikstad(
     regressors_to_add = []
     for venue in fredrikstad_venues:
         # for venue in karl_johan_venues:
-        venue_df = fetch_events("Oslo Torggata", venue,city)
+        venue_df = fetch_events("Fredrikstad", venue,city)
         event_holidays = pd.concat(objs=[event_holidays, venue_df], ignore_index=True)
         if "name" in venue_df.columns:
             venue_df = venue_df.drop_duplicates("date")
@@ -380,16 +392,19 @@ def fredrikstad(
     else:
         m = Prophet(
             holidays=holidays,
-            yearly_seasonality=5,
+            yearly_seasonality=True,
+            weekly_seasonality=True,
             daily_seasonality=False,
-            changepoint_prior_scale=0.1,
+            changepoint_prior_scale=0.005,
+            seasonality_prior_scale=1,
+            holidays_prior_scale=1,
         )
     for event_df, regressor_name in regressors_to_add:
         if "event" in event_df.columns:
-            # m.add_regressor(regressor_name)
-            m.add_regressor(regressor_name + '_good_weather')
-            m.add_regressor(regressor_name + '_bad_weather')
-            m.add_regressor(regressor_name + '_normal_weather')
+            m.add_regressor(regressor_name)
+            # m.add_regressor(regressor_name + '_good_weather')
+            # m.add_regressor(regressor_name + '_bad_weather')
+            # m.add_regressor(regressor_name + '_normal_weather')
 
     # Add the payday columns as regressors
     # m.add_regressor("days_since_last_30")
@@ -411,6 +426,7 @@ def fredrikstad(
     m.add_regressor("opening_duration")
     m.add_regressor("sunshine_amount")
     m.add_regressor("rain_sum")
+    m.add_regressor("fall_weekday")
 
     m.add_seasonality(name="monthly", period=30.5, fourier_order=5)
     m.add_seasonality(
@@ -497,6 +513,8 @@ def fredrikstad(
     for event_df, event_column in regressors_to_add:
         if "event" in event_df.columns:
             event_df = event_df.drop_duplicates("ds")
+            event_df['ds'] = pd.to_datetime(event_df['ds'])
+            future['ds'] = pd.to_datetime(future['ds'])
             future = pd.merge(
                 future,
                 event_df[["ds", event_column]],
@@ -514,6 +532,7 @@ def fredrikstad(
     # future = heavy_rain_winter_weekend_future(future)
     future = heavy_rain_spring_weekday_future(future)
     future = heavy_rain_spring_weekend_future(future)
+    future = fall_weekday(future)
     future = add_opening_hours(future, "Fredrikstad", [11], [16])
     # future = non_heavy_rain_fall_weekend_future(future)
 

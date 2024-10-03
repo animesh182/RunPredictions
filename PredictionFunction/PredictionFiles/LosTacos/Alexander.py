@@ -192,10 +192,12 @@ def alexander_function(
     # holidays.to_csv('holidays.csv')
     m = Prophet(
         holidays=holidays,
-        yearly_seasonality=False,
-        daily_seasonality=False,
-        changepoint_prior_scale=0.1,
-        changepoint_range=0.8
+        # yearly_seasonality=True,
+        weekly_seasonality=True,
+        # daily_seasonality=False,
+        changepoint_prior_scale=0.05,
+        seasonality_prior_scale=0.2,
+        # changepoint_range=0.8
     )
 
 
@@ -207,7 +209,7 @@ def alexander_function(
             # m.add_regressor(regressor_name + '_normal_weather')
 
     # Weather regressors
-    m.add_regressor("sunshine_amount")
+    # m.add_regressor("sunshine_amount")
     m.add_regressor("rain_sum")
     m.add_regressor("opening_duration")
     m.add_regressor("high_weekend")

@@ -181,7 +181,8 @@ def restaurantdrift_function(
         "Oslo Concert Hall",
         # "Salt Langhuset",
         "Sofienbergparken",
-        "Tons of Rock"
+        "Tons of Rock",
+        "Ulleval"
     }
 
     data = {"name": [], "effect": []}
