@@ -7,6 +7,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.dataset_holidays import (
     last_working_day,
 )
 import logging
+from PredictionFunction.Datasets.Regressors.Fisketorget.regressors import is_outdoor_seating_month,is_outdoor_seating
 from PredictionFunction.utils.utils import (
     calculate_days_30,
     calculate_days_15,
@@ -26,7 +27,6 @@ from PredictionFunction.Datasets.Regressors.general_regressors import (
     is_fall_start,
     is_covid_loose_fall21,
     is_christmas_shopping,
-    is_outdoor_seating,
     is_high_weekend_spring,
     is_monday_Fisk_restaurant
 )
@@ -204,6 +204,7 @@ def fisketorget_restaurant(
     # df = heavy_rain_spring_weekend(df)
     df = non_heavy_rain_fall_weekend(df)
     df = is_outdoor_seating(df)
+    df = is_outdoor_seating_month(df)
     df = add_opening_hours(df, "Restaurant", [13], [13])
 
     m = Prophet()
@@ -504,6 +505,7 @@ def fisketorget_restaurant(
     # Add the conditional regressor to the model
     m.add_regressor("high_weekend_spring")
     m.add_regressor("outdoor_seating")
+    m.add_regressor("outdoor_seating_month")
     m.add_regressor("sunshine_amount")
     m.add_regressor("rain_sum")
     m.add_regressor("warm_and_dry")
@@ -643,6 +645,7 @@ def fisketorget_restaurant(
     future = non_heavy_rain_fall_weekend_future(future)
     future = add_opening_hours(future, "Restaurant", [13], [13])
     future = is_outdoor_seating(future)
+    future = is_outdoor_seating_month(future)
     # Calculate the custom regressor values for the future dates
     future["ds"] = pd.to_datetime(future["ds"])
     future_date_mask = (future["ds"] >= start_date) & (future["ds"] <= end_date)

@@ -220,6 +220,7 @@ def restaurantdrift_function(
         # weekly_seasonality=False,
         # daily_seasonality=False,
         changepoint_prior_scale=0.01,
+        seasonality_prior_scale=1,
         seasonality_mode="additive"
     )
 
@@ -232,7 +233,7 @@ def restaurantdrift_function(
             # m.add_regressor(regressor_name + '_normal_weather')
 
     # Weather regressors
-    # m.add_regressor("sunshine_amount",standardize=False)
+    m.add_regressor("sunshine_amount",standardize=False)
     m.add_regressor("rain_sum",standardize=False)
     m.add_regressor('heavy_rain_fall_weekend')
     m.add_regressor('warm_and_dry')
