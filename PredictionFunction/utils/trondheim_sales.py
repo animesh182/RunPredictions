@@ -43,12 +43,13 @@ def sales_without_effect(
 
     with psycopg2.connect(**prod_params) as conn:
         trondheim_query = """
-            SELECT *
+            SELECT gastronomic_day, article_supergroup, sum(total_net) as total_net
             FROM public."SalesData" 
             WHERE company = %s 
                 AND restaurant = %s
                 AND date >= %s 
                 AND date <= %s 
+            group by 1,2
         """
 
         actual_trondheim_sales = pd.read_sql_query(

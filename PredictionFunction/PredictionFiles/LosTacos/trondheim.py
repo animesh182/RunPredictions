@@ -366,8 +366,9 @@ def trondheim(prediction_category,restaurant,merged_data,historical_data,future_
             holidays=holidays,
             yearly_seasonality=5,
             daily_seasonality=False,
-            changepoint_prior_scale=0.5,
-            seasonality_prior_scale=0.4,# changepoint_prior_scale=0.5,
+            changepoint_prior_scale=0.01,
+            seasonality_prior_scale=1,
+            # changepoint_prior_scale=0.5,
             # seasonality_prior_scale=0.4,
         )
     for event_df, regressor_name in regressors_to_add:
