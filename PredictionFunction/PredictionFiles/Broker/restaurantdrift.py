@@ -41,7 +41,6 @@ from PredictionFunction.Datasets.Regressors.general_regressors import(
     is_fall_start,
     is_fellesferie,
     is_specific_month,
-    is_high_weekend_spring,
     # is_may
     )
 from PredictionFunction.Datasets.Holidays.LosTacos.common_oslo_holidays import (
@@ -64,6 +63,7 @@ from PredictionFunction.Datasets.Holidays.LosTacos.common_holidays import (
     new_year_romjul
 )
 from PredictionFunction.utils.openinghours import add_opening_hours
+from PredictionFunction.Datasets.Regressors.Broker.regressor import is_high_weekends, is_low_weekday
 
 
 def restaurantdrift_function(
@@ -167,10 +167,11 @@ def restaurantdrift_function(
     df["ds"] = pd.to_datetime(df["ds"])
     df["week_number"] = df["ds"].dt.isocalendar().week
     df["is_fellesferie"] = df["ds"].apply(is_fellesferie)
-    # df["high_weekend"] = df["ds"].apply(is_high_weekend_spring)
     df["fall_start"] = df["ds"].apply(is_fall_start)
     df = heavy_rain_fall_weekend(df)
     df = warm_dry_weather_spring(df)
+    df = is_high_weekends(df)
+    df = is_low_weekday(df)
     # df = is_outdoor_seating_broker(df)
 
     prediction_venues = {
@@ -216,12 +217,12 @@ def restaurantdrift_function(
     # holidays.to_csv('holidays.csv')
     m = Prophet(
         holidays=holidays,
-        # yearly_seasonality=True,
-        # weekly_seasonality=False,
+        yearly_seasonality=True,
+        weekly_seasonality=True,
         # daily_seasonality=False,
-        changepoint_prior_scale=0.01,
-        seasonality_prior_scale=1,
-        seasonality_mode="additive"
+        changepoint_prior_scale=1,
+        # seasonality_prior_scale=0.2,
+        # seasonality_mode="additive"
     )
 
 
@@ -237,7 +238,8 @@ def restaurantdrift_function(
     m.add_regressor("rain_sum",standardize=False)
     m.add_regressor('heavy_rain_fall_weekend')
     m.add_regressor('warm_and_dry')
-    # m.add_regressor('sunday_low_sales')
+    m.add_regressor('high_sales_weekend')
+    m.add_regressor('low_sales_weekday')
     m.add_regressor("opening_duration")
     # m.add_regressor("outdoor_seating")
     # m.add_regressor("fall_start")
@@ -287,6 +289,8 @@ def restaurantdrift_function(
     future["fall_start"] = future["ds"].apply(is_fall_start)
     future = heavy_rain_fall_weekend(future)
     future = warm_dry_weather_spring(future)
+    future = is_high_weekends(future)
+    future = is_low_weekday(future)
     # future = is_outdoor_seating_broker(future)
 
     merged_data["ds"] = pd.to_datetime(merged_data["ds"], format="%Y", errors="coerce")
