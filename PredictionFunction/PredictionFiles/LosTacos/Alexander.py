@@ -5,6 +5,7 @@ from PredictionFunction.Datasets.OpeningHours.lostacos_opening_hours import (
     restaurant_opening_hours,
 )
 import numpy as np
+from PredictionFunction.Datasets.Regressors.Kiellands.regressors import high_sale_month_kiellands
 from PredictionFunction.utils.fetch_events import fetch_events
 from PredictionFunction.Datasets.Regressors.weather_regressors import (
     # warm_dry_weather_spring,
@@ -106,6 +107,7 @@ def alexander_function(
         ]
     # df = heavy_rain_spring_weekend(df)
     df = add_opening_hours(df, "Alexander Kielland", [13], [17])
+    df = high_sale_month_kiellands(df)
     m = Prophet()
 
     ### Holidays and other repeating outliers
@@ -195,8 +197,8 @@ def alexander_function(
         # yearly_seasonality=True,
         weekly_seasonality=True,
         # daily_seasonality=False,
-        changepoint_prior_scale=0.05,
-        seasonality_prior_scale=0.2,
+        changepoint_prior_scale=5,
+        # seasonality_prior_scale=0.2,
         # changepoint_range=0.8
     )
 
@@ -213,11 +215,12 @@ def alexander_function(
     m.add_regressor("rain_sum")
     m.add_regressor("opening_duration")
     m.add_regressor("high_weekend")
+    m.add_regressor("high_sale_months")
     # m.add_regressor("is_may")
     m.add_regressor("fall_start")
 
-    m.add_seasonality(name="monthly", period=30.5, fourier_order=10)
-    m.add_seasonality(name="weekly", period=7, fourier_order=3)
+    # m.add_seasonality(name="monthly", period=30.5, fourier_order=10)
+    # m.add_seasonality(name="weekly", period=7, fourier_order=3)
 
     m.add_seasonality(
         name="is_fellesferie",
@@ -267,6 +270,7 @@ def alexander_function(
 
     future.fillna(0, inplace=True)
     future = add_opening_hours(future, "Alexander Kielland", [13], [17])
+    future = high_sale_month_kiellands(future)
 
     return m, future, df, event_holidays, venue_list
 

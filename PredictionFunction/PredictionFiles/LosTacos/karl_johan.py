@@ -357,10 +357,10 @@ def karl_johan(
     else:
         m = Prophet(
             holidays=holidays,
-            yearly_seasonality=10,
+            # yearly_seasonality=10,
             daily_seasonality=False,
-            changepoint_prior_scale=0.1,
-            changepoint_range=0.8
+            changepoint_prior_scale=5,
+            # changepoint_range=0.8
         )
 
 
