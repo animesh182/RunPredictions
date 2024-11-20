@@ -52,6 +52,12 @@ from PredictionFunction.PredictionFiles.LosTacos.bjorvika import(
 from PredictionFunction.PredictionFiles.Broker.restaurantdrift import(
     location_function as restaurantdrift_function
 )
+# from PredictionFunction.PredictionFiles.yips.pedersgata_restaurant import(
+#     location_function as pedersgata_restaurant_function
+# )
+# from PredictionFunction.PredictionFiles.yips.pedersgata_take_away import(
+#     location_function as pedersgata_takeaway_function
+# )
 
 
 # This is a datatable showing which city each restaurant locations is in
@@ -69,18 +75,18 @@ data = [
     {"Restaurant": "Sandnes", "City": "Stavanger", "Company": "Los Tacos"},
     {"Restaurant": "Alexander Kielland", "City": "Oslo", "Company": "Los Tacos"},
     {"Restaurant": "Bjørvika", "City": "Oslo", "Company": "Los Tacos"},
-    {
-        "Restaurant": "Restaurant",
-        "City": "Stavanger",
-        "Company": "Fisketorget",
-        "Parent Restaurant": "Fisketorget Stavanger",
-    },
-    {
-        "Restaurant": "Fisketorget Utsalg",
-        "City": "Stavanger",
-        "Company": "Fisketorget",
-        "Parent Restaurant": "Fisketorget Stavanger",
-    },
+    # {
+    #     "Restaurant": "Restaurant",
+    #     "City": "Stavanger",
+    #     "Company": "Fisketorget",
+    #     "Parent Restaurant": "Fisketorget Stavanger",
+    # },
+    # {
+    #     "Restaurant": "Fisketorget Utsalg",
+    #     "City": "Stavanger",
+    #     "Company": "Fisketorget",
+    #     "Parent Restaurant": "Fisketorget Stavanger",
+    # },
     {
         "Restaurant": "Trondheim",
         "City": "Trondheim",
@@ -90,18 +96,20 @@ data = [
         "Alcohol City": "Oslo",
         "Food City": "Stavanger",
     },
-    {
-        "Restaurant": "Åsane Storsenter",
-        "City": "Asane",
-        "Company": "Burgerheim",
-        "Parent Restaurant": "",
-    },
+    # {
+    #     "Restaurant": "Åsane Storsenter",
+    #     "City": "Asane",
+    #     "Company": "Burgerheim",
+    #     "Parent Restaurant": "",
+    # },
     {
         "Restaurant": "Restaurantdrift AS",
         "City": "Oslo",
         "Company": "The Broker",
         "Parent Restaurant": "",
     },
+    # {"Restaurant": "Pedersgata Restaurant", "City": "Stavanger", "Company": "Yips"},
+    # {"Restaurant": "Pedersgata Take-away", "City": "Stavanger", "Company": "Yips"},
 ]
 location_specific_dictionary = {
     "Stavanger": stavanger_function,
@@ -122,6 +130,8 @@ location_specific_dictionary = {
     "Alexander Kielland":alexander_function,
     "Bjørvika":bjorvika_function,
     "Restaurantdrift AS":restaurantdrift_function
+    # "Pedersgata Restaurant": pedersgata_restaurant_function,
+    # "Pedersgata Take-away": pedersgata_takeaway_function
 }
 # OBS! for Drammen and Fredrikstad i had trouble finding good weather data, so used Oslo
 weather_locations = {
