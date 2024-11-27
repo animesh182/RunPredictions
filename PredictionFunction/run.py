@@ -49,7 +49,7 @@ async def main(mytimer: func.TimerRequest) -> None:
         start_date = date(2024, 9, 10)
     elif restaurant == "Åsane Storsenter":
         start_date = date(2022, 5, 1)
-    elif restaurant == "Pedersgata Restaurant":
+    elif restaurant == "Pedersgata Dine-In":
         start_date = date(2023, 1, 1)
     elif restaurant == "Pedersgata Take-away":
         start_date = date(2023, 1, 1)
@@ -74,7 +74,7 @@ async def main(mytimer: func.TimerRequest) -> None:
     conn.close()
 
     if restaurant == "Restaurantdrift AS":
-        start_date = date(2023, 9, 1)
+        start_date = date(2024, 1, 1)
     if company == "Fisketorget":
         start_date = date(2022, 9, 1)
     # end_date = date(2024,4,27)

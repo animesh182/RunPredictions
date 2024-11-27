@@ -217,11 +217,11 @@ def restaurantdrift_function(
     # holidays.to_csv('holidays.csv')
     m = Prophet(
         holidays=holidays,
-        yearly_seasonality=True,
+        # yearly_seasonality=1,
         weekly_seasonality=True,
         # daily_seasonality=False,
         changepoint_prior_scale=1,
-        # seasonality_prior_scale=0.2,
+        # seasonality_prior_scale=5,
         # seasonality_mode="additive"
     )
 

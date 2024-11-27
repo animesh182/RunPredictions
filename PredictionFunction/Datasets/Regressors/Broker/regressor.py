@@ -24,8 +24,8 @@ def is_high_weekends(df):
     df['month'] = df['ds'].dt.month
     # Apply the conditions 
     df['high_sales_weekend'] = (
-        (df['month'].isin([10,11])) &
-        (df['day_of_week'].isin([5]))
+        (df['month'].isin([10,11,12])) &
+        (df['day_of_week'].isin([5,4]))
     ).astype(int)
     # df.to_csv('outdoor_seating.csv')
     return df
@@ -34,8 +34,8 @@ def is_low_weekday(df):
     df['month'] = df['ds'].dt.month
     # Apply the conditions 
     df['low_sales_weekday'] = (
-        # (df['month'].isin([10,11])) &
-        (df['day_of_week'].isin([6,0,1]))
+        (df['month'].isin([10,11,12])) &
+        (df['day_of_week'].isin([6,0,1,2]))
     ).astype(int)
     # df.to_csv('outdoor_seating.csv')
     return df
